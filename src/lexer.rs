@@ -1,12 +1,14 @@
 use itertools::Itertools;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone, Copy)]
 pub enum Token {
     Plus,
     Minus,
     Times,
     Slash,
     Power,
+    LParen,
+    RParen,
     Number(f64),
 }
 
@@ -27,6 +29,9 @@ pub fn lex(input: &str) -> Result<Vec<Token>, LexError> {
             '*' => Token::Times,
             '/' => Token::Slash,
             '^' => Token::Power,
+
+            '(' => Token::LParen,
+            ')' => Token::RParen,
 
             '.' => {
                 let (i2, _) = it
