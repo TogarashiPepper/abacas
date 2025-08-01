@@ -17,7 +17,7 @@ fn main() {
     let m = Monomial::new(4.0, 2);
     let r = Monomial::new(5.0, 2);
     let res = m + r + Monomial::new(1.0, 1000);
-    let res = res + (Monomial::new(10.0, 10) + Monomial::new(9.0, 9));
+    let res = res + (Monomial::new(10.0, 9) - Monomial::new(9.0, 9));
 
     println!("{res:?}"); // prints [x^1000, 10x^10, 9x^9, 9x^2]
 }
