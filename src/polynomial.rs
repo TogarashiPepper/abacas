@@ -28,6 +28,18 @@ impl Add<Monomial> for Polynomial {
     }
 }
 
+impl Add for Polynomial {
+    type Output = Polynomial;
+
+    fn add(mut self, rhs: Self) -> Self::Output {
+        for mono in rhs.0.into_iter() {
+            self = self + mono;
+        }
+
+        self
+    }
+}
+
 impl Debug for Polynomial {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_list().entries(self.0.iter().rev()).finish()
