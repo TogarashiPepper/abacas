@@ -9,6 +9,7 @@ pub enum Token {
     Power,
     LParen,
     RParen,
+    X,
     Number(f64),
 }
 
@@ -29,6 +30,8 @@ pub fn lex(input: &str) -> Result<Vec<Token>, LexError> {
             '*' => Token::Times,
             '/' => Token::Slash,
             '^' => Token::Power,
+
+            'x' => Token::X,
 
             '(' => Token::LParen,
             ')' => Token::RParen,

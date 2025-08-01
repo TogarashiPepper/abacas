@@ -41,6 +41,7 @@ pub enum Expr {
         rhs: Box<Expr>,
     },
     Num(f64),
+    Ident(String),
 }
 
 #[derive(Debug)]
@@ -62,6 +63,7 @@ where
             l
         }
         Token::Number(n) => Expr::Num(n),
+        Token::X => Expr::Ident("x".to_owned()),
         _ => {
             return Err(ParseErr::ExpectedLiteral);
         }
