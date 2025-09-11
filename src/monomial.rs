@@ -1,6 +1,6 @@
 use std::{
     fmt::Debug,
-    ops::{Add, Neg, Sub},
+    ops::{Add, Div, Mul, Neg, Sub},
 };
 
 use crate::polynomial::Polynomial;
@@ -65,6 +65,28 @@ impl Sub for Monomial {
         }
 
         Polynomial::new(poly)
+    }
+}
+
+impl Mul for Monomial {
+    type Output = Monomial;
+
+    fn mul(mut self, rhs: Self) -> Self::Output {
+        self.degree += rhs.degree;
+        self.coeff *= rhs.coeff;
+
+        self
+    }
+}
+
+impl Div for Monomial {
+    type Output = Monomial;
+
+    fn div(mut self, rhs: Self) -> Self::Output {
+        self.degree -= rhs.degree;
+        self.coeff /= rhs.coeff;
+
+        self
     }
 }
 
