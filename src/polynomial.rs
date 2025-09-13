@@ -1,11 +1,12 @@
 use std::{
     fmt::Debug,
-    ops::{Add, Sub},
+    ops::{Add, Mul, Sub},
 };
 
 use crate::monomial::Monomial;
 
 /// Sorted by `degree`
+#[derive(Clone)]
 pub struct Polynomial(Vec<Monomial>);
 
 impl Polynomial {
@@ -45,6 +46,34 @@ impl Sub<Monomial> for Polynomial {
         }
 
         self
+    }
+}
+
+impl Mul<Monomial> for Polynomial {
+    type Output = Polynomial;
+
+    fn mul(mut self, rhs: Monomial) -> Self::Output {
+        for mono in self.0.iter_mut() {
+            *mono = *mono * rhs;
+        }
+
+        self.0.sort_by_key(|m| m.degree);
+        
+        self
+    }
+}
+
+impl Mul for Polynomial {
+    type Output = Polynomial;
+
+    fn mul(self, rhs: Self) -> Self::Output {
+        let mut acc = Polynomial::new(vec![]);
+
+        for mono in self.0 {
+            acc = acc + (rhs.clone() * mono);
+        }
+
+        acc
     }
 }
 
