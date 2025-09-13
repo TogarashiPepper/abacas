@@ -1,4 +1,5 @@
 use std::{
+    cmp::Ordering,
     fmt::Debug,
     ops::{Add, Div, Mul, Neg, Sub},
 };
@@ -33,15 +34,14 @@ impl Add for Monomial {
 
     fn add(self, rhs: Self) -> Self::Output {
         let mut poly = vec![];
-        if self.degree == rhs.degree {
-            poly.push(Monomial {
+
+        match self.degree.cmp(&rhs.degree) {
+            Ordering::Equal => poly.push(Monomial {
                 coeff: self.coeff + rhs.coeff,
                 degree: self.degree,
-            })
-        } else if self.degree > rhs.degree {
-            poly.extend([self, rhs]);
-        } else {
-            poly.extend([rhs, self]);
+            }),
+            Ordering::Greater => poly.extend([self, rhs]),
+            Ordering::Less => poly.extend([rhs, self]),
         }
 
         Polynomial::new(poly)
@@ -53,15 +53,14 @@ impl Sub for Monomial {
 
     fn sub(self, rhs: Self) -> Self::Output {
         let mut poly = vec![];
-        if self.degree == rhs.degree {
-            poly.push(Monomial {
+
+        match self.degree.cmp(&rhs.degree) {
+            Ordering::Equal => poly.push(Monomial {
                 coeff: self.coeff - rhs.coeff,
                 degree: self.degree,
-            })
-        } else if self.degree > rhs.degree {
-            poly.extend([self, -rhs]);
-        } else {
-            poly.extend([-rhs, self]);
+            }),
+            Ordering::Greater => poly.extend([self, -rhs]),
+            Ordering::Less => poly.extend([-rhs, self]),
         }
 
         Polynomial::new(poly)
