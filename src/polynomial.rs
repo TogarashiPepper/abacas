@@ -1,6 +1,6 @@
-mod add;
-mod mul;
-mod sub;
+pub mod add;
+pub mod mul;
+pub mod sub;
 
 use std::fmt::Display;
 
@@ -22,14 +22,14 @@ impl Polynomial {
     /// Gets the `Monomial` with `monomial.degree == degree`
     /// # Panics
     /// Panics if there's no existing `Monomial` with `degree == index`
-    fn deg(&self, degree: i64) -> &Monomial {
+    pub fn deg(&self, degree: i64) -> &Monomial {
         let true_idx = self.0.binary_search_by_key(&degree, |m| m.degree).unwrap();
         &self.0[true_idx]
     }
 
     /// Gets the `Monomial` with `monomial.degree == degree`.
     /// Creates the value if doesn't already exist
-    fn deg_mut(&mut self, degree: i64) -> &mut Monomial {
+    pub fn deg_mut(&mut self, degree: i64) -> &mut Monomial {
         let true_idx = match self.0.binary_search_by_key(&degree, |m| m.degree) {
             Ok(idx) => idx,
             Err(idx) => {
@@ -41,7 +41,7 @@ impl Polynomial {
         &mut self.0[true_idx]
     }
 
-    fn lead_coeff(&self) -> f64 {
+    pub fn lead_coeff(&self) -> f64 {
         self.0.last().unwrap().coeff
     }
 }
