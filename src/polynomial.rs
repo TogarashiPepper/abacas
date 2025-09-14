@@ -1,7 +1,8 @@
-use std::{
-    fmt::{Debug, Display},
-    ops::{Add, Mul, Sub},
-};
+mod add;
+mod mul;
+mod sub;
+
+use std::fmt::Display;
 
 use itertools::Itertools;
 
@@ -42,76 +43,6 @@ impl Polynomial {
 
     fn lead_coeff(&self) -> f64 {
         self.0.last().unwrap().coeff
-    }
-}
-
-impl Add<Monomial> for Polynomial {
-    type Output = Polynomial;
-
-    fn add(mut self, rhs: Monomial) -> Self::Output {
-        self.deg_mut(rhs.degree).coeff += rhs.coeff;
-
-        self
-    }
-}
-
-impl Sub<Monomial> for Polynomial {
-    type Output = Polynomial;
-
-    fn sub(mut self, rhs: Monomial) -> Self::Output {
-        self.deg_mut(rhs.degree).coeff -= rhs.coeff;
-
-        self
-    }
-}
-
-impl Mul<Monomial> for Polynomial {
-    type Output = Polynomial;
-
-    fn mul(mut self, rhs: Monomial) -> Self::Output {
-        for mono in self.0.iter_mut() {
-            *mono = *mono * rhs;
-        }
-
-        self
-    }
-}
-
-impl Mul for Polynomial {
-    type Output = Polynomial;
-
-    fn mul(self, rhs: Self) -> Self::Output {
-        let mut acc = Polynomial::new(vec![]);
-
-        for mono in self.0 {
-            acc = acc + (rhs.clone() * mono);
-        }
-
-        acc
-    }
-}
-
-impl Add for Polynomial {
-    type Output = Polynomial;
-
-    fn add(mut self, rhs: Self) -> Self::Output {
-        for mono in rhs.0 {
-            self = self + mono;
-        }
-
-        self
-    }
-}
-
-impl Sub for Polynomial {
-    type Output = Polynomial;
-
-    fn sub(mut self, rhs: Self) -> Self::Output {
-        for mono in rhs.0 {
-            self = self - mono;
-        }
-
-        self
     }
 }
 
