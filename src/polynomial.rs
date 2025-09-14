@@ -45,6 +45,21 @@ impl Polynomial {
     pub fn lead_coeff(&self) -> f64 {
         self.0.last().unwrap().coeff
     }
+
+    /// Removes all Monomials with coeff 0
+    pub fn clean(&mut self) {
+        let mut to_remove = vec![];
+
+        for (i, mono) in self.0.iter().enumerate() {
+            if mono.coeff == 0.0 {
+                to_remove.push(i);
+            }
+        }
+
+        for i in to_remove {
+            self.0.remove(i);
+        }
+    }
 }
 
 impl Display for Polynomial {

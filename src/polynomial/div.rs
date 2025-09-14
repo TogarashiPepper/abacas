@@ -41,6 +41,8 @@ impl Div for Polynomial {
             }
         }
 
+        dividend.clean();
+
         dividend
     }
 }
