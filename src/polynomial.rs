@@ -1,12 +1,14 @@
 use std::{
-    fmt::Debug,
+    fmt::{Debug, Display},
     ops::{Add, Mul, Sub},
 };
+
+use itertools::Itertools;
 
 use crate::monomial::Monomial;
 
 /// Sorted by `degree`
-#[derive(Clone)]
+#[derive(Debug, Clone)]
 pub struct Polynomial(Vec<Monomial>);
 
 impl Polynomial {
@@ -57,8 +59,6 @@ impl Mul<Monomial> for Polynomial {
             *mono = *mono * rhs;
         }
 
-        self.0.sort_by_key(|m| m.degree);
-        
         self
     }
 }
@@ -81,7 +81,7 @@ impl Add for Polynomial {
     type Output = Polynomial;
 
     fn add(mut self, rhs: Self) -> Self::Output {
-        for mono in rhs.0.into_iter() {
+        for mono in rhs.0 {
             self = self + mono;
         }
 
@@ -93,7 +93,7 @@ impl Sub for Polynomial {
     type Output = Polynomial;
 
     fn sub(mut self, rhs: Self) -> Self::Output {
-        for mono in rhs.0.into_iter() {
+        for mono in rhs.0 {
             self = self - mono;
         }
 
@@ -101,8 +101,10 @@ impl Sub for Polynomial {
     }
 }
 
-impl Debug for Polynomial {
+impl Display for Polynomial {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        f.debug_list().entries(self.0.iter().rev()).finish()
+        let r = self.0.iter().rev().map(|el| el.to_string()).join(" + ");
+
+        write!(f, "{r}")
     }
 }
