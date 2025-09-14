@@ -22,14 +22,14 @@ impl Polynomial {
     /// Gets the `Monomial` with `monomial.degree == degree`
     /// # Panics
     /// Panics if there's no existing `Monomial` with `degree == index`
-    fn deg(&self, degree: u64) -> &Monomial {
+    fn deg(&self, degree: i64) -> &Monomial {
         let true_idx = self.0.binary_search_by_key(&degree, |m| m.degree).unwrap();
         &self.0[true_idx]
     }
 
     /// Gets the `Monomial` with `monomial.degree == degree`.
     /// Creates the value if doesn't already exist
-    fn deg_mut(&mut self, degree: u64) -> &mut Monomial {
+    fn deg_mut(&mut self, degree: i64) -> &mut Monomial {
         let true_idx = match self.0.binary_search_by_key(&degree, |m| m.degree) {
             Ok(idx) => idx,
             Err(idx) => {
