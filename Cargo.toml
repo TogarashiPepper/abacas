@@ -3,5 +3,23 @@ name = "abacas"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+name = "abacas_lib"
+path = "src/lib.rs"
+
+[[bin]]
+name = "abacas_bin"
+path = "src/bin.rs"
+
 [dependencies]
 itertools = "0.14.0"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = 'abort'
+strip = true
+
+[profile.dev]
+debug = true
