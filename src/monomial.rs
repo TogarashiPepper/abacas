@@ -9,11 +9,11 @@ use crate::polynomial::Polynomial;
 #[derive(Clone, Copy, Debug)]
 pub struct Monomial {
     pub coeff: f64,
-    pub degree: u64,
+    pub degree: i64,
 }
 
 impl Monomial {
-    pub fn new(coeff: f64, degree: u64) -> Self {
+    pub fn new(coeff: f64, degree: i64) -> Self {
         Monomial { coeff, degree }
     }
 }
@@ -91,12 +91,16 @@ impl Div for Monomial {
 
 impl Display for Monomial {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        if self.coeff == 1.0 {
-            write!(f, "x^{}", self.degree)
+        if self.coeff == 0.0 {
+            write!(f, "0")
         } else if self.degree == 0 {
             write!(f, "{}", self.coeff)
         } else if self.degree == 1 {
-            write!(f, "{}x", self.coeff)
+            if self.coeff == 1.0 {
+                write!(f, "x")
+            } else {
+                write!(f, "{}x", self.coeff)
+            }
         } else {
             write!(f, "{}x^{}", self.coeff, self.degree)
         }
