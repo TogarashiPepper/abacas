@@ -12,7 +12,9 @@ use crate::monomial::Monomial;
 pub struct Polynomial(Vec<Monomial>);
 
 impl Polynomial {
-    pub fn new(v: Vec<Monomial>) -> Self {
+    pub fn new(mut v: Vec<Monomial>) -> Self {
+        v.sort_by_key(|m| m.degree);
+
         Polynomial(v)
     }
 }
