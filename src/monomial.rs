@@ -1,12 +1,12 @@
 use std::{
     cmp::Ordering,
-    fmt::Debug,
+    fmt::Display,
     ops::{Add, Div, Mul, Neg, Sub},
 };
 
 use crate::polynomial::Polynomial;
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub struct Monomial {
     pub coeff: f64,
     pub degree: u64,
@@ -89,10 +89,14 @@ impl Div for Monomial {
     }
 }
 
-impl Debug for Monomial {
+impl Display for Monomial {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         if self.coeff == 1.0 {
             write!(f, "x^{}", self.degree)
+        } else if self.degree == 0 {
+            write!(f, "{}", self.coeff)
+        } else if self.degree == 1 {
+            write!(f, "{}x", self.coeff)
         } else {
             write!(f, "{}x^{}", self.coeff, self.degree)
         }
