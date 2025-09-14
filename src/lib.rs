@@ -12,6 +12,15 @@ mod tests {
         let res =
             (m + r + Monomial::new(1.0, 1000)) * (Monomial::new(10.0, 3) + Monomial::new(4.0, 21));
 
+        println!(
+            "{}",
+            Polynomial::new(vec![
+                Monomial::new(1.0, 2),
+                Monomial::new(-3.0, 1),
+                Monomial::new(2.0, 0)
+            ]) / Polynomial::new(vec![Monomial::new(1.0, 1), Monomial::new(-1.0, 0)])
+        );
+
         assert_eq!(
             res.to_string(),
             Polynomial::new(vec![
