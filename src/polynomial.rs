@@ -3,59 +3,78 @@ pub mod div;
 pub mod mul;
 pub mod sub;
 
-use std::fmt::Display;
+use std::fmt;
+use std::ops::{Add, Neg};
 
 use itertools::Itertools;
 
 use crate::monomial::Monomial;
 
-/// Sorted by `degree`
-#[derive(Debug, Clone)]
+/// A polynomial with its monomials sorted by `degree`.
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Polynomial(Vec<Monomial>);
 
 impl Polynomial {
-    pub fn new(mut v: Vec<Monomial>) -> Self {
-        v.sort_by_key(|m| m.degree);
+	/// The zero polynomial.
+	pub const ZERO: Self = Self(Vec::new());
 
-        Polynomial(v)
-    }
+	/// Internal method to clean up a polynomial after operating on it.
+	fn clean(&mut self) {
+		self.0.retain(|mono| mono.coeff != 0.0);
+		self.0.sort_by_key(|mono| mono.degree);
+	}
 
-    /// Gets the `Monomial` with `monomial.degree == degree`
-    /// # Panics
-    /// Panics if there's no existing `Monomial` with `degree == index`
-    pub fn deg(&self, degree: i64) -> &Monomial {
-        let true_idx = self.0.binary_search_by_key(&degree, |m| m.degree).unwrap();
-        &self.0[true_idx]
-    }
+	/// The degree of the polynomial.
+	pub fn degree(&self) -> Option<i64> {
+		self.0.last().map(|mono| mono.degree)
+	}
 
-    /// Gets the `Monomial` with `monomial.degree == degree`.
-    /// Creates the value if doesn't already exist
-    pub fn deg_mut(&mut self, degree: i64) -> &mut Monomial {
-        let true_idx = match self.0.binary_search_by_key(&degree, |m| m.degree) {
-            Ok(idx) => idx,
-            Err(idx) => {
-                self.0.insert(idx, Monomial::new(0.0, degree));
-                idx
-            }
-        };
+	/// Gets the monomial with the given degree.
+	pub fn get(&self, degree: i64) -> Option<Monomial> {
+		self.0
+			.binary_search_by_key(&degree, |mono| mono.degree)
+			.ok()
+			.map(|index| self.0[index])
+	}
 
-        &mut self.0[true_idx]
-    }
+	/// Gets the monomial with the given degree.
+	pub fn get_mut(&mut self, degree: i64) -> Option<&mut Monomial> {
+		self.0
+			.binary_search_by_key(&degree, |mono| mono.degree)
+			.ok()
+			.map(|index| &mut self.0[index])
+	}
 
-    pub fn lead_coeff(&self) -> f64 {
-        self.0.last().unwrap().coeff
-    }
-
-    /// Removes all Monomials with coeff 0
-    pub fn clean(&mut self) {
-        self.0.retain(|m| m.coeff != 0.0);
-    }
+	/// Creates a new polynomial from the given monomials.
+	pub fn new(monomials: impl IntoIterator<Item = Monomial>) -> Self {
+		Self::from_iter(monomials)
+	}
 }
 
-impl Display for Polynomial {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let r = self.0.iter().rev().map(|el| el.to_string()).join(" + ");
+impl FromIterator<Monomial> for Polynomial {
+	fn from_iter<T: IntoIterator<Item = Monomial>>(iter: T) -> Self {
+		iter.into_iter().fold(Self::ZERO, Self::add)
+	}
+}
 
-        write!(f, "{r}")
-    }
+impl Neg for Polynomial {
+	type Output = Polynomial;
+
+	fn neg(mut self) -> Self::Output {
+		for monomial in self.0.iter_mut() {
+			*monomial = -*monomial;
+		}
+
+		self
+	}
+}
+
+impl fmt::Display for Polynomial {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		if self.0.is_empty() {
+			write!(f, "0")
+		} else {
+			write!(f, "{}", self.0.iter().rev().join(" + "))
+		}
+	}
 }
