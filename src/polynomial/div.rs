@@ -25,9 +25,8 @@ impl DivAssign<Monomial> for Polynomial {
 impl Div for Polynomial {
     type Output = Polynomial;
 
-    fn div(self, rhs: Self) -> Self::Output {
+    fn div(self, divisor: Self) -> Self::Output {
         let mut dividend = self;
-        let divisor = rhs;
 
         let normalizer = *divisor.0.last().unwrap();
 
