@@ -48,17 +48,7 @@ impl Polynomial {
 
     /// Removes all Monomials with coeff 0
     pub fn clean(&mut self) {
-        let mut to_remove = vec![];
-
-        for (i, mono) in self.0.iter().enumerate() {
-            if mono.coeff == 0.0 {
-                to_remove.push(i);
-            }
-        }
-
-        for i in to_remove {
-            self.0.remove(i);
-        }
+        self.0.retain(|m| m.coeff != 0.0);
     }
 }
 
