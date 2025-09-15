@@ -1,33 +1,43 @@
 use std::ops::{Add, AddAssign};
 
+use super::Polynomial;
 use crate::monomial::Monomial;
 
-use super::Polynomial;
-
 impl Add<Monomial> for Polynomial {
-    type Output = Polynomial;
+	type Output = Polynomial;
 
-    fn add(mut self, rhs: Monomial) -> Self::Output {
-        self += rhs;
-
-        self
-    }
+	fn add(mut self, rhs: Monomial) -> Self::Output {
+		self += rhs;
+		self
+	}
 }
 
 impl AddAssign<Monomial> for Polynomial {
-    fn add_assign(&mut self, rhs: Monomial) {
-        self.deg_mut(rhs.degree).coeff += rhs.coeff;
-    }
+	fn add_assign(&mut self, rhs: Monomial) {
+		match self.0.binary_search_by_key(&rhs.degree, |mono| mono.degree) {
+			Ok(index) => self.0[index].coeff += rhs.coeff,
+			Err(index) => self.0.insert(index, rhs),
+		}
+
+		self.clean();
+	}
 }
 
 impl Add for Polynomial {
-    type Output = Polynomial;
+	type Output = Polynomial;
 
-    fn add(mut self, rhs: Self) -> Self::Output {
-        for mono in rhs.0 {
-            self += mono;
-        }
+	fn add(mut self, rhs: Self) -> Self::Output {
+		self += rhs;
+		self
+	}
+}
 
-        self
-    }
+impl AddAssign for Polynomial {
+	fn add_assign(&mut self, rhs: Self) {
+		for monomial in rhs.0 {
+			*self += monomial;
+		}
+
+		self.clean();
+	}
 }
