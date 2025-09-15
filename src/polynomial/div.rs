@@ -27,19 +27,29 @@ impl Div for Polynomial {
 
     fn div(self, rhs: Self) -> Self::Output {
         let mut dividend = self;
+        let divisor = rhs;
 
-        let normalizer = *rhs.0.get(0).unwrap();
+        let normalizer = *divisor.0.last().unwrap();
 
-        for i in 0..(dividend.0.len() - rhs.0.len() + 1) {
-            dividend.0[i] = dividend.0[i] / normalizer;
-            let coeff = dividend.0[i];
+        let l1 = dividend.0.last().unwrap().degree as usize;
+        let l2 = divisor.0.last().unwrap().degree as usize;
 
-            if coeff.coeff != 0.0 {
-                for j in 1..rhs.0.len() {
-                    dividend.0[i + j] = (dividend.0[i + j] - rhs.0[j] * coeff).0[0];
+        let len = l1 - l2;
+
+        for i in 0..=len {
+            let term = dividend.deg_mut((l1 - i) as i64);
+            term.coeff = term.coeff / normalizer.coeff;
+            let coeff = term.coeff;
+
+            if coeff != 0.0 {
+                for j in 1..=l2 as usize {
+                    let var = dividend.deg_mut((l1 - i - j) as i64);
+                    var.coeff = var.coeff - divisor.0[l2 - j].coeff * coeff;
                 }
             }
         }
+
+        dividend = dividend / Monomial::new(1.0, divisor.0.last().unwrap().degree);
 
         dividend.clean();
 
