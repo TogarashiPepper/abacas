@@ -36,7 +36,7 @@ mod tests {
 		let zero = B * D - D * B;
 		assert_eq!(zero.to_string(), "0");
 
-        let division = (F + E + D + C) / F;
-        assert_eq!(division.to_string(), "1.4 + 1.4x^-3")
+		let division = (F + E + D + C) / F;
+		assert_eq!(division.to_string(), "1.4 + 1.4x^-3")
 	}
 }
