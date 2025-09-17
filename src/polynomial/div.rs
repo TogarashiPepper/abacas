@@ -50,7 +50,6 @@ impl Div for Polynomial {
 		dividend /= Monomial::new(1.0, divisor.0.last().unwrap().degree);
 
 		dividend.clean();
-
-		dividend
+		Polynomial::new(dividend.0[0..l2].to_vec())
 	}
 }
