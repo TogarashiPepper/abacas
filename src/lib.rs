@@ -1,8 +1,10 @@
+pub mod expr;
 pub mod monomial;
 pub mod polynomial;
 
 #[cfg(test)]
 mod tests {
+	use crate::expr::{Expr, Product};
 	use crate::monomial::Monomial;
 	use crate::polynomial::Polynomial;
 
@@ -38,5 +40,16 @@ mod tests {
 
 		let division = (F + E + D + C) / F;
 		assert_eq!(division.to_string(), "1.4 + 1.4x^-3")
+	}
+
+	#[test]
+	fn factor() {
+		let poly = Monomial::new(4.0, 3) + Monomial::new(2.0, 2) + Monomial::new(16.0, 0);
+		let factored = Monomial::new(2.0, 3) + Monomial::new(1.0, 2) + Monomial::new(8.0, 0);
+
+		assert_eq!(
+			poly.factor().unwrap(),
+			Product(vec![Expr::Number(2.0), Expr::Polynomial(factored)])
+		)
 	}
 }
