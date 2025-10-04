@@ -1,4 +1,4 @@
-use std::ops::{Div, DivAssign};
+use std::ops::{Div, DivAssign, Rem};
 
 use super::Polynomial;
 use crate::monomial::Monomial;
@@ -21,35 +21,58 @@ impl DivAssign<Monomial> for Polynomial {
 	}
 }
 
-impl Div for Polynomial {
-	type Output = Polynomial;
-
-	fn div(self, divisor: Self) -> Self::Output {
+impl Polynomial {
+	pub fn div_rem(self, divisor: Polynomial) -> (Polynomial, Polynomial) {
 		let mut dividend = self;
 
+		// TODO: handle error of division by the zero polynomial
 		let normalizer = *divisor.0.last().unwrap();
 
-		let l1 = dividend.0.last().unwrap().degree as usize;
-		let l2 = divisor.0.last().unwrap().degree as usize;
+		let l1 = dividend.degree().unwrap();
+		let l2 = divisor.degree().unwrap();
 
 		let len = l1 - l2;
 
-		for i in 0..=len {
-			let term = dividend.get_mut((l1 - i) as i64).unwrap();
+		for i in (0..=len).rev() {
+			let term = dividend.get_mut(i).unwrap();
 			term.coeff /= normalizer.coeff;
 			let coeff = term.coeff;
 
 			if coeff != 0.0 {
 				for j in 1..=l2 {
-					let var = dividend.get_mut((l1 - i - j) as i64).unwrap();
-					var.coeff -= divisor.0[l2 - j].coeff * coeff;
+                    let var = dividend.get_mut_insert(i - j);
+					var.coeff -= divisor.get_insert(l2 - j).coeff * coeff;
 				}
 			}
 		}
 
-		dividend /= Monomial::new(1.0, divisor.0.last().unwrap().degree);
+		dividend /= Monomial::new(1.0, normalizer.degree);
 
 		dividend.clean();
-		Polynomial::new(dividend.0[0..l2].to_vec())
+
+		let idx = match dividend.0.binary_search_by_key(&l2, |m| m.degree) {
+			Ok(i) | Err(i) => i,
+		};
+
+		let rem = dividend.0.split_off(idx - 1);
+		let quo = dividend.0;
+
+		(Polynomial::new(quo), Polynomial::new(rem))
+	}
+}
+
+impl Div for Polynomial {
+	type Output = Polynomial;
+
+	fn div(self, divisor: Self) -> Self::Output {
+		self.div_rem(divisor).0
+	}
+}
+
+impl Rem for Polynomial {
+	type Output = Polynomial;
+
+	fn rem(self, rhs: Self) -> Self::Output {
+		self.div_rem(rhs).1
 	}
 }
