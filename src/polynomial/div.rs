@@ -40,7 +40,7 @@ impl Polynomial {
 
 			if coeff != 0.0 {
 				for j in 1..=l2 {
-                    let var = dividend.get_mut_insert(i - j);
+					let var = dividend.get_mut_insert(i - j);
 					var.coeff -= divisor.get_insert(l2 - j).coeff * coeff;
 				}
 			}
@@ -54,7 +54,7 @@ impl Polynomial {
 			Ok(i) | Err(i) => i,
 		};
 
-		let rem = dividend.0.split_off(idx - 1);
+		let rem = dividend.0.split_off((idx + 1).min(dividend.0.len()));
 		let quo = dividend.0;
 
 		(Polynomial::new(quo), Polynomial::new(rem))
