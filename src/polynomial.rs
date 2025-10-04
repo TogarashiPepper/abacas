@@ -1,8 +1,8 @@
 pub mod add;
 pub mod div;
+pub mod factor;
 pub mod mul;
 pub mod sub;
-pub mod factor;
 
 use std::fmt;
 use std::ops::{Add, Neg};
@@ -13,7 +13,7 @@ use crate::monomial::Monomial;
 
 /// A polynomial with its monomials sorted by `degree`.
 #[derive(Clone, Debug, Default, PartialEq)]
-pub struct Polynomial(Vec<Monomial>);
+pub struct Polynomial(pub(crate) Vec<Monomial>);
 
 impl Polynomial {
 	/// The zero polynomial.
@@ -38,12 +38,33 @@ impl Polynomial {
 			.map(|index| self.0[index])
 	}
 
+	fn get_insert(&self, degree: i64) -> Monomial {
+		let idx = match self.0.binary_search_by_key(&degree, |mono| mono.degree) {
+			Ok(i) => i,
+			Err(_) => self.0.len(),
+		};
+
+		self.0.get(idx).cloned().unwrap_or(Monomial { coeff: 0.0, degree })
+	}
+
 	/// Gets the monomial with the given degree.
 	pub fn get_mut(&mut self, degree: i64) -> Option<&mut Monomial> {
 		self.0
 			.binary_search_by_key(&degree, |mono| mono.degree)
 			.ok()
 			.map(|index| &mut self.0[index])
+	}
+
+	fn get_mut_insert(&mut self, degree: i64) -> &mut Monomial {
+		let idx = match self.0.binary_search_by_key(&degree, |mono| mono.degree) {
+			Ok(i) => i,
+			Err(i) => {
+				self.0.insert(i, Monomial { coeff: 0.0, degree });
+				i
+			}
+		};
+
+		&mut self.0[idx]
 	}
 
 	/// Creates a new polynomial from the given monomials.
