@@ -56,6 +56,10 @@ mod tests {
 		Monomial { coeff, degree }
 	}
 
+	fn p(s: &str) -> Polynomial {
+		s.split("+").map(|s| m(s.trim())).collect::<Polynomial>()
+	}
+
 	#[test]
 	fn construction() {
 		let polynomial = Polynomial::new([A, D, F, D, A]);
@@ -81,15 +85,23 @@ mod tests {
 	}
 
 	#[test]
-	fn division() {
+	fn div_rem() {
 		let division = (F + E + D + C) / F;
 		assert_eq!(division.to_string(), "1.4 + 1.4x^-3");
+
+		let num = p("3x^3 + 4x^5 + 1x^2 + 1x^0");
+		let denom = p("1x^3");
+		let (quo, rem) = num.clone().div_rem(denom.clone());
+		assert_eq!(quo.to_string(), "4x^2 + 3 + x^-1 + x^-3");
+		assert_eq!(rem.to_string(), "0");
+
+		assert_eq!(num, quo * denom + rem);
 	}
 
 	#[test]
 	fn factor() {
-		let poly = m("4x^3") + m("2x^2") + m("16x^0");
-		let factored = m("2x^3") + m("1x^2") + m("8x^0");
+		let poly = p("4x^3 + 2x^2 + 16x^0");
+		let factored = p("2x^3 + 1x^2 + 8x^0");
 
 		assert_eq!(
 			poly.factor().unwrap(),
