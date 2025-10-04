@@ -21,7 +21,7 @@ impl Monomial {
 	}
 
     pub const fn constant(coeff: f64) -> Self {
-        Monomial { coeff, degree: 1 }
+        Monomial { coeff, degree: 0 }
     }
 }
 
