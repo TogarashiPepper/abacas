@@ -22,11 +22,11 @@ impl DivAssign<Monomial> for Polynomial {
 }
 
 impl Polynomial {
-	pub fn div_rem(self, divisor: Polynomial) -> (Polynomial, Polynomial) {
+	pub fn div_rem(self, divisor: Polynomial) -> Result<(Polynomial, Polynomial), &'static str> {
 		let mut dividend = self;
 
 		// TODO: handle error of division by the zero polynomial
-		let normalizer = *divisor.0.last().unwrap();
+		let normalizer = *divisor.0.last().ok_or("Cannot divide by zero polynomial")?;
 
 		let l1 = dividend.degree().unwrap();
 		let l2 = divisor.degree().unwrap();
@@ -57,7 +57,7 @@ impl Polynomial {
 		let rem = dividend.0.split_off((idx + 1).min(dividend.0.len()));
 		let quo = dividend.0;
 
-		(Polynomial::new(quo), Polynomial::new(rem))
+		Ok((Polynomial::new(quo), Polynomial::new(rem)))
 	}
 }
 
@@ -65,7 +65,7 @@ impl Div for Polynomial {
 	type Output = Polynomial;
 
 	fn div(self, divisor: Self) -> Self::Output {
-		self.div_rem(divisor).0
+		self.div_rem(divisor).unwrap().0
 	}
 }
 
@@ -73,6 +73,6 @@ impl Rem for Polynomial {
 	type Output = Polynomial;
 
 	fn rem(self, rhs: Self) -> Self::Output {
-		self.div_rem(rhs).1
+		self.div_rem(rhs).unwrap().1
 	}
 }
