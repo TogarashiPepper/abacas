@@ -91,7 +91,7 @@ mod tests {
 
 		let num = p("3x^3 + 4x^5 + 1x^2 + 1x^0");
 		let denom = p("1x^3");
-		let (quo, rem) = num.clone().div_rem(denom.clone());
+		let (quo, rem) = num.clone().div_rem(denom.clone()).unwrap();
 		assert_eq!(quo.to_string(), "4x^2 + 3 + x^-1 + x^-3");
 		assert_eq!(rem.to_string(), "0");
 
