@@ -1,9 +1,6 @@
-use crate::{
-	expr::{Expr, Product},
-	monomial::Monomial,
-};
-
-use super::Polynomial;
+use crate::expr::{Expr, Product};
+use crate::monomial::Monomial;
+use crate::polynomial::Polynomial;
 
 fn gcd(mut a: f64, mut b: f64) -> f64 {
 	if a == 0.0 {
