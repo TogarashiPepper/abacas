@@ -4,11 +4,12 @@ pub mod factor;
 pub mod mul;
 pub mod sub;
 
-use std::fmt;
 use std::ops::{Add, Neg};
+use std::{fmt, str};
 
 use itertools::Itertools;
 
+use crate::error::ParseError;
 use crate::monomial::Monomial;
 
 /// A polynomial with its monomials sorted by `degree`.
@@ -97,6 +98,18 @@ impl fmt::Display for Polynomial {
 			write!(f, "0")
 		} else {
 			write!(f, "{}", self.0.iter().rev().join(" + "))
+		}
+	}
+}
+
+impl str::FromStr for Polynomial {
+	type Err = ParseError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		if s.trim() == "0" {
+			Ok(Self::ZERO)
+		} else {
+			s.split('+').map(str::parse).collect()
 		}
 	}
 }

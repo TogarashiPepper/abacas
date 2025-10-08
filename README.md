@@ -1,3 +1,3 @@
 # abacas
 
-A CAS library written in Rust
+A modern CAS library written in Rust
