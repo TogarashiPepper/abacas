@@ -1,6 +1,9 @@
-use std::fmt;
 use std::ops::{Add, Div, DivAssign, Mul, MulAssign, Neg, Sub};
+use std::{fmt, str};
 
+use itertools::Itertools;
+
+use crate::error::ParseError;
 use crate::polynomial::Polynomial;
 
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
@@ -17,11 +20,17 @@ impl Monomial {
 			panic!("abacas: monomial coefficient must not be zero");
 		}
 
-		Monomial { coeff, degree }
+		Self { coeff, degree }
 	}
 
+	/// Creates a constant monomial. Panics if `coeff` is zero.
 	pub const fn constant(coeff: f64) -> Self {
-		Monomial { coeff, degree: 0 }
+		Self::new(coeff, 0)
+	}
+
+	/// Creates a linear monomial. Panics if `coeff` is zero.
+	pub const fn linear(coeff: f64) -> Self {
+		Self::new(coeff, 1)
 	}
 }
 
@@ -84,16 +93,42 @@ impl Sub for Monomial {
 
 impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		if self.coeff != 1.0 || self.degree == 0 {
-			write!(f, "{}", self.coeff)?;
+		match self.degree {
+			0 => write!(f, "{}", self.coeff),
+			1 => write!(f, "{}x", self.coeff),
+			_ => write!(f, "{}x^{}", self.coeff, self.degree),
+		}
+	}
+}
+
+impl str::FromStr for Monomial {
+	type Err = ParseError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		let mut chars = s.trim().chars().peekable();
+
+		let init: String = chars.peeking_take_while(|&c| c != 'x').collect();
+		let coeff = init.parse()?;
+
+		if coeff == 0.0 {
+			return Err(ParseError::InvalidValue);
 		}
 
-		if self.degree == 1 {
-			write!(f, "x")?;
-		} else if self.degree != 0 {
-			write!(f, "x^{}", self.degree)?;
+		match chars.next() {
+			None => return Ok(Self::constant(coeff)),
+			Some('x') => (),
+			Some(_) => return Err(ParseError::InvalidSyntax),
 		}
 
-		Ok(())
+		match chars.next() {
+			None => return Ok(Self::linear(coeff)),
+			Some('^') => (),
+			Some(_) => return Err(ParseError::InvalidSyntax),
+		}
+
+		let tail: String = chars.collect();
+		let degree = tail.parse()?;
+
+		Ok(Self { coeff, degree })
 	}
 }

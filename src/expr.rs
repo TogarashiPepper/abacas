@@ -1,4 +1,5 @@
-use crate::{monomial::Monomial, polynomial::Polynomial};
+use crate::monomial::Monomial;
+use crate::polynomial::Polynomial;
 
 #[derive(Debug, PartialEq)]
 pub enum Expr {

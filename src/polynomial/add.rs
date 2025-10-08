@@ -1,7 +1,7 @@
 use std::ops::{Add, AddAssign};
 
-use super::Polynomial;
 use crate::monomial::Monomial;
+use crate::polynomial::Polynomial;
 
 impl Add<Monomial> for Polynomial {
 	type Output = Polynomial;

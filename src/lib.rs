@@ -1,14 +1,15 @@
+#![doc = include_str!("../README.md")]
+
+pub mod error;
 pub mod expr;
 pub mod monomial;
 pub mod polynomial;
 
 #[cfg(test)]
 mod tests {
-	use crate::{
-		expr::{Expr, Product},
-		monomial::Monomial,
-		polynomial::Polynomial,
-	};
+	use crate::expr::{Expr, Product};
+	use crate::monomial::Monomial;
+	use crate::polynomial::Polynomial;
 
 	const A: Monomial = Monomial::new(1.0, 0);
 	const B: Monomial = Monomial::new(2.5, 0);
@@ -17,47 +18,14 @@ mod tests {
 	const E: Monomial = Monomial::new(1.0, 4);
 	const F: Monomial = Monomial::new(2.5, 4);
 
-	/// Helper to create a monomial from a string {n}x^{k}
+	/// Helper to create a monomial from a string
 	fn m(s: &str) -> Monomial {
-		let mut neg = false;
-		let mut chrs = s.chars().peekable();
-
-		if let Some('-') = chrs.peek() {
-			neg = true;
-			chrs.next();
-		}
-
-		let mut seen_dot = false;
-		let mut coeff = (&mut chrs)
-			.take_while(|e| {
-				if *e == '.' && !seen_dot {
-					seen_dot = true;
-					true
-				} else {
-					e.is_ascii_digit()
-				}
-			})
-			.collect::<String>()
-			.parse::<f64>()
-			.unwrap();
-
-		assert_eq!(chrs.next(), Some('^'));
-
-		let degree = chrs
-			.take_while(|c| c.is_ascii_digit() || *c == '-')
-			.collect::<String>()
-			.parse::<i64>()
-			.unwrap();
-
-		if neg {
-			coeff *= -1.0;
-		}
-
-		Monomial { coeff, degree }
+		s.parse().unwrap()
 	}
 
+	/// Helper to create a polynomial from a string
 	fn p(s: &str) -> Polynomial {
-		s.split("+").map(|s| m(s.trim())).collect::<Polynomial>()
+		s.parse().unwrap()
 	}
 
 	#[test]
@@ -85,14 +53,28 @@ mod tests {
 	}
 
 	#[test]
+	fn parse() {
+		let expected = A + D + E;
+
+		let mono = m("1") + m("2.5x") + m("1x^4");
+		assert_eq!(mono, expected);
+
+		let poly = p("1x^4 + 2.5x + 1");
+		assert_eq!(poly, expected);
+
+		let same = p(expected.to_string().as_str());
+		assert_eq!(same, expected);
+	}
+
+	#[test]
 	fn div_rem() {
 		let division = (F + E + D + C) / F;
 		assert_eq!(division.to_string(), "1.4 + 1.4x^-3");
 
-		let num = p("3x^3 + 4x^5 + 1x^2 + 1x^0");
+		let num = p("3x^3 + 4x^5 + 1x^2 + 1");
 		let denom = p("1x^3");
 		let (quo, rem) = num.clone().div_rem(denom.clone()).unwrap();
-		assert_eq!(quo.to_string(), "4x^2 + 3 + x^-1 + x^-3");
+		assert_eq!(quo.to_string(), "4x^2 + 3 + 1x^-1 + 1x^-3");
 		assert_eq!(rem.to_string(), "0");
 
 		assert_eq!(num, quo * denom + rem);
@@ -100,20 +82,12 @@ mod tests {
 
 	#[test]
 	fn factor() {
-		let poly = p("4x^3 + 2x^2 + 16x^0");
-		let factored = p("2x^3 + 1x^2 + 8x^0");
+		let poly = p("4x^3 + 2x^2 + 16");
+		let factored = p("2x^3 + 1x^2 + 8");
 
 		assert_eq!(
 			poly.factor().unwrap(),
 			Product(vec![Expr::Number(2.0), Expr::Polynomial(factored)])
 		)
-	}
-
-	#[test]
-	fn mon_helper() {
-		let pol1 = Monomial::new(4.0, 2) + Monomial::new(2.3, 3) + Monomial::new(1.0, 1);
-		let pol2 = m("4x^2") + m("2.3x^3") + m("1x^1");
-
-		assert_eq!(pol1, pol2);
 	}
 }
