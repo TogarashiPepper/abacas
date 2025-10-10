@@ -1,13 +1,11 @@
 #![doc = include_str!("../README.md")]
 
 pub mod error;
-pub mod expr;
 pub mod monomial;
 pub mod polynomial;
 
 #[cfg(test)]
 mod tests {
-	use crate::expr::{Expr, Product};
 	use crate::monomial::Monomial;
 	use crate::polynomial::Polynomial;
 
@@ -87,7 +85,7 @@ mod tests {
 
 		assert_eq!(
 			poly.factor().unwrap(),
-			Product(vec![Expr::Number(2.0), Expr::Polynomial(factored)])
+		    (2.0, factored)
 		)
 	}
 }

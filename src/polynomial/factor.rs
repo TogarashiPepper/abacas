@@ -1,4 +1,3 @@
-use crate::expr::{Expr, Product};
 use crate::monomial::Monomial;
 use crate::polynomial::Polynomial;
 
@@ -21,7 +20,7 @@ fn gcd(mut a: f64, mut b: f64) -> f64 {
 }
 
 impl Polynomial {
-	pub fn factor(&self) -> Option<Product> {
+	pub fn factor(&self) -> Option<(f64, Polynomial)> {
 		let g = self.0.iter().map(|m| m.coeff).reduce(gcd)?;
 		if g == 1.0 {
 			return None;
@@ -32,6 +31,6 @@ impl Polynomial {
 			degree: m.degree,
 		}));
 
-		Some(Product(vec![Expr::Number(g), Expr::Polynomial(factored)]))
+		Some((g, factored))
 	}
 }
