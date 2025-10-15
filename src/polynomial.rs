@@ -7,8 +7,6 @@ pub mod sub;
 use std::ops::{Add, Neg};
 use std::{fmt, str};
 
-use itertools::Itertools;
-
 use crate::error::ParseError;
 use crate::monomial::Monomial;
 
