@@ -95,10 +95,20 @@ impl Neg for Polynomial {
 impl fmt::Display for Polynomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		if self.0.is_empty() {
-			write!(f, "0")
+			write!(f, "0")?;
 		} else {
-			write!(f, "{}", self.0.iter().rev().join(" + "))
+			write!(f, "{}", self.0.last().unwrap())?;
+			for mono in self.0[0..self.0.len() - 1].iter().rev() {
+				let mut mono = *mono;
+				let is_neg = mono.coeff.is_sign_negative();
+
+				mono.coeff = mono.coeff.abs();
+
+				write!(f, " {} {mono}", if is_neg { '-' } else { '+' })?;
+			}
 		}
+
+		Ok(())
 	}
 }
 
