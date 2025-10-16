@@ -21,6 +21,7 @@ impl DivAssign<Monomial> for Polynomial {
 }
 
 impl Polynomial {
+	/// Calculates division and remainder at the same time.
 	pub fn div_rem(self, divisor: Polynomial) -> Result<(Polynomial, Polynomial), &'static str> {
 		let mut dividend = self;
 

@@ -9,7 +9,9 @@ use crate::structs::Polynomial;
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Monomial {
+	/// The coefficient of the monomial
 	pub coeff: f64,
+	/// The degree of the monomial
 	pub degree: i64,
 }
 
