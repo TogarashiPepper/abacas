@@ -62,6 +62,8 @@ mod tests {
 
 		let same = p(expected.to_string().as_str());
 		assert_eq!(same, expected);
+
+        assert_eq!(p("-4x^2 - 2 + 2x + 5x^9").to_string(), "5x^9 - 4x^2 + 2x - 2");
 	}
 
 	#[test]
