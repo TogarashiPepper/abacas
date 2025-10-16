@@ -9,7 +9,7 @@ use std::ops::Add;
 use std::{fmt, str};
 
 use crate::error::ParseError;
-use crate::structs::monomial::Monomial;
+use crate::structs::Monomial;
 
 /// A polynomial with its monomials sorted by `degree`.
 #[derive(Clone, Debug, Default, PartialEq)]

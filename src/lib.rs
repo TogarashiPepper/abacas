@@ -5,8 +5,7 @@ pub mod structs;
 
 #[cfg(test)]
 mod tests {
-	use crate::structs::monomial::Monomial;
-	use crate::structs::polynomial::Polynomial;
+	use crate::structs::{Monomial, Polynomial};
 
 	const A: Monomial = Monomial::new(1.0, 0);
 	const B: Monomial = Monomial::new(2.5, 0);

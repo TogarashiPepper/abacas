@@ -1,4 +1,4 @@
-use abacas::structs::polynomial::Polynomial;
+use abacas::structs::Polynomial;
 
 const GREEN: &str = "\x1b[38;5;10m";
 const RED: &str = "\x1b[38;5;1m";

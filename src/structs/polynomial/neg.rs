@@ -1,6 +1,6 @@
 use std::ops::Neg;
 
-use crate::structs::polynomial::Polynomial;
+use crate::structs::Polynomial;
 
 impl Neg for Polynomial {
 	type Output = Polynomial;
