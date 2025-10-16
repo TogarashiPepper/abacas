@@ -1,7 +1,6 @@
 use std::ops::{Add, AddAssign};
 
-use crate::monomial::Monomial;
-use crate::polynomial::Polynomial;
+use crate::structs::{Monomial, Polynomial};
 
 impl Add<Monomial> for Polynomial {
 	type Output = Polynomial;

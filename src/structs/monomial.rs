@@ -4,7 +4,7 @@ use std::{fmt, str};
 use itertools::Itertools;
 
 use crate::error::ParseError;
-use crate::polynomial::Polynomial;
+use crate::structs::Polynomial;
 
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
 #[derive(Clone, Copy, Debug, PartialEq)]

@@ -1,13 +1,11 @@
 #![doc = include_str!("../README.md")]
 
 pub mod error;
-pub mod monomial;
-pub mod polynomial;
+pub mod structs;
 
 #[cfg(test)]
 mod tests {
-	use crate::monomial::Monomial;
-	use crate::polynomial::Polynomial;
+	use crate::structs::{Monomial, Polynomial};
 
 	const A: Monomial = Monomial::new(1.0, 0);
 	const B: Monomial = Monomial::new(2.5, 0);
@@ -63,7 +61,7 @@ mod tests {
 		let same = p(expected.to_string().as_str());
 		assert_eq!(same, expected);
 
-        assert_eq!(p("-4x^2 - 2 + 2x + 5x^9").to_string(), "5x^9 - 4x^2 + 2x - 2");
+		assert_eq!(p("-4x^2 - 2 + 2x + 5x^9").to_string(), "5x^9 - 4x^2 + 2x - 2");
 	}
 
 	#[test]
@@ -85,9 +83,6 @@ mod tests {
 		let poly = p("4x^3 + 2x^2 + 16");
 		let factored = p("2x^3 + x^2 + 8");
 
-		assert_eq!(
-			poly.factor().unwrap(),
-		    (2.0, factored)
-		)
+		assert_eq!(poly.factor().unwrap(), (2.0, factored))
 	}
 }
