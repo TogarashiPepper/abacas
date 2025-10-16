@@ -1,9 +1,9 @@
-pub mod add;
-pub mod div;
-pub mod factor;
-pub mod mul;
-pub mod neg;
-pub mod sub;
+mod add;
+mod div;
+mod factor;
+mod mul;
+mod neg;
+mod sub;
 
 use std::ops::Add;
 use std::{fmt, str};

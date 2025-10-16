@@ -1,0 +1,27 @@
+name: Documentation
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docs:
+    name: Documentation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+
+      - name: Generate
+        run: cargo doc
+
+      - name: Deploy
+        uses: s0/git-publish-subdir-action@develop
+        env:
+          BRANCH: docs
+          FOLDER: target/doc
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MESSAGE: Build files for {sha}
+          REPO: self
+          SQUASH_HISTORY: true

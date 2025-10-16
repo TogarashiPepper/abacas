@@ -19,6 +19,7 @@ fn gcd(mut a: f64, mut b: f64) -> f64 {
 }
 
 impl Polynomial {
+	/// Extracts the common factor of all monomials if there is one.
 	pub fn factor(&self) -> Option<(f64, Polynomial)> {
 		let g = self.0.iter().map(|m| m.coeff).reduce(gcd)?;
 		if g <= 1.0 {

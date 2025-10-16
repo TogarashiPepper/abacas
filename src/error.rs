@@ -1,3 +1,5 @@
+//! Collection of error types used across the library.
+
 use std::error::Error;
 use std::fmt;
 use std::num::{ParseFloatError, ParseIntError};
@@ -5,9 +7,13 @@ use std::num::{ParseFloatError, ParseIntError};
 /// An error that can occur while parsing.
 #[derive(Clone, Debug)]
 pub enum ParseError {
+	/// Invalid Syntax
 	InvalidSyntax,
+	/// Invalid Value
 	InvalidValue,
+	/// A wrapper around a [`ParseFloatError`]
 	ParseFloat(ParseFloatError),
+	/// A wrapper around a [`ParseIntError`]
 	ParseInt(ParseIntError),
 }
 

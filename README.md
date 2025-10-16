@@ -1,3 +1,8 @@
 # abacas
 
-A modern CAS library written in Rust
+A modern CAS library. This is still a work in progress.
+
+## References
+
+* Documentation: <https://togarashipepper.github.io/abacas/abacas>
+* Examples: <https://github.com/TogarashiPepper/abacas/tree/main/examples>
