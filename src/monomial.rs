@@ -95,8 +95,8 @@ impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match (self.coeff, self.degree) {
 			(1.0, 1) => write!(f, "x"),
-			(1.0, deg) => write!(f, "x^{deg}"),
 			(_, 0) => write!(f, "{}", self.coeff),
+			(1.0, deg) => write!(f, "x^{deg}"),
 			(_, 1) => write!(f, "{}x", self.coeff),
 			(_, _) => write!(f, "{}x^{}", self.coeff, self.degree),
 		}

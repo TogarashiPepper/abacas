@@ -54,10 +54,10 @@ mod tests {
 	fn parse() {
 		let expected = A + D + E;
 
-		let mono = m("1") + m("2.5x") + m("1x^4");
+		let mono = m("1") + m("2.5x") + m("x^4");
 		assert_eq!(mono, expected);
 
-		let poly = p("1x^4 + 2.5x + 1");
+		let poly = p("x^4 + 2.5x + 1");
 		assert_eq!(poly, expected);
 
 		let same = p(expected.to_string().as_str());
@@ -69,10 +69,10 @@ mod tests {
 		let division = (F + E + D + C) / F;
 		assert_eq!(division.to_string(), "1.4 + 1.4x^-3");
 
-		let num = p("3x^3 + 4x^5 + 1x^2 + 1");
-		let denom = p("1x^3");
+		let num = p("3x^3 + 4x^5 + x^2 + 1");
+		let denom = p("x^3");
 		let (quo, rem) = num.clone().div_rem(denom.clone()).unwrap();
-		assert_eq!(quo.to_string(), "4x^2 + 3 + 1x^-1 + 1x^-3");
+		assert_eq!(quo.to_string(), "4x^2 + 3 + x^-1 + x^-3");
 		assert_eq!(rem.to_string(), "0");
 
 		assert_eq!(num, quo * denom + rem);
@@ -81,7 +81,7 @@ mod tests {
 	#[test]
 	fn factor() {
 		let poly = p("4x^3 + 2x^2 + 16");
-		let factored = p("2x^3 + 1x^2 + 8");
+		let factored = p("2x^3 + x^2 + 8");
 
 		assert_eq!(
 			poly.factor().unwrap(),
