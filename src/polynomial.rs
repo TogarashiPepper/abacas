@@ -117,7 +117,20 @@ impl str::FromStr for Polynomial {
 		if s.trim() == "0" {
 			Ok(Self::ZERO)
 		} else {
-			s.split('+').map(str::parse).collect()
+			s.split_inclusive(['+', '-'])
+				.scan(false, |prev_neg, raw_str| {
+					let curr_neg = std::mem::replace(prev_neg, false);
+
+					let (mon_str, next_neg) = raw_str
+						.strip_suffix(['-', '+'])
+						.map(|stripped| (stripped, raw_str.ends_with('-')))
+						.unwrap_or((raw_str, false));
+
+					*prev_neg = next_neg;
+
+					Some(mon_str.parse::<Monomial>().map(|m| if curr_neg { -m } else { m }))
+				})
+				.collect()
 		}
 	}
 }
