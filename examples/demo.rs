@@ -6,7 +6,7 @@ const PURPLE: &str = "\x1b[38;5;33m";
 const RESET: &str = "\x1b[0m";
 
 fn main() {
-    let a = "1x^3 + 2x^2 + 3x + 4".parse::<Polynomial>().unwrap();
+    let a = "x^3 + 2x^2 + 3x + 4".parse::<Polynomial>().unwrap();
     let b = "9x^4 + 3x^3 + 2x + 1".parse::<Polynomial>().unwrap();
 
     let fa = format!("{GREEN}a{RESET}");

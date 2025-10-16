@@ -93,10 +93,12 @@ impl Sub for Monomial {
 
 impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match self.degree {
-			0 => write!(f, "{}", self.coeff),
-			1 => write!(f, "{}x", self.coeff),
-			_ => write!(f, "{}x^{}", self.coeff, self.degree),
+		match (self.coeff, self.degree) {
+			(1.0, 1) => write!(f, "x"),
+			(1.0, deg) => write!(f, "x^{deg}"),
+			(_, 0) => write!(f, "{}", self.coeff),
+			(_, 1) => write!(f, "{}x", self.coeff),
+			(_, _) => write!(f, "{}x^{}", self.coeff, self.degree),
 		}
 	}
 }
@@ -108,7 +110,7 @@ impl str::FromStr for Monomial {
 		let mut chars = s.trim().chars().peekable();
 
 		let init: String = chars.peeking_take_while(|&c| c != 'x').collect();
-		let coeff = init.parse()?;
+		let coeff = if init.is_empty() { 1.0 } else { init.parse()? };
 
 		if coeff == 0.0 {
 			return Err(ParseError::InvalidValue);
