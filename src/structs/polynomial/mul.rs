@@ -1,8 +1,8 @@
 use std::mem;
 use std::ops::{Mul, MulAssign};
 
-use crate::monomial::Monomial;
-use crate::polynomial::Polynomial;
+use crate::structs::monomial::Monomial;
+use crate::structs::polynomial::Polynomial;
 
 impl Mul<Monomial> for Polynomial {
 	type Output = Polynomial;

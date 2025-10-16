@@ -2,13 +2,14 @@ pub mod add;
 pub mod div;
 pub mod factor;
 pub mod mul;
+pub mod neg;
 pub mod sub;
 
-use std::ops::{Add, Neg};
+use std::ops::Add;
 use std::{fmt, str};
 
 use crate::error::ParseError;
-use crate::monomial::Monomial;
+use crate::structs::monomial::Monomial;
 
 /// A polynomial with its monomials sorted by `degree`.
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -75,18 +76,6 @@ impl Polynomial {
 impl FromIterator<Monomial> for Polynomial {
 	fn from_iter<T: IntoIterator<Item = Monomial>>(iter: T) -> Self {
 		iter.into_iter().fold(Self::ZERO, Self::add)
-	}
-}
-
-impl Neg for Polynomial {
-	type Output = Polynomial;
-
-	fn neg(mut self) -> Self::Output {
-		for monomial in self.0.iter_mut() {
-			*monomial = -*monomial;
-		}
-
-		self
 	}
 }
 
