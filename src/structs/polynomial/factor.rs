@@ -1,5 +1,4 @@
-use crate::structs::Monomial;
-use crate::structs::Polynomial;
+use crate::structs::{Monomial, Polynomial};
 
 fn gcd(mut a: f64, mut b: f64) -> f64 {
 	if a == 0.0 {

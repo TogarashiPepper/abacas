@@ -1,7 +1,6 @@
 use std::ops::{Div, DivAssign, Rem};
 
-use crate::structs::Monomial;
-use crate::structs::Polynomial;
+use crate::structs::{Monomial, Polynomial};
 
 impl Div<Monomial> for Polynomial {
 	type Output = Polynomial;
