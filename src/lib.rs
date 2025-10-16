@@ -2,7 +2,6 @@
 #![warn(missing_docs)]
 
 pub mod error;
-pub mod number;
 pub mod structs;
 
 #[cfg(test)]
