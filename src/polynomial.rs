@@ -117,7 +117,18 @@ impl str::FromStr for Polynomial {
 		if s.trim() == "0" {
 			Ok(Self::ZERO)
 		} else {
-			s.split('+').map(str::parse).collect()
+			let s: String = s.chars().filter(|c| !c.is_ascii_whitespace()).collect();
+
+			let (neg_first, s) = s.strip_prefix('-').map_or((false, s.as_str()), |rest| (true, rest));
+
+			s.replace("-", "+-")
+				.split('+')
+				.enumerate()
+				.map(|(i, m)| {
+					m.parse::<Monomial>()
+						.map(|mon| if i == 0 && neg_first { -mon } else { mon })
+				})
+				.collect()
 		}
 	}
 }
