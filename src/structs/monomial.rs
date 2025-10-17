@@ -2,6 +2,7 @@ use std::ops::{Add, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 use std::{fmt, str};
 
 use itertools::Itertools;
+use rug::ops::NegAssign;
 
 use crate::error::ParseError;
 use crate::structs::Polynomial;
@@ -80,8 +81,14 @@ impl Neg for Monomial {
 	type Output = Monomial;
 
 	fn neg(mut self) -> Self::Output {
-		self.coeff = -self.coeff;
+		self.neg_assign();
 		self
+	}
+}
+
+impl NegAssign for Monomial {
+	fn neg_assign(&mut self) {
+		self.coeff.neg_assign();
 	}
 }
 
