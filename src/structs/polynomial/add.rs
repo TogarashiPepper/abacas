@@ -13,7 +13,7 @@ impl Add<Monomial> for Polynomial {
 
 impl AddAssign<Monomial> for Polynomial {
 	fn add_assign(&mut self, rhs: Monomial) {
-		match self.0.binary_search_by_key(&rhs.degree, |mono| mono.degree) {
+		match self.0.binary_search_by(|mono| rhs.degree.cmp(&mono.degree)) {
 			Ok(index) => self.0[index].coeff += rhs.coeff,
 			Err(index) => self.0.insert(index, rhs),
 		}
