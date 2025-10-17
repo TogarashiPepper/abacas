@@ -7,64 +7,57 @@ impl Div<Monomial> for Polynomial {
 
 	fn div(mut self, rhs: Monomial) -> Self::Output {
 		self /= rhs;
-
 		self
 	}
 }
 
 impl DivAssign<Monomial> for Polynomial {
 	fn div_assign(&mut self, rhs: Monomial) {
-		for mono in self.0.iter_mut() {
-			*mono = *mono / rhs;
+		for monomial in self.0.iter_mut() {
+			*monomial /= rhs;
 		}
 	}
 }
 
 impl Polynomial {
-	/// Calculates division and remainder at the same time.
-	pub fn div_rem(self, divisor: Polynomial) -> Result<(Polynomial, Polynomial), &'static str> {
-		let mut dividend = self;
+	/// Calculates division and remainder at the same time, returning [`None`] if the divisor is zero.
+	pub fn div_rem(mut self, divisor: &Polynomial) -> Option<(Polynomial, Polynomial)> {
+		let (normalizer, remaining) = divisor.0.split_first()?;
 
-		let normalizer = *divisor.0.first().ok_or("Cannot divide by zero polynomial")?;
+		let Some(degree) = self.degree() else {
+			return Some((Polynomial::ZERO, Polynomial::ZERO));
+		};
 
-		let l1 = dividend.degree().unwrap();
-		let l2 = divisor.degree().unwrap();
+		for degree in (normalizer.degree..=degree).rev() {
+			let monomial = self.get_or_insert(degree);
+			let coeff = monomial.coeff / normalizer.coeff;
 
-		let len = l1 - l2;
+			monomial.coeff = coeff;
 
-		for i in (0..=len).rev() {
-			let term = dividend.get_mut(i).unwrap();
-			term.coeff /= normalizer.coeff;
-			let coeff = term.coeff;
-
-			if coeff != 0.0 {
-				for j in 1..=l2 {
-					let var = dividend.get_mut_insert(i - j);
-					var.coeff -= divisor.get_insert(l2 - j).coeff * coeff;
-				}
+			for monomial in remaining {
+				self.get_or_insert(degree + monomial.degree - normalizer.degree).coeff -= monomial.coeff * coeff;
 			}
 		}
 
-		dividend /= Monomial::new(1.0, normalizer.degree);
+		self.clean();
 
-		dividend.clean();
+		let index = self
+			.0
+			.binary_search_by(|mono| normalizer.degree.cmp(&mono.degree))
+			.map_or_else(|index| index, |index| index + 1);
 
-		let idx = match dividend.0.binary_search_by(|mono| mono.degree.cmp(&l2)) {
-			Ok(i) | Err(i) => i,
-		};
+		let remainder = Polynomial::new(self.0.split_off(self.0.len().min(index)));
+		let quotient = self / Monomial::new(1.0, normalizer.degree);
 
-		let rem = dividend.0.split_off((idx + 1).min(dividend.0.len()));
-		let quo = dividend.0;
-
-		Ok((Polynomial::new(quo), Polynomial::new(rem)))
+		Some((quotient, remainder))
 	}
 }
 
 impl Div for Polynomial {
 	type Output = Polynomial;
 
-	fn div(self, divisor: Self) -> Self::Output {
-		self.div_rem(divisor).unwrap().0
+	fn div(self, rhs: Self) -> Self::Output {
+		self.div_rem(&rhs).expect("abacas: cannot divide by zero").0
 	}
 }
 
@@ -72,6 +65,6 @@ impl Rem for Polynomial {
 	type Output = Polynomial;
 
 	fn rem(self, rhs: Self) -> Self::Output {
-		self.div_rem(rhs).unwrap().1
+		self.div_rem(&rhs).expect("abacas: cannot divide by zero").1
 	}
 }

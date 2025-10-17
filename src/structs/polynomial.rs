@@ -31,20 +31,11 @@ impl Polynomial {
 	}
 
 	/// Gets the monomial with the given degree.
-	pub fn get(&self, degree: i64) -> Option<Monomial> {
+	pub fn get(&self, degree: i64) -> Option<&Monomial> {
 		self.0
 			.binary_search_by(|mono| degree.cmp(&mono.degree))
 			.ok()
-			.map(|index| self.0[index])
-	}
-
-	fn get_insert(&self, degree: i64) -> Monomial {
-		let idx = match self.0.binary_search_by(|mono| degree.cmp(&mono.degree)) {
-			Ok(i) => i,
-			Err(_) => self.0.len(),
-		};
-
-		self.0.get(idx).cloned().unwrap_or(Monomial { coeff: 0.0, degree })
+			.and_then(|index| self.0.get(index))
 	}
 
 	/// Gets the monomial with the given degree.
@@ -52,19 +43,18 @@ impl Polynomial {
 		self.0
 			.binary_search_by(|mono| degree.cmp(&mono.degree))
 			.ok()
-			.map(|index| &mut self.0[index])
+			.and_then(|index| self.0.get_mut(index))
 	}
 
-	fn get_mut_insert(&mut self, degree: i64) -> &mut Monomial {
-		let idx = match self.0.binary_search_by(|mono| degree.cmp(&mono.degree)) {
-			Ok(i) => i,
-			Err(i) => {
-				self.0.insert(i, Monomial { coeff: 0.0, degree });
-				i
-			}
-		};
+	/// Internal method to get a monomial or insert it if it does not exist.
+	fn get_or_insert(&mut self, degree: i64) -> &mut Monomial {
+		let index = self
+			.0
+			.binary_search_by(|mono| degree.cmp(&mono.degree))
+			.inspect_err(|&index| self.0.insert(index, Monomial { coeff: 0.0, degree }))
+			.unwrap_or_else(|index| index);
 
-		&mut self.0[idx]
+		&mut self.0[index]
 	}
 
 	/// Creates a new polynomial from the given monomials.
