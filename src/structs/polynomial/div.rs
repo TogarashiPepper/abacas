@@ -25,7 +25,7 @@ impl Polynomial {
 	pub fn div_rem(self, divisor: Polynomial) -> Result<(Polynomial, Polynomial), &'static str> {
 		let mut dividend = self;
 
-		let normalizer = *divisor.0.last().ok_or("Cannot divide by zero polynomial")?;
+		let normalizer = *divisor.0.first().ok_or("Cannot divide by zero polynomial")?;
 
 		let l1 = dividend.degree().unwrap();
 		let l2 = divisor.degree().unwrap();
