@@ -27,9 +27,9 @@ impl Polynomial {
 		Some((factor, factored))
 	}
 
-	/// Creates a monic polynomial by extracting the coefficient of the highest degree.
+	/// Creates a monic polynomial by dividing all monomials by the lead coefficient.
 	pub fn monic(&self) -> Option<(f64, Polynomial)> {
-		let factor = self.0.last()?.coeff;
+		let factor = self.0.first()?.coeff;
 
 		if factor == 1.0 {
 			return None;
