@@ -4,15 +4,10 @@ fn gcd(mut a: f64, mut b: f64) -> f64 {
 	if a == 0.0 {
 		return b;
 	}
-	if b == 0.0 {
-		return a;
-	}
 
 	// Euclidean algorithm
 	while b != 0.0 {
-		let temp = a;
-		a = b;
-		b = temp % b;
+		(a, b) = (b, a % b);
 	}
 
 	a
@@ -21,16 +16,27 @@ fn gcd(mut a: f64, mut b: f64) -> f64 {
 impl Polynomial {
 	/// Extracts the common factor of all monomials if there is one.
 	pub fn factor(&self) -> Option<(f64, Polynomial)> {
-		let g = self.0.iter().map(|m| m.coeff).reduce(gcd)?;
-		if g <= 1.0 {
+		let factor = self.0.iter().map(|mono| mono.coeff).reduce(gcd)?;
+
+		if factor <= 1.0 {
 			return None;
 		}
 
-		let factored = Polynomial::from_iter(self.0.iter().map(|m| Monomial {
-			coeff: m.coeff / g,
-			degree: m.degree,
-		}));
+		let factored = self.clone() / Monomial::constant(factor);
 
-		Some((g, factored))
+		Some((factor, factored))
+	}
+
+	/// Creates a monic polynomial by dividing all monomials by the lead coefficient.
+	pub fn monic(&self) -> Option<(f64, Polynomial)> {
+		let factor = self.0.first()?.coeff;
+
+		if factor == 1.0 {
+			return None;
+		}
+
+		let monic = self.clone() / Monomial::constant(factor);
+
+		Some((factor, monic))
 	}
 }
