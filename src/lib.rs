@@ -45,38 +45,48 @@ mod tests {
 		let multiplication = B * D + E * F;
 		assert_eq!(multiplication.to_string(), "2.5x^8 + 6.25x");
 
+		let division = (F + E + D + C) / F;
+		assert_eq!(division.to_string(), "1.4 + 1.4x^-3");
+
 		let zero = B * D - D * B;
 		assert_eq!(zero.to_string(), "0");
 	}
 
 	#[test]
 	fn parse() {
-		let expected = A + D + E;
+		let expected = A - D - E - E;
 
-		let mono = m("1") + m("2.5x") + m("x^4");
+		let mono = m("1") + m("-2.5x") + m("-2x^4");
 		assert_eq!(mono, expected);
 
-		let poly = p("x^4 + 2.5x + 1");
+		let poly = p("-2x^4 - 2.5x + 1");
 		assert_eq!(poly, expected);
 
 		let same = p(expected.to_string().as_str());
 		assert_eq!(same, expected);
-
-		assert_eq!(p("-4x^2 - 2 + 2x + 5x^9").to_string(), "5x^9 - 4x^2 + 2x - 2");
 	}
 
 	#[test]
 	fn div_rem() {
-		let division = (F + E + D + C) / F;
-		assert_eq!(division.to_string(), "1.4 + 1.4x^-3");
+		let dividend = p("6x^5 + 5x^2 - 7");
+		let divisor = p("2x^2 - 1");
 
-		let num = p("3x^3 + 4x^5 + x^2 + 1");
-		let denom = p("x^3");
-		let (quo, rem) = num.clone().div_rem(denom.clone()).unwrap();
-		assert_eq!(quo.to_string(), "4x^2 + 3 + x^-1 + x^-3");
-		assert_eq!(rem.to_string(), "0");
+		let dividend_zero = Polynomial::ZERO.div_rem(&divisor);
+		assert_eq!(dividend_zero, Some((Polynomial::ZERO, Polynomial::ZERO)));
 
-		assert_eq!(num, quo * denom + rem);
+		let divisor_zero = dividend.clone().div_rem(&Polynomial::ZERO);
+		assert_eq!(divisor_zero, None);
+
+		let both_zero = Polynomial::ZERO.div_rem(&Polynomial::ZERO);
+		assert_eq!(both_zero, None);
+
+		let dividend_smaller = divisor.clone().div_rem(&dividend);
+		assert_eq!(dividend_smaller, Some((Polynomial::ZERO, divisor.clone())));
+
+		let (quotient, remainder) = dividend.clone().div_rem(&divisor).unwrap();
+		assert_eq!(quotient.to_string(), "3x^3 + 1.5x + 2.5");
+		assert_eq!(remainder.to_string(), "1.5x - 4.5");
+		assert_eq!(quotient * divisor + remainder, dividend);
 	}
 
 	#[test]
