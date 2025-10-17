@@ -11,9 +11,9 @@ use std::{fmt, str};
 use crate::error::ParseError;
 use crate::structs::Monomial;
 
-/// A polynomial with its monomials sorted by `degree`.
+/// A polynomial with its monomials sorted by `degree` in descending order.
 #[derive(Clone, Debug, Default, PartialEq)]
-pub struct Polynomial(pub(crate) Vec<Monomial>);
+pub struct Polynomial(Vec<Monomial>);
 
 impl Polynomial {
 	/// The zero polynomial.
@@ -22,24 +22,24 @@ impl Polynomial {
 	/// Internal method to clean up a polynomial after operating on it.
 	fn clean(&mut self) {
 		self.0.retain(|mono| mono.coeff != 0.0);
-		self.0.sort_by_key(|mono| mono.degree);
+		self.0.sort_by(|first, second| second.degree.cmp(&first.degree));
 	}
 
 	/// The degree of the polynomial.
 	pub fn degree(&self) -> Option<i64> {
-		self.0.last().map(|mono| mono.degree)
+		self.0.first().map(|mono| mono.degree)
 	}
 
 	/// Gets the monomial with the given degree.
 	pub fn get(&self, degree: i64) -> Option<Monomial> {
 		self.0
-			.binary_search_by_key(&degree, |mono| mono.degree)
+			.binary_search_by(|mono| degree.cmp(&mono.degree))
 			.ok()
 			.map(|index| self.0[index])
 	}
 
 	fn get_insert(&self, degree: i64) -> Monomial {
-		let idx = match self.0.binary_search_by_key(&degree, |mono| mono.degree) {
+		let idx = match self.0.binary_search_by(|mono| degree.cmp(&mono.degree)) {
 			Ok(i) => i,
 			Err(_) => self.0.len(),
 		};
@@ -50,13 +50,13 @@ impl Polynomial {
 	/// Gets the monomial with the given degree.
 	pub fn get_mut(&mut self, degree: i64) -> Option<&mut Monomial> {
 		self.0
-			.binary_search_by_key(&degree, |mono| mono.degree)
+			.binary_search_by(|mono| degree.cmp(&mono.degree))
 			.ok()
 			.map(|index| &mut self.0[index])
 	}
 
 	fn get_mut_insert(&mut self, degree: i64) -> &mut Monomial {
-		let idx = match self.0.binary_search_by_key(&degree, |mono| mono.degree) {
+		let idx = match self.0.binary_search_by(|mono| degree.cmp(&mono.degree)) {
 			Ok(i) => i,
 			Err(i) => {
 				self.0.insert(i, Monomial { coeff: 0.0, degree });
@@ -84,8 +84,8 @@ impl fmt::Display for Polynomial {
 		if self.0.is_empty() {
 			write!(f, "0")?;
 		} else {
-			write!(f, "{}", self.0.last().unwrap())?;
-			for mono in self.0[0..self.0.len() - 1].iter().rev() {
+			write!(f, "{}", self.0.first().unwrap())?;
+			for mono in self.0[1..].iter() {
 				let mut mono = *mono;
 				let is_neg = mono.coeff.is_sign_negative();
 

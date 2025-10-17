@@ -49,7 +49,7 @@ impl Polynomial {
 
 		dividend.clean();
 
-		let idx = match dividend.0.binary_search_by_key(&l2, |m| m.degree) {
+		let idx = match dividend.0.binary_search_by(|mono| mono.degree.cmp(&l2)) {
 			Ok(i) | Err(i) => i,
 		};
 
