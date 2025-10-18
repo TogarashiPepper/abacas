@@ -4,7 +4,7 @@ use std::ops::{Mul, MulAssign};
 use crate::structs::{Monomial, Polynomial};
 
 impl Mul<Monomial> for Polynomial {
-	type Output = Polynomial;
+	type Output = Self;
 
 	fn mul(mut self, rhs: Monomial) -> Self::Output {
 		self *= rhs;
@@ -23,7 +23,7 @@ impl MulAssign<Monomial> for Polynomial {
 }
 
 impl Mul for Polynomial {
-	type Output = Polynomial;
+	type Output = Self;
 
 	fn mul(mut self, rhs: Self) -> Self::Output {
 		self *= rhs;

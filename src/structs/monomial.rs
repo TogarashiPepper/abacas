@@ -46,7 +46,7 @@ impl Add for Monomial {
 }
 
 impl Div for Monomial {
-	type Output = Monomial;
+	type Output = Self;
 
 	fn div(mut self, rhs: Self) -> Self::Output {
 		self /= rhs;
@@ -62,7 +62,7 @@ impl DivAssign for Monomial {
 }
 
 impl Mul for Monomial {
-	type Output = Monomial;
+	type Output = Self;
 
 	fn mul(mut self, rhs: Self) -> Self::Output {
 		self *= rhs;
@@ -78,7 +78,7 @@ impl MulAssign for Monomial {
 }
 
 impl Neg for Monomial {
-	type Output = Monomial;
+	type Output = Self;
 
 	fn neg(mut self) -> Self::Output {
 		self.neg_assign();
@@ -116,7 +116,7 @@ impl str::FromStr for Monomial {
 	type Err = ParseError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let mut chars = s.trim().chars().peekable();
+		let mut chars = s.trim().chars();
 
 		let init: String = chars.peeking_take_while(|&c| c != 'x').collect();
 		let coeff = if init.is_empty() { 1.0 } else { init.parse()? };

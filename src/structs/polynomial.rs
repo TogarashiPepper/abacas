@@ -22,7 +22,6 @@ impl Polynomial {
 	/// Internal method to clean up a polynomial after operating on it.
 	fn clean(&mut self) {
 		self.0.retain(|mono| mono.coeff != 0.0);
-		self.0.sort_by(|first, second| second.degree.cmp(&first.degree));
 	}
 
 	/// The degree of the polynomial.

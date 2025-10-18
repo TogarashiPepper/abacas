@@ -3,7 +3,7 @@ use std::ops::{Add, AddAssign};
 use crate::structs::{Monomial, Polynomial};
 
 impl Add<Monomial> for Polynomial {
-	type Output = Polynomial;
+	type Output = Self;
 
 	fn add(mut self, rhs: Monomial) -> Self::Output {
 		self += rhs;
@@ -23,7 +23,7 @@ impl AddAssign<Monomial> for Polynomial {
 }
 
 impl Add for Polynomial {
-	type Output = Polynomial;
+	type Output = Self;
 
 	fn add(mut self, rhs: Self) -> Self::Output {
 		self += rhs;
