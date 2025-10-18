@@ -34,7 +34,7 @@
 		overlays.default = final: prev: {
 			rustToolchain = with fenix.packages.${prev.stdenv.hostPlatform.system};
 				combine (
-					(with stable; [clippy rustc cargo rust-src])
+					(with stable; [clippy rustc cargo rust-src rust-analyzer])
 					++ [default.rustfmt]
 				);
 		};
@@ -88,7 +88,6 @@
 								cargo-semver-checks
 								cargo-watch
 								cargo-show-asm
-								rust-analyzer
 								bacon
 							];
 
