@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"macro":["MPFR_DECL_INIT","mpfr_round_nearest_away"],"mod":["C","gmp","mpc","mpfr"]};

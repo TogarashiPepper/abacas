@@ -1,0 +1,996 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="Used to get a reference to a `Complex` number."><title>BorrowComplex in rug::complex - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rug" data-themes="" data-resource-suffix="" data-rustdoc-version="1.90.0 (1159e78c4 2025-09-14)" data-channel="1.90.0" data-search-js="search-fa3e91e5.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-68b7e25d.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-eebb9057.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc struct"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rug/index.html"><img src="data:image/svg+xml;base64,
+PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMzMuODY3IDMzLjg2NyIgeG1s
+bnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIC0yNjMuMTMpIj48Y2lyY2xl
+IGN4PSIxNi45MzMiIGN5PSIyODAuMDciIHI9IjE2LjkzMyIgZmlsbD0iI2Y3ZjFhMSIvPjxnIGZpbGw9IiMwMDcyYjIiIHN0cm9r
+ZS13aWR0aD0iLjI2NDU4cHgiPjxnIHN0cm9rZT0iIzAwMCI+PGcgYXJpYS1sYWJlbD0iNiI+PHBhdGggZD0ibTE0LjM2MSAyNzgu
+NzFjMC42NjA0IDAgMS4yODQxIDAuMjc1MTYgMS4yODQxIDEuMzk0MiAwIDEuMjI5MS0wLjU4NzAyIDEuNjE0My0xLjI0NzQgMS42
+MTQzLTAuNTY4NjggMC0xLjI2NTgtMC4zODUyMy0xLjUyMjYtMi4wMTc5IDAuMzY2ODktMC42OTcwOSAwLjkzNTU2LTAuOTkwNiAx
+LjQ4NTktMC45OTA2em0wLjExMDA3IDUuMzU2NmMyLjIwMTMgMCA0LjAzNTgtMS40Njc2IDQuMDM1OC0zLjk2MjRzLTEuNTQwOS0z
+LjU5NTUtMy41MjIxLTMuNTk1NWMtMC42MjM3MSAwLTEuNjE0MyAwLjQwMzU4LTIuMTgzIDEuMTU1NyAwLjEyODQxLTIuMzQ4MSAx
+LjAwODktMy4xMzY5IDIuMTQ2My0zLjEzNjkgMC42NjA0IDAgMS4zOTQyIDAuNDAzNTcgMS43NjExIDAuODA3MTVsMS42NTEtMS44
+NzExYy0wLjc3MDQ2LTAuNzcwNDYtMS45ODEyLTEuNDY3Ni0zLjYzMjItMS40Njc2LTIuNDk0OCAwLTQuODA2MiAyLjAxNzktNC44
+MDYyIDYuMjM3MSAwIDQuMjE5MiAyLjMxMTQgNS44MzM1IDQuNTQ5NCA1LjgzMzV6IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJh
+bnNmb3JtPSJyb3RhdGUoMTUuNTE1KSIgYXJpYS1sYWJlbD0iMiI+PHBhdGggZD0ibTk4LjAyOCAyNjcuOTVoNS4wNDYxdi0xLjM5
+OThoLTEuNjAzYy0wLjMyNzM4IDAtMC44MjQwOSAwLjA0NTEtMS4xOTY2IDAuMDkwMyAxLjI3NTYtMS4yNTMxIDIuNDQ5Ny0yLjQy
+NzEgMi40NDk3LTMuNzI1MyAwLTEuMzY2LTAuOTU5NTYtMi4yNjkxLTIuMzcwNy0yLjI2OTEtMS4wMDQ3IDAtMS42ODIgMC4zOTUx
+MS0yLjM3MDcgMS4xNzRsMC44NjkyNCAwLjg1Nzk2YzAuMzYxMjQtMC4zODM4MyAwLjc1NjM2LTAuNzMzNzggMS4yNzU2LTAuNzMz
+NzggMC42MjA4OSAwIDEuMDE2IDAuMzgzODIgMS4wMTYgMS4wODM3IDAgMS4wMDQ3LTEuMzA5NSAyLjI5MTYtMy4xMTU3IDMuODk0
+N3oiIGZpbGwtb3BhY2l0eT0iLjk3MjU1IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoLTExLjAzMyki
+IGFyaWEtbGFiZWw9IjgiPjxwYXRoIGQ9Im0tMzguOTIgMjkwLjc2YzEuMjc0MiAwIDIuMTIzNy0wLjc0MDgzIDIuMTIzNy0xLjcw
+ODggMC0wLjgzOTYyLTAuNTAzNzctMS4zMDM5LTEuMDg2Ni0xLjYyOTh2LTAuMDM5NWMwLjQwNDk5LTAuMjk2MzMgMC44Mzk2MS0w
+LjgxOTg2IDAuODM5NjEtMS40NDIyIDAtMS4wMTc0LTAuNzIxMDgtMS42OTktMS44NDcxLTEuNjk5LTEuMDg2NiAwLTEuODk2NSAw
+LjY1MTkzLTEuODk2NSAxLjY2OTMgMCAwLjY2MTgxIDAuMzg1MjMgMS4xMjYxIDAuODY5MjQgMS40NzE4djAuMDM5NWMtMC41OTI2
+NyAwLjMxNjA5LTEuMTM1OSAwLjgyOTc0LTEuMTM1OSAxLjYxMDEgMCAxLjAxNzQgMC45MDg3NiAxLjcyODYgMi4xMzM2IDEuNzI4
+NnptMC40MTQ4Ny0zLjY2NDdjLTAuNzAxMzItMC4yNzY1Ny0xLjI2NDQtMC41NTMxNS0xLjI2NDQtMS4xODUzIDAtMC41NDMyOCAw
+LjM3NTM2LTAuODU5MzcgMC44NTkzNy0wLjg1OTM3IDAuNTgyNzkgMCAwLjkyODUxIDAuNDA0OTkgMC45Mjg1MSAwLjk1ODE1IDAg
+MC4zOTUxMS0wLjE4NzY4IDAuNzUwNzEtMC41MjM1MiAxLjA4NjZ6bS0wLjM5NTExIDIuODU0N2MtMC42NDIwNiAwLTEuMTU1Ny0w
+LjQxNDg2LTEuMTU1Ny0xLjAzNzIgMC0wLjQ4NDAxIDAuMjg2NDYtMC44ODkgMC42ODE1Ny0xLjE3NTUgMC44NDk0OSAwLjM0NTcy
+IDEuNTExMyAwLjU5MjY3IDEuNTExMyAxLjI3NDIgMCAwLjU4Mjc5LTAuNDM0NjIgMC45MzgzOS0xLjAzNzIgMC45MzgzOXoiIGZp
+bGwtb3BhY2l0eT0iLjk0MTE4IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoNi41MDA4KSIgYXJpYS1s
+YWJlbD0iMyI+PHBhdGggZD0ibTM5LjMwMiAyODMuNjRjMS4wMzI5IDAgMS44ODgxLTAuNTc1NzMgMS44ODgxLTEuNTU3OSAwLTAu
+NzExMi0wLjQ4MjYtMS4xNjg0LTEuMTE3Ni0xLjMzNzd2LTAuMDMzOWMwLjU4NDItMC4yMjg2IDAuOTM5OC0wLjYzNSAwLjkzOTgt
+MS4yMzYxIDAtMC45MTQ0LTAuNzExMi0xLjQyMjQtMS43NDQxLTEuNDIyNC0wLjY0MzQ3IDAtMS4xNTk5IDAuMjcwOTMtMS42MTcx
+IDAuNjc3MzNsMC40OTk1MyAwLjYwMTE0YzAuMzMwMi0wLjMwNDggMC42NjA0LTAuNTA4IDEuMDgzNy0wLjUwOCAwLjQ5MTA3IDAg
+MC43OTU4NyAwLjI3MDkzIDAuNzk1ODcgMC43MTk2NiAwIDAuNDk5NTQtMC4zNDcxMyAwLjg2MzYtMS40MDU1IDAuODYzNnYwLjcx
+MTJjMS4yMjc3IDAgMS41ODMzIDAuMzU1NiAxLjU4MzMgMC45MTQ0IDAgMC41MDgtMC40MDY0IDAuODEyODEtMC45OTA2IDAuODEy
+ODEtMC41NDE4NyAwLTAuOTU2NzMtMC4yNjI0Ny0xLjI3ODUtMC41OTI2N2wtMC40NjU2NyAwLjYyNjUzYzAuMzgxIDAuNDIzMzQg
+MC45NTY3MyAwLjc2MiAxLjgyODggMC43NjJ6IiBmaWxsLW9wYWNpdHk9Ii44Nzg0MyIgc3Ryb2tlPSJub25lIi8+PC9nPjxnIHRy
+YW5zZm9ybT0icm90YXRlKDguMzU2KSIgYXJpYS1sYWJlbD0iMSI+PHBhdGggZD0ibTQ2LjQwNSAyNjguOWgzLjI0Mjd2LTAuNzk1
+ODdoLTEuMDU4M3YtNC41ODg5aC0wLjcyODEzYy0wLjMzODY3IDAuMjAzMi0wLjcxMTIgMC4zMzg2Ny0xLjI0NDYgMC40NDAyN3Yw
+LjYwOTZoMC45OTA2djMuNTM5MWgtMS4yMDIzeiIgZmlsbC1vcGFjaXR5PSIuNzUyOTQiIHN0cm9rZT0ibm9uZSIvPjwvZz48ZyB0
+cmFuc2Zvcm09InJvdGF0ZSgxMi44NjEpIiBhcmlhLWxhYmVsPSI4Ij48cGF0aCBkPSJtODUuMDM2IDI2MS42M2MxLjA5MjIgMCAx
+LjgyMDMtMC42MzUgMS44MjAzLTEuNDY0NyAwLTAuNzE5NjctMC40MzE4LTEuMTE3Ni0wLjkzMTMzLTEuMzk3di0wLjAzMzljMC4z
+NDcxMy0wLjI1NCAwLjcxOTY3LTAuNzAyNzMgMC43MTk2Ny0xLjIzNjEgMC0wLjg3MjA3LTAuNjE4MDctMS40NTYzLTEuNTgzMy0x
+LjQ1NjMtMC45MzEzMyAwLTEuNjI1NiAwLjU1ODgtMS42MjU2IDEuNDMwOSAwIDAuNTY3MjYgMC4zMzAyIDAuOTY1MiAwLjc0NTA3
+IDEuMjYxNXYwLjAzMzljLTAuNTA4IDAuMjcwOTMtMC45NzM2NyAwLjcxMTItMC45NzM2NyAxLjM4MDEgMCAwLjg3MjA3IDAuNzc4
+OTMgMS40ODE3IDEuODI4OCAxLjQ4MTd6bTAuMzU1Ni0zLjE0MTFjLTAuNjAxMTMtMC4yMzcwNy0xLjA4MzctMC40NzQxNC0xLjA4
+MzctMS4wMTYgMC0wLjQ2NTY3IDAuMzIxNzMtMC43MzY2IDAuNzM2Ni0wLjczNjYgMC40OTk1MyAwIDAuNzk1ODcgMC4zNDcxMyAw
+Ljc5NTg3IDAuODIxMjYgMCAwLjMzODY3LTAuMTYwODcgMC42NDM0Ny0wLjQ0ODczIDAuOTMxMzR6bS0wLjMzODY3IDIuNDQ2OWMt
+MC41NTAzMyAwLTAuOTkwNi0wLjM1NTYtMC45OTA2LTAuODg5IDAtMC40MTQ4NiAwLjI0NTUzLTAuNzYyIDAuNTg0Mi0xLjAwNzUg
+MC43MjgxMyAwLjI5NjMzIDEuMjk1NCAwLjUwOCAxLjI5NTQgMS4wOTIyIDAgMC40OTk1My0wLjM3MjUzIDAuODA0MzMtMC44ODkg
+MC44MDQzM3oiIGZpbGwtb3BhY2l0eT0iLjYyNzQ1IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoNC4z
+MDk5KSIgYXJpYS1sYWJlbD0iNSI+PHBhdGggZD0ibTQ2LjM0MSAyODkuNDljMC45OTA2IDAgMS44OTY1LTAuNjc3MzQgMS44OTY1
+LTEuODU0MiAwLTEuMTU5OS0wLjc3MDQ3LTEuNjg0OS0xLjY5MzMtMS42ODQ5LTAuMjc5NCAwLTAuNDgyNiAwLjA2NzctMC43MTEy
+IDAuMTc3OGwwLjExMDA3LTEuMzAzOWgyLjAzMnYtMC44MjEyN2gtMi44Nzg3bC0wLjE2MDg3IDIuNjU4NSAwLjQ2NTY3IDAuMjk2
+MzNjMC4zMjE3My0wLjIxMTY3IDAuNTE2NDctMC4zMDQ4IDAuODYzNi0wLjMwNDggMC41OTI2NyAwIDAuOTkwNiAwLjM2NDA3IDAu
+OTkwNiAxLjAwNzUgMCAwLjY1MTk0LTAuNDQwMjcgMS4wMzI5LTEuMDQxNCAxLjAzMjktMC41NDE4NyAwLTAuOTM5OC0wLjI3MDk0
+LTEuMjYxNS0wLjU3NTc0bC0wLjQ0ODczIDAuNjI2NTRjMC4zOTc5MyAwLjM5NzkzIDAuOTY1MiAwLjc0NTA3IDEuODM3MyAwLjc0
+NTA3eiIgZmlsbC1vcGFjaXR5PSIuNTAxOTYiIHN0cm9rZT0ibm9uZSIvPjwvZz48ZyBmaWxsLW9wYWNpdHk9Ii4zNzY0NyIgYXJp
+YS1sYWJlbD0iMyI+PHBhdGggZD0ibTkuODg1OSAyOTMuNDZjMS4wMzI5IDAgMS44ODgxLTAuNTc1NzQgMS44ODgxLTEuNTU3OSAw
+LTAuNzExMi0wLjQ4MjYtMS4xNjg0LTEuMTE3Ni0xLjMzNzd2LTAuMDMzOWMwLjU4NDItMC4yMjg2IDAuOTM5OC0wLjYzNSAwLjkz
+OTgtMS4yMzYxIDAtMC45MTQ0LTAuNzExMi0xLjQyMjQtMS43NDQxLTEuNDIyNC0wLjY0MzQ3IDAtMS4xNTk5IDAuMjcwOTQtMS42
+MTcxIDAuNjc3MzRsMC40OTk1MyAwLjYwMTEzYzAuMzMwMi0wLjMwNDggMC42NjA0LTAuNTA4IDEuMDgzNy0wLjUwOCAwLjQ5MTA3
+IDAgMC43OTU4NyAwLjI3MDkzIDAuNzk1ODcgMC43MTk2NyAwIDAuNDk5NTMtMC4zNDcxMyAwLjg2MzYtMS40MDU1IDAuODYzNnYw
+LjcxMTJjMS4yMjc3IDAgMS41ODMzIDAuMzU1NiAxLjU4MzMgMC45MTQ0IDAgMC41MDgtMC40MDY0IDAuODEyOC0wLjk5MDYgMC44
+MTI4LTAuNTQxODcgMC0wLjk1NjczLTAuMjYyNDctMS4yNzg1LTAuNTkyNjdsLTAuNDY1NjcgMC42MjY1NGMwLjM4MSAwLjQyMzMz
+IDAuOTU2NzMgMC43NjIgMS44Mjg4IDAuNzYyeiIgc3Ryb2tlPSJub25lIi8+PC9nPjxnIHRyYW5zZm9ybT0icm90YXRlKC0xMS4z
+NTIpIiBhcmlhLWxhYmVsPSIwIj48cGF0aCBkPSJtLTUxLjQ3MSAyNzYuMTdjMS4xMTc2IDAgMS44Mjg4LTAuOTk5MDcgMS44Mjg4
+LTIuODE5NCAwLTEuODExOS0wLjcxMTItMi43Njg2LTEuODI4OC0yLjc2ODYtMS4xMTc2IDAtMS44Mjg4IDAuOTQ4MjYtMS44Mjg4
+IDIuNzY4NiAwIDEuODIwMyAwLjcxMTIgMi44MTk0IDEuODI4OCAyLjgxOTR6bTAtMC43NjJjLTAuNTE2NDcgMC0wLjg5NzQ3LTAu
+NTMzNC0wLjg5NzQ3LTIuMDU3NHMwLjM4MS0yLjAwNjYgMC44OTc0Ny0yLjAwNjZjMC41MjQ5MyAwIDAuODk3NDcgMC40ODI2IDAu
+ODk3NDcgMi4wMDY2cy0wLjM3MjUzIDIuMDU3NC0wLjg5NzQ3IDIuMDU3NHoiIGZpbGwtb3BhY2l0eT0iLjI1MDk4IiBzdHJva2U9
+Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoMjIuNTA2KSIgYXJpYS1sYWJlbD0iNyI+PHBhdGggZD0ibTExOC4xNSAy
+NDMuMDhoMC45OTA2YzAuMDkzMS0yLjA5OTcgMC4zNDcxMy0zLjIwODkgMS42NDI1LTQuNzkyMXYtMC41OTI2NmgtMy42MTUzdjAu
+ODIxMjZoMi41NTY5Yy0xLjA3NTMgMS40NjQ3LTEuNDczMiAyLjY1MDEtMS41NzQ4IDQuNTYzNXoiIGZpbGwtb3BhY2l0eT0iLjEy
+NTQ5IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoLTkuNzI3MykiIGFyaWEtbGFiZWw9IjEiPjxwYXRo
+IGQ9Im0tMTguMjk5IDI4Mi43OWgzLjI0Mjd2LTAuNzk1ODdoLTEuMDU4M3YtNC41ODg5aC0wLjcyODEzYy0wLjMzODY3IDAuMjAz
+Mi0wLjcxMTIgMC4zMzg2Ni0xLjI0NDYgMC40NDAyNnYwLjYwOTZoMC45OTA2djMuNTM5MWgtMS4yMDIzeiIgZmlsbC1vcGFjaXR5
+PSIuMDYyNzQ1IiBzdHJva2U9Im5vbmUiLz48L2c+PC9nPjxnIGFyaWEtbGFiZWw9Ii4iPjxwYXRoIGQ9Im0yMC45MiAyODMuOThj
+MC42NTQ3NiAwIDEuMTI4OS0wLjUxOTI5IDEuMTI4OS0xLjE3NCAwLTAuNjU0NzYtMC40NzQxMy0xLjE3NC0xLjEyODktMS4xNzQt
+MC42NTQ3NiAwLTEuMTI4OSAwLjUxOTI5LTEuMTI4OSAxLjE3NCAwIDAuNjU0NzUgMC40NzQxMyAxLjE3NCAxLjEyODkgMS4xNzR6
+Ii8+PC9nPjwvZz48L2c+PC9zdmc+Cg==
+" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rug/index.html"><img src="data:image/svg+xml;base64,
+PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMzMuODY3IDMzLjg2NyIgeG1s
+bnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIC0yNjMuMTMpIj48Y2lyY2xl
+IGN4PSIxNi45MzMiIGN5PSIyODAuMDciIHI9IjE2LjkzMyIgZmlsbD0iI2Y3ZjFhMSIvPjxnIGZpbGw9IiMwMDcyYjIiIHN0cm9r
+ZS13aWR0aD0iLjI2NDU4cHgiPjxnIHN0cm9rZT0iIzAwMCI+PGcgYXJpYS1sYWJlbD0iNiI+PHBhdGggZD0ibTE0LjM2MSAyNzgu
+NzFjMC42NjA0IDAgMS4yODQxIDAuMjc1MTYgMS4yODQxIDEuMzk0MiAwIDEuMjI5MS0wLjU4NzAyIDEuNjE0My0xLjI0NzQgMS42
+MTQzLTAuNTY4NjggMC0xLjI2NTgtMC4zODUyMy0xLjUyMjYtMi4wMTc5IDAuMzY2ODktMC42OTcwOSAwLjkzNTU2LTAuOTkwNiAx
+LjQ4NTktMC45OTA2em0wLjExMDA3IDUuMzU2NmMyLjIwMTMgMCA0LjAzNTgtMS40Njc2IDQuMDM1OC0zLjk2MjRzLTEuNTQwOS0z
+LjU5NTUtMy41MjIxLTMuNTk1NWMtMC42MjM3MSAwLTEuNjE0MyAwLjQwMzU4LTIuMTgzIDEuMTU1NyAwLjEyODQxLTIuMzQ4MSAx
+LjAwODktMy4xMzY5IDIuMTQ2My0zLjEzNjkgMC42NjA0IDAgMS4zOTQyIDAuNDAzNTcgMS43NjExIDAuODA3MTVsMS42NTEtMS44
+NzExYy0wLjc3MDQ2LTAuNzcwNDYtMS45ODEyLTEuNDY3Ni0zLjYzMjItMS40Njc2LTIuNDk0OCAwLTQuODA2MiAyLjAxNzktNC44
+MDYyIDYuMjM3MSAwIDQuMjE5MiAyLjMxMTQgNS44MzM1IDQuNTQ5NCA1LjgzMzV6IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJh
+bnNmb3JtPSJyb3RhdGUoMTUuNTE1KSIgYXJpYS1sYWJlbD0iMiI+PHBhdGggZD0ibTk4LjAyOCAyNjcuOTVoNS4wNDYxdi0xLjM5
+OThoLTEuNjAzYy0wLjMyNzM4IDAtMC44MjQwOSAwLjA0NTEtMS4xOTY2IDAuMDkwMyAxLjI3NTYtMS4yNTMxIDIuNDQ5Ny0yLjQy
+NzEgMi40NDk3LTMuNzI1MyAwLTEuMzY2LTAuOTU5NTYtMi4yNjkxLTIuMzcwNy0yLjI2OTEtMS4wMDQ3IDAtMS42ODIgMC4zOTUx
+MS0yLjM3MDcgMS4xNzRsMC44NjkyNCAwLjg1Nzk2YzAuMzYxMjQtMC4zODM4MyAwLjc1NjM2LTAuNzMzNzggMS4yNzU2LTAuNzMz
+NzggMC42MjA4OSAwIDEuMDE2IDAuMzgzODIgMS4wMTYgMS4wODM3IDAgMS4wMDQ3LTEuMzA5NSAyLjI5MTYtMy4xMTU3IDMuODk0
+N3oiIGZpbGwtb3BhY2l0eT0iLjk3MjU1IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoLTExLjAzMyki
+IGFyaWEtbGFiZWw9IjgiPjxwYXRoIGQ9Im0tMzguOTIgMjkwLjc2YzEuMjc0MiAwIDIuMTIzNy0wLjc0MDgzIDIuMTIzNy0xLjcw
+ODggMC0wLjgzOTYyLTAuNTAzNzctMS4zMDM5LTEuMDg2Ni0xLjYyOTh2LTAuMDM5NWMwLjQwNDk5LTAuMjk2MzMgMC44Mzk2MS0w
+LjgxOTg2IDAuODM5NjEtMS40NDIyIDAtMS4wMTc0LTAuNzIxMDgtMS42OTktMS44NDcxLTEuNjk5LTEuMDg2NiAwLTEuODk2NSAw
+LjY1MTkzLTEuODk2NSAxLjY2OTMgMCAwLjY2MTgxIDAuMzg1MjMgMS4xMjYxIDAuODY5MjQgMS40NzE4djAuMDM5NWMtMC41OTI2
+NyAwLjMxNjA5LTEuMTM1OSAwLjgyOTc0LTEuMTM1OSAxLjYxMDEgMCAxLjAxNzQgMC45MDg3NiAxLjcyODYgMi4xMzM2IDEuNzI4
+NnptMC40MTQ4Ny0zLjY2NDdjLTAuNzAxMzItMC4yNzY1Ny0xLjI2NDQtMC41NTMxNS0xLjI2NDQtMS4xODUzIDAtMC41NDMyOCAw
+LjM3NTM2LTAuODU5MzcgMC44NTkzNy0wLjg1OTM3IDAuNTgyNzkgMCAwLjkyODUxIDAuNDA0OTkgMC45Mjg1MSAwLjk1ODE1IDAg
+MC4zOTUxMS0wLjE4NzY4IDAuNzUwNzEtMC41MjM1MiAxLjA4NjZ6bS0wLjM5NTExIDIuODU0N2MtMC42NDIwNiAwLTEuMTU1Ny0w
+LjQxNDg2LTEuMTU1Ny0xLjAzNzIgMC0wLjQ4NDAxIDAuMjg2NDYtMC44ODkgMC42ODE1Ny0xLjE3NTUgMC44NDk0OSAwLjM0NTcy
+IDEuNTExMyAwLjU5MjY3IDEuNTExMyAxLjI3NDIgMCAwLjU4Mjc5LTAuNDM0NjIgMC45MzgzOS0xLjAzNzIgMC45MzgzOXoiIGZp
+bGwtb3BhY2l0eT0iLjk0MTE4IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoNi41MDA4KSIgYXJpYS1s
+YWJlbD0iMyI+PHBhdGggZD0ibTM5LjMwMiAyODMuNjRjMS4wMzI5IDAgMS44ODgxLTAuNTc1NzMgMS44ODgxLTEuNTU3OSAwLTAu
+NzExMi0wLjQ4MjYtMS4xNjg0LTEuMTE3Ni0xLjMzNzd2LTAuMDMzOWMwLjU4NDItMC4yMjg2IDAuOTM5OC0wLjYzNSAwLjkzOTgt
+MS4yMzYxIDAtMC45MTQ0LTAuNzExMi0xLjQyMjQtMS43NDQxLTEuNDIyNC0wLjY0MzQ3IDAtMS4xNTk5IDAuMjcwOTMtMS42MTcx
+IDAuNjc3MzNsMC40OTk1MyAwLjYwMTE0YzAuMzMwMi0wLjMwNDggMC42NjA0LTAuNTA4IDEuMDgzNy0wLjUwOCAwLjQ5MTA3IDAg
+MC43OTU4NyAwLjI3MDkzIDAuNzk1ODcgMC43MTk2NiAwIDAuNDk5NTQtMC4zNDcxMyAwLjg2MzYtMS40MDU1IDAuODYzNnYwLjcx
+MTJjMS4yMjc3IDAgMS41ODMzIDAuMzU1NiAxLjU4MzMgMC45MTQ0IDAgMC41MDgtMC40MDY0IDAuODEyODEtMC45OTA2IDAuODEy
+ODEtMC41NDE4NyAwLTAuOTU2NzMtMC4yNjI0Ny0xLjI3ODUtMC41OTI2N2wtMC40NjU2NyAwLjYyNjUzYzAuMzgxIDAuNDIzMzQg
+MC45NTY3MyAwLjc2MiAxLjgyODggMC43NjJ6IiBmaWxsLW9wYWNpdHk9Ii44Nzg0MyIgc3Ryb2tlPSJub25lIi8+PC9nPjxnIHRy
+YW5zZm9ybT0icm90YXRlKDguMzU2KSIgYXJpYS1sYWJlbD0iMSI+PHBhdGggZD0ibTQ2LjQwNSAyNjguOWgzLjI0Mjd2LTAuNzk1
+ODdoLTEuMDU4M3YtNC41ODg5aC0wLjcyODEzYy0wLjMzODY3IDAuMjAzMi0wLjcxMTIgMC4zMzg2Ny0xLjI0NDYgMC40NDAyN3Yw
+LjYwOTZoMC45OTA2djMuNTM5MWgtMS4yMDIzeiIgZmlsbC1vcGFjaXR5PSIuNzUyOTQiIHN0cm9rZT0ibm9uZSIvPjwvZz48ZyB0
+cmFuc2Zvcm09InJvdGF0ZSgxMi44NjEpIiBhcmlhLWxhYmVsPSI4Ij48cGF0aCBkPSJtODUuMDM2IDI2MS42M2MxLjA5MjIgMCAx
+LjgyMDMtMC42MzUgMS44MjAzLTEuNDY0NyAwLTAuNzE5NjctMC40MzE4LTEuMTE3Ni0wLjkzMTMzLTEuMzk3di0wLjAzMzljMC4z
+NDcxMy0wLjI1NCAwLjcxOTY3LTAuNzAyNzMgMC43MTk2Ny0xLjIzNjEgMC0wLjg3MjA3LTAuNjE4MDctMS40NTYzLTEuNTgzMy0x
+LjQ1NjMtMC45MzEzMyAwLTEuNjI1NiAwLjU1ODgtMS42MjU2IDEuNDMwOSAwIDAuNTY3MjYgMC4zMzAyIDAuOTY1MiAwLjc0NTA3
+IDEuMjYxNXYwLjAzMzljLTAuNTA4IDAuMjcwOTMtMC45NzM2NyAwLjcxMTItMC45NzM2NyAxLjM4MDEgMCAwLjg3MjA3IDAuNzc4
+OTMgMS40ODE3IDEuODI4OCAxLjQ4MTd6bTAuMzU1Ni0zLjE0MTFjLTAuNjAxMTMtMC4yMzcwNy0xLjA4MzctMC40NzQxNC0xLjA4
+MzctMS4wMTYgMC0wLjQ2NTY3IDAuMzIxNzMtMC43MzY2IDAuNzM2Ni0wLjczNjYgMC40OTk1MyAwIDAuNzk1ODcgMC4zNDcxMyAw
+Ljc5NTg3IDAuODIxMjYgMCAwLjMzODY3LTAuMTYwODcgMC42NDM0Ny0wLjQ0ODczIDAuOTMxMzR6bS0wLjMzODY3IDIuNDQ2OWMt
+MC41NTAzMyAwLTAuOTkwNi0wLjM1NTYtMC45OTA2LTAuODg5IDAtMC40MTQ4NiAwLjI0NTUzLTAuNzYyIDAuNTg0Mi0xLjAwNzUg
+MC43MjgxMyAwLjI5NjMzIDEuMjk1NCAwLjUwOCAxLjI5NTQgMS4wOTIyIDAgMC40OTk1My0wLjM3MjUzIDAuODA0MzMtMC44ODkg
+MC44MDQzM3oiIGZpbGwtb3BhY2l0eT0iLjYyNzQ1IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoNC4z
+MDk5KSIgYXJpYS1sYWJlbD0iNSI+PHBhdGggZD0ibTQ2LjM0MSAyODkuNDljMC45OTA2IDAgMS44OTY1LTAuNjc3MzQgMS44OTY1
+LTEuODU0MiAwLTEuMTU5OS0wLjc3MDQ3LTEuNjg0OS0xLjY5MzMtMS42ODQ5LTAuMjc5NCAwLTAuNDgyNiAwLjA2NzctMC43MTEy
+IDAuMTc3OGwwLjExMDA3LTEuMzAzOWgyLjAzMnYtMC44MjEyN2gtMi44Nzg3bC0wLjE2MDg3IDIuNjU4NSAwLjQ2NTY3IDAuMjk2
+MzNjMC4zMjE3My0wLjIxMTY3IDAuNTE2NDctMC4zMDQ4IDAuODYzNi0wLjMwNDggMC41OTI2NyAwIDAuOTkwNiAwLjM2NDA3IDAu
+OTkwNiAxLjAwNzUgMCAwLjY1MTk0LTAuNDQwMjcgMS4wMzI5LTEuMDQxNCAxLjAzMjktMC41NDE4NyAwLTAuOTM5OC0wLjI3MDk0
+LTEuMjYxNS0wLjU3NTc0bC0wLjQ0ODczIDAuNjI2NTRjMC4zOTc5MyAwLjM5NzkzIDAuOTY1MiAwLjc0NTA3IDEuODM3MyAwLjc0
+NTA3eiIgZmlsbC1vcGFjaXR5PSIuNTAxOTYiIHN0cm9rZT0ibm9uZSIvPjwvZz48ZyBmaWxsLW9wYWNpdHk9Ii4zNzY0NyIgYXJp
+YS1sYWJlbD0iMyI+PHBhdGggZD0ibTkuODg1OSAyOTMuNDZjMS4wMzI5IDAgMS44ODgxLTAuNTc1NzQgMS44ODgxLTEuNTU3OSAw
+LTAuNzExMi0wLjQ4MjYtMS4xNjg0LTEuMTE3Ni0xLjMzNzd2LTAuMDMzOWMwLjU4NDItMC4yMjg2IDAuOTM5OC0wLjYzNSAwLjkz
+OTgtMS4yMzYxIDAtMC45MTQ0LTAuNzExMi0xLjQyMjQtMS43NDQxLTEuNDIyNC0wLjY0MzQ3IDAtMS4xNTk5IDAuMjcwOTQtMS42
+MTcxIDAuNjc3MzRsMC40OTk1MyAwLjYwMTEzYzAuMzMwMi0wLjMwNDggMC42NjA0LTAuNTA4IDEuMDgzNy0wLjUwOCAwLjQ5MTA3
+IDAgMC43OTU4NyAwLjI3MDkzIDAuNzk1ODcgMC43MTk2NyAwIDAuNDk5NTMtMC4zNDcxMyAwLjg2MzYtMS40MDU1IDAuODYzNnYw
+LjcxMTJjMS4yMjc3IDAgMS41ODMzIDAuMzU1NiAxLjU4MzMgMC45MTQ0IDAgMC41MDgtMC40MDY0IDAuODEyOC0wLjk5MDYgMC44
+MTI4LTAuNTQxODcgMC0wLjk1NjczLTAuMjYyNDctMS4yNzg1LTAuNTkyNjdsLTAuNDY1NjcgMC42MjY1NGMwLjM4MSAwLjQyMzMz
+IDAuOTU2NzMgMC43NjIgMS44Mjg4IDAuNzYyeiIgc3Ryb2tlPSJub25lIi8+PC9nPjxnIHRyYW5zZm9ybT0icm90YXRlKC0xMS4z
+NTIpIiBhcmlhLWxhYmVsPSIwIj48cGF0aCBkPSJtLTUxLjQ3MSAyNzYuMTdjMS4xMTc2IDAgMS44Mjg4LTAuOTk5MDcgMS44Mjg4
+LTIuODE5NCAwLTEuODExOS0wLjcxMTItMi43Njg2LTEuODI4OC0yLjc2ODYtMS4xMTc2IDAtMS44Mjg4IDAuOTQ4MjYtMS44Mjg4
+IDIuNzY4NiAwIDEuODIwMyAwLjcxMTIgMi44MTk0IDEuODI4OCAyLjgxOTR6bTAtMC43NjJjLTAuNTE2NDcgMC0wLjg5NzQ3LTAu
+NTMzNC0wLjg5NzQ3LTIuMDU3NHMwLjM4MS0yLjAwNjYgMC44OTc0Ny0yLjAwNjZjMC41MjQ5MyAwIDAuODk3NDcgMC40ODI2IDAu
+ODk3NDcgMi4wMDY2cy0wLjM3MjUzIDIuMDU3NC0wLjg5NzQ3IDIuMDU3NHoiIGZpbGwtb3BhY2l0eT0iLjI1MDk4IiBzdHJva2U9
+Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoMjIuNTA2KSIgYXJpYS1sYWJlbD0iNyI+PHBhdGggZD0ibTExOC4xNSAy
+NDMuMDhoMC45OTA2YzAuMDkzMS0yLjA5OTcgMC4zNDcxMy0zLjIwODkgMS42NDI1LTQuNzkyMXYtMC41OTI2NmgtMy42MTUzdjAu
+ODIxMjZoMi41NTY5Yy0xLjA3NTMgMS40NjQ3LTEuNDczMiAyLjY1MDEtMS41NzQ4IDQuNTYzNXoiIGZpbGwtb3BhY2l0eT0iLjEy
+NTQ5IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoLTkuNzI3MykiIGFyaWEtbGFiZWw9IjEiPjxwYXRo
+IGQ9Im0tMTguMjk5IDI4Mi43OWgzLjI0Mjd2LTAuNzk1ODdoLTEuMDU4M3YtNC41ODg5aC0wLjcyODEzYy0wLjMzODY3IDAuMjAz
+Mi0wLjcxMTIgMC4zMzg2Ni0xLjI0NDYgMC40NDAyNnYwLjYwOTZoMC45OTA2djMuNTM5MWgtMS4yMDIzeiIgZmlsbC1vcGFjaXR5
+PSIuMDYyNzQ1IiBzdHJva2U9Im5vbmUiLz48L2c+PC9nPjxnIGFyaWEtbGFiZWw9Ii4iPjxwYXRoIGQ9Im0yMC45MiAyODMuOThj
+MC42NTQ3NiAwIDEuMTI4OS0wLjUxOTI5IDEuMTI4OS0xLjE3NCAwLTAuNjU0NzYtMC40NzQxMy0xLjE3NC0xLjEyODktMS4xNzQt
+MC42NTQ3NiAwLTEuMTI4OSAwLjUxOTI5LTEuMTI4OSAxLjE3NCAwIDAuNjU0NzUgMC40NzQxMyAxLjE3NCAxLjEyODkgMS4xNzR6
+Ii8+PC9nPjwvZz48L2c+PC9zdmc+Cg==
+" alt="logo"></a><h2><a href="../../rug/index.html">rug</a><span class="version">1.28.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Borrow<wbr>Complex</a></h2><h3><a href="#">Sections</a></h3><ul class="block top-toc"><li><a href="#examples" title="Examples">Examples</a></li></ul><h3><a href="#implementations">Methods</a></h3><ul class="block method"><li><a href="#method.const_deref" title="const_deref">const_deref</a></li><li><a href="#method.from_raw" title="from_raw">from_raw</a></li></ul><h3><a href="#deref-methods-Complex">Methods from Deref&lt;<wbr>Target=<wbr>Complex&gt;</a></h3><ul class="block deref-methods"><li><a href="#method.abs_ref" title="abs_ref">abs_ref</a></li><li><a href="#method.acos_ref" title="acos_ref">acos_ref</a></li><li><a href="#method.acosh_ref" title="acosh_ref">acosh_ref</a></li><li><a href="#method.agm_ref" title="agm_ref">agm_ref</a></li><li><a href="#method.arg_ref" title="arg_ref">arg_ref</a></li><li><a href="#method.as_conj" title="as_conj">as_conj</a></li><li><a href="#method.as_mul_i" title="as_mul_i">as_mul_i</a></li><li><a href="#method.as_neg" title="as_neg">as_neg</a></li><li><a href="#method.as_ord" title="as_ord">as_ord</a></li><li><a href="#method.as_raw" title="as_raw">as_raw</a></li><li><a href="#method.as_shl" title="as_shl">as_shl</a></li><li><a href="#method.as_shr" title="as_shr">as_shr</a></li><li><a href="#method.asin_ref" title="asin_ref">asin_ref</a></li><li><a href="#method.asinh_ref" title="asinh_ref">asinh_ref</a></li><li><a href="#method.atan_ref" title="atan_ref">atan_ref</a></li><li><a href="#method.atanh_ref" title="atanh_ref">atanh_ref</a></li><li><a href="#method.cmp_abs" title="cmp_abs">cmp_abs</a></li><li><a href="#method.conj_ref" title="conj_ref">conj_ref</a></li><li><a href="#method.cos_ref" title="cos_ref">cos_ref</a></li><li><a href="#method.cosh_ref" title="cosh_ref">cosh_ref</a></li><li><a href="#method.eq0" title="eq0">eq0</a></li><li><a href="#method.exp_ref" title="exp_ref">exp_ref</a></li><li><a href="#method.imag" title="imag">imag</a></li><li><a href="#method.is_zero" title="is_zero">is_zero</a></li><li><a href="#method.ln_ref" title="ln_ref">ln_ref</a></li><li><a href="#method.log10_ref" title="log10_ref">log10_ref</a></li><li><a href="#method.mul_add_ref" title="mul_add_ref">mul_add_ref</a></li><li><a href="#method.mul_i_ref" title="mul_i_ref">mul_i_ref</a></li><li><a href="#method.mul_sub_ref" title="mul_sub_ref">mul_sub_ref</a></li><li><a href="#method.norm_ref" title="norm_ref">norm_ref</a></li><li><a href="#method.prec" title="prec">prec</a></li><li><a href="#method.prec_64" title="prec_64">prec_64</a></li><li><a href="#method.proj_ref" title="proj_ref">proj_ref</a></li><li><a href="#method.real" title="real">real</a></li><li><a href="#method.recip_ref" title="recip_ref">recip_ref</a></li><li><a href="#method.sin_cos_ref" title="sin_cos_ref">sin_cos_ref</a></li><li><a href="#method.sin_ref" title="sin_ref">sin_ref</a></li><li><a href="#method.sinh_ref" title="sinh_ref">sinh_ref</a></li><li><a href="#method.sqrt_ref" title="sqrt_ref">sqrt_ref</a></li><li><a href="#method.square_ref" title="square_ref">square_ref</a></li><li><a href="#method.tan_ref" title="tan_ref">tan_ref</a></li><li><a href="#method.tanh_ref" title="tanh_ref">tanh_ref</a></li><li><a href="#method.to_string_radix" title="to_string_radix">to_string_radix</a></li><li><a href="#method.to_string_radix_round" title="to_string_radix_round">to_string_radix_round</a></li><li><a href="#method.total_cmp" title="total_cmp">total_cmp</a></li></ul><h3><a href="#trait-implementations">Trait Implementations</a></h3><ul class="block trait-implementation"><li><a href="#impl-Binary-for-BorrowComplex%3C'_%3E" title="Binary">Binary</a></li><li><a href="#impl-Clone-for-BorrowComplex%3C'a%3E" title="Clone">Clone</a></li><li><a href="#impl-Copy-for-BorrowComplex%3C'a%3E" title="Copy">Copy</a></li><li><a href="#impl-Debug-for-BorrowComplex%3C'_%3E" title="Debug">Debug</a></li><li><a href="#impl-Deref-for-BorrowComplex%3C'_%3E" title="Deref">Deref</a></li><li><a href="#impl-Display-for-BorrowComplex%3C'_%3E" title="Display">Display</a></li><li><a href="#impl-LowerExp-for-BorrowComplex%3C'_%3E" title="LowerExp">LowerExp</a></li><li><a href="#impl-LowerHex-for-BorrowComplex%3C'_%3E" title="LowerHex">LowerHex</a></li><li><a href="#impl-Octal-for-BorrowComplex%3C'_%3E" title="Octal">Octal</a></li><li><a href="#impl-Pointer-for-BorrowComplex%3C'_%3E" title="Pointer">Pointer</a></li><li><a href="#impl-Send-for-BorrowComplex%3C'_%3E" title="Send">Send</a></li><li><a href="#impl-Sync-for-BorrowComplex%3C'_%3E" title="Sync">Sync</a></li><li><a href="#impl-UpperExp-for-BorrowComplex%3C'_%3E" title="UpperExp">UpperExp</a></li><li><a href="#impl-UpperHex-for-BorrowComplex%3C'_%3E" title="UpperHex">UpperHex</a></li></ul><h3><a href="#synthetic-implementations">Auto Trait Implementations</a></h3><ul class="block synthetic-implementation"><li><a href="#impl-Freeze-for-BorrowComplex%3C'a%3E" title="Freeze">Freeze</a></li><li><a href="#impl-RefUnwindSafe-for-BorrowComplex%3C'a%3E" title="RefUnwindSafe">RefUnwindSafe</a></li><li><a href="#impl-Unpin-for-BorrowComplex%3C'a%3E" title="Unpin">Unpin</a></li><li><a href="#impl-UnwindSafe-for-BorrowComplex%3C'a%3E" title="UnwindSafe">UnwindSafe</a></li></ul><h3><a href="#blanket-implementations">Blanket Implementations</a></h3><ul class="block blanket-implementation"><li><a href="#impl-Any-for-T" title="Any">Any</a></li><li><a href="#impl-Az-for-T" title="Az">Az</a></li><li><a href="#impl-Borrow%3CT%3E-for-T" title="Borrow&#60;T&#62;">Borrow&#60;T&#62;</a></li><li><a href="#impl-BorrowMut%3CT%3E-for-T" title="BorrowMut&#60;T&#62;">BorrowMut&#60;T&#62;</a></li><li><a href="#impl-CastFrom%3CSrc%3E-for-Dst" title="CastFrom&#60;Src&#62;">CastFrom&#60;Src&#62;</a></li><li><a href="#impl-CheckedAs-for-T" title="CheckedAs">CheckedAs</a></li><li><a href="#impl-CheckedCastFrom%3CSrc%3E-for-Dst" title="CheckedCastFrom&#60;Src&#62;">CheckedCastFrom&#60;Src&#62;</a></li><li><a href="#impl-CloneToUninit-for-T" title="CloneToUninit">CloneToUninit</a></li><li><a href="#impl-From%3CT%3E-for-T" title="From&#60;T&#62;">From&#60;T&#62;</a></li><li><a href="#impl-Into%3CU%3E-for-T" title="Into&#60;U&#62;">Into&#60;U&#62;</a></li><li><a href="#impl-OverflowingAs-for-T" title="OverflowingAs">OverflowingAs</a></li><li><a href="#impl-OverflowingCastFrom%3CSrc%3E-for-Dst" title="OverflowingCastFrom&#60;Src&#62;">OverflowingCastFrom&#60;Src&#62;</a></li><li><a href="#impl-Receiver-for-P" title="Receiver">Receiver</a></li><li><a href="#impl-SaturatingAs-for-T" title="SaturatingAs">SaturatingAs</a></li><li><a href="#impl-SaturatingCastFrom%3CSrc%3E-for-Dst" title="SaturatingCastFrom&#60;Src&#62;">SaturatingCastFrom&#60;Src&#62;</a></li><li><a href="#impl-ToOwned-for-T" title="ToOwned">ToOwned</a></li><li><a href="#impl-ToString-for-T" title="ToString">ToString</a></li><li><a href="#impl-TryFrom%3CU%3E-for-T" title="TryFrom&#60;U&#62;">TryFrom&#60;U&#62;</a></li><li><a href="#impl-TryInto%3CU%3E-for-T" title="TryInto&#60;U&#62;">TryInto&#60;U&#62;</a></li><li><a href="#impl-UnwrappedAs-for-T" title="UnwrappedAs">UnwrappedAs</a></li><li><a href="#impl-UnwrappedCastFrom%3CSrc%3E-for-Dst" title="UnwrappedCastFrom&#60;Src&#62;">UnwrappedCastFrom&#60;Src&#62;</a></li><li><a href="#impl-WrappingAs-for-T" title="WrappingAs">WrappingAs</a></li><li><a href="#impl-WrappingCastFrom%3CSrc%3E-for-Dst" title="WrappingCastFrom&#60;Src&#62;">WrappingCastFrom&#60;Src&#62;</a></li></ul></section><div id="rustdoc-modnav"><h2><a href="index.html">In rug::<wbr>complex</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rug</a>::<wbr><a href="index.html">complex</a></div><h1>Struct <span class="struct">BorrowComplex</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rug/complex/borrow.rs.html#46-49">Source</a> </span></div><pre class="rust item-decl"><code>pub struct BorrowComplex&lt;'a&gt; { <span class="comment">/* private fields */</span> }</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p>Used to get a reference to a <a href="../struct.Complex.html" title="struct rug::Complex"><code>Complex</code></a> number.</p>
+<p>The struct implements <code><a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref">Deref</a>&lt;<a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html#associatedtype.Target" title="associated type core::ops::deref::Deref::Target">Target</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt;</code>.</p>
+<p>No memory is unallocated when this struct is dropped.</p>
+<h2 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h2>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::complex::BorrowComplex;
+<span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">4.2</span>, -<span class="number">2.3</span>));
+<span class="kw">let </span>neg: BorrowComplex = c.as_neg();
+<span class="comment">// c is still valid
+</span><span class="macro">assert_eq!</span>(c, (<span class="number">4.2</span>, -<span class="number">2.3</span>));
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>neg, (-<span class="number">4.2</span>, <span class="number">2.3</span>));</code></pre></div>
+</div></details><h2 id="implementations" class="section-header">Implementations<a href="#implementations" class="anchor">§</a></h2><div id="implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-BorrowComplex%3C'a%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#51-174">Source</a><a href="#impl-BorrowComplex%3C'a%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'a&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from_raw" class="method"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#77-82">Source</a><h4 class="code-header">pub const unsafe fn <a href="#method.from_raw" class="fn">from_raw</a>(raw: <a class="struct" href="../../gmp_mpfr_sys/mpc/struct.mpc_t.html" title="struct gmp_mpfr_sys::mpc::mpc_t">mpc_t</a>) -&gt; <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'a&gt;</h4></section></summary><div class="docblock"><p>Create a borrow from a raw <a href="../../gmp_mpfr_sys/mpc/struct.mpc_t.html" title="struct gmp_mpfr_sys::mpc::mpc_t">MPC complex number</a>.</p>
+<h5 id="safety"><a class="doc-anchor" href="#safety">§</a>Safety</h5>
+<ul>
+<li>The value must be initialized as a valid <a href="../../gmp_mpfr_sys/mpc/struct.mpc_t.html" title="struct gmp_mpfr_sys::mpc::mpc_t"><code>mpc_t</code></a>.</li>
+<li>The <a href="../../gmp_mpfr_sys/mpc/struct.mpc_t.html" title="struct gmp_mpfr_sys::mpc::mpc_t"><code>mpc_t</code></a> type can be considered as a kind of pointer, so there
+can be multiple copies of it. <a href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex"><code>BorrowComplex</code></a> cannot mutate the
+value, so there can be other copies, but none of them are allowed to
+mutate the value.</li>
+<li>The lifetime is obtained from the return type. The user must ensure
+the value remains valid for the duration of the lifetime.</li>
+</ul>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::complex::BorrowComplex;
+<span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">4.2</span>, -<span class="number">2.3</span>));
+<span class="comment">// Safety: c.as_raw() is a valid pointer.
+</span><span class="kw">let </span>raw = <span class="kw">unsafe </span>{ <span class="kw-2">*</span>c.as_raw() };
+<span class="comment">// Safety: c is still valid when borrow is used.
+</span><span class="kw">let </span>borrow = <span class="kw">unsafe </span>{ BorrowComplex::from_raw(raw) };
+<span class="macro">assert_eq!</span>(c, <span class="kw-2">*</span>borrow);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.const_deref" class="method"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#169-173">Source</a><h4 class="code-header">pub const fn <a href="#method.const_deref" class="fn">const_deref</a>&lt;'b&gt;(b: &amp;'b <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'a&gt;) -&gt; &amp;'b <a class="struct" href="../struct.Complex.html" title="struct rug::Complex">Complex</a></h4></section></summary><div class="docblock"><p>Gets a reference to <a href="../struct.Complex.html" title="struct rug::Complex"><code>Complex</code></a> from a <code>BorrowComplex</code>.</p>
+<p>This is equivalent to taking the reference of the dereferencing operator
+<code>*</code> or to <code><a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref">Deref</a>::<a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html#tymethod.deref" title="method core::ops::deref::Deref::deref">deref</a></code>, but can also be
+used in constant context. Unless required in constant context, use the
+operator or trait instead.</p>
+<h5 id="planned-deprecation"><a class="doc-anchor" href="#planned-deprecation">§</a>Planned deprecation</h5>
+<p>This method will be deprecated when the unary <code>*</code> operator and the
+<a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref"><code>Deref</code></a> trait are usable in constant context.</p>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core::ops::Deref;
+<span class="kw">use </span>core::ptr;
+<span class="kw">use </span>rug::complex::BorrowComplex;
+<span class="kw">use </span>rug::Complex;
+
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">23.5</span>, -<span class="number">12.25</span>));
+<span class="kw">let </span>b = c.as_conj();
+<span class="kw">let </span>using_method: <span class="kw-2">&amp;</span>Complex = BorrowComplex::const_deref(<span class="kw-2">&amp;</span>b);
+<span class="kw">let </span>using_operator: <span class="kw-2">&amp;</span>Complex = <span class="kw-2">&amp;*</span>b;
+<span class="kw">let </span>using_trait: <span class="kw-2">&amp;</span>Complex = b.deref();
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>using_method, (<span class="number">23.5</span>, <span class="number">12.25</span>));
+<span class="macro">assert!</span>(ptr::eq(using_method, using_operator));
+<span class="macro">assert!</span>(ptr::eq(using_method, using_trait));</code></pre></div>
+<p>This method can be used to create a constant reference.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::complex::{BorrowComplex, MiniComplex};
+<span class="kw">use </span>rug::float::MiniFloat;
+<span class="kw">use </span>rug::Complex;
+
+<span class="kw">const </span>TWO_FLOAT: MiniFloat = MiniFloat::const_from_i8(<span class="number">2</span>);
+<span class="kw">const </span>THOUSAND_FLOAT: MiniFloat = MiniFloat::const_from_i16(<span class="number">1000</span>);
+<span class="kw">const </span>TWO_1000I_MINI: MiniComplex =
+    MiniComplex::const_from_parts(TWO_FLOAT, THOUSAND_FLOAT);
+<span class="kw">const </span>TWO_1000I_BORROW: BorrowComplex = TWO_1000I_MINI.borrow();
+<span class="kw">const </span>TWO_1000I: <span class="kw-2">&amp;</span>Complex = BorrowComplex::const_deref(<span class="kw-2">&amp;</span>TWO_1000I_BORROW);
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>TWO_1000I, (<span class="number">2</span>, <span class="number">1000</span>));</code></pre></div>
+<p>If the constant cannot be initialized using
+<a href="struct.MiniComplex.html" title="struct rug::complex::MiniComplex"><code>MiniComplex</code></a>, we can set up the limbs
+directly, though it is more complicated.</p>
+
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core::ptr::NonNull;
+<span class="kw">use </span>gmp_mpfr_sys::gmp::limb_t;
+<span class="kw">use </span>gmp_mpfr_sys::mpfr::{mpfr_t, prec_t};
+<span class="kw">use </span>gmp_mpfr_sys::mpc::mpc_t;
+<span class="kw">use </span>rug::complex::BorrowComplex;
+<span class="kw">use </span>rug::{Complex, Float};
+
+<span class="kw">const </span>LIMBS: [limb_t; <span class="number">2</span>] = [<span class="number">5</span>, <span class="number">1 </span>&lt;&lt; (limb_t::BITS - <span class="number">1</span>)];
+<span class="kw">const </span>LIMBS_PTR: <span class="kw-2">*const </span>[limb_t; <span class="number">2</span>] = <span class="kw-2">&amp;</span>LIMBS;
+<span class="kw">const </span>MANTISSA_DIGITS: u32 = limb_t::BITS * <span class="number">2</span>;
+<span class="kw">const </span>MPC: mpc_t = mpc_t {
+    re: mpfr_t {
+        prec: MANTISSA_DIGITS <span class="kw">as </span>prec_t,
+        sign: -<span class="number">1</span>,
+        exp: <span class="number">1</span>,
+        d: <span class="kw">unsafe </span>{ NonNull::new_unchecked(LIMBS_PTR.cast_mut().cast()) },
+    },
+    im: mpfr_t {
+        prec: MANTISSA_DIGITS <span class="kw">as </span>prec_t,
+        sign: <span class="number">1</span>,
+        exp: <span class="number">1</span>,
+        d: <span class="kw">unsafe </span>{ NonNull::new_unchecked(LIMBS_PTR.cast_mut().cast()) },
+    },
+};
+<span class="comment">// Safety: MPFR will remain valid, and will not be changed.
+</span><span class="kw">const </span>BORROW: BorrowComplex = <span class="kw">unsafe </span>{ BorrowComplex::from_raw(MPC) };
+<span class="kw">const </span>C: <span class="kw-2">&amp;</span>Complex = BorrowComplex::const_deref(<span class="kw-2">&amp;</span>BORROW);
+<span class="kw">let </span>lsig = Float::with_val(MANTISSA_DIGITS, <span class="number">5</span>) &gt;&gt; (MANTISSA_DIGITS - <span class="number">1</span>);
+<span class="kw">let </span>msig = <span class="number">1u32</span>;
+<span class="kw">let </span>val = lsig + msig;
+<span class="kw">let </span>check = Complex::from((-val.clone(), val));
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>C, check);</code></pre></div>
+</div></details></div></details></div><details class="toggle big-toggle" open><summary><h2 id="deref-methods-Complex" class="section-header"><span>Methods from <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref">Deref</a>&lt;Target = <a class="struct" href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt;</span><a href="#deref-methods-Complex" class="anchor">§</a></h2></summary><div id="deref-methods-Complex-1" class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.prec" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#305-307">Source</a><h4 class="code-header">pub fn <a href="#method.prec" class="fn">prec</a>(&amp;self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u32.html">u32</a>, <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u32.html">u32</a>)</h4></section></summary><div class="docblock"><p>Returns the precision of the real and imaginary parts.</p>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>r = Complex::new((<span class="number">24</span>, <span class="number">53</span>));
+<span class="macro">assert_eq!</span>(r.prec(), (<span class="number">24</span>, <span class="number">53</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.prec_64" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#467-469">Source</a><h4 class="code-header">pub fn <a href="#method.prec_64" class="fn">prec_64</a>(&amp;self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Returns the precision of the real and imaginary parts.</p>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>r = Complex::new_64((<span class="number">24</span>, <span class="number">53</span>));
+<span class="macro">assert_eq!</span>(r.prec_64(), (<span class="number">24</span>, <span class="number">53</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.as_raw" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#652-654">Source</a><h4 class="code-header">pub fn <a href="#method.as_raw" class="fn">as_raw</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.pointer.html">*const </a><a class="struct" href="../../gmp_mpfr_sys/mpc/struct.mpc_t.html" title="struct gmp_mpfr_sys::mpc::mpc_t">mpc_t</a></h4></section></summary><div class="docblock"><p>Returns a pointer to the inner <a href="../../gmp_mpfr_sys/mpc/struct.mpc_t.html" title="struct gmp_mpfr_sys::mpc::mpc_t">MPC complex number</a>.</p>
+<p>The returned pointer will be valid for as long as <code>self</code> is valid.</p>
+<h5 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>gmp_mpfr_sys::mpc;
+<span class="kw">use </span>gmp_mpfr_sys::mpfr;
+<span class="kw">use </span>gmp_mpfr_sys::mpfr::rnd_t;
+<span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (-<span class="number">14.5</span>, <span class="number">3.25</span>));
+<span class="kw">let </span>m_ptr = c.as_raw();
+<span class="kw">unsafe </span>{
+    <span class="kw">let </span>re_ptr = mpc::realref_const(m_ptr);
+    <span class="kw">let </span>re = mpfr::get_d(re_ptr, rnd_t::RNDN);
+    <span class="macro">assert_eq!</span>(re, -<span class="number">14.5</span>);
+    <span class="kw">let </span>im_ptr = mpc::imagref_const(m_ptr);
+    <span class="kw">let </span>im = mpfr::get_d(im_ptr, rnd_t::RNDN);
+    <span class="macro">assert_eq!</span>(im, <span class="number">3.25</span>);
+}
+<span class="comment">// c is still valid
+</span><span class="macro">assert_eq!</span>(c, (-<span class="number">14.5</span>, <span class="number">3.25</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.to_string_radix" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1038-1040">Source</a><h4 class="code-header">pub fn <a href="#method.to_string_radix" class="fn">to_string_radix</a>(&amp;self, radix: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.i32.html">i32</a>, num_digits: <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.usize.html">usize</a>&gt;) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.90.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a></h4></section></summary><div class="docblock"><p>Returns a string representation of the value for the specified <code>radix</code>
+rounding to the nearest.</p>
+<p>The exponent is encoded in decimal. If the number of digits is not
+specified, the output string will have enough precision such that
+reading it again will give the exact same number.</p>
+<h5 id="panics"><a class="doc-anchor" href="#panics">§</a>Panics</h5>
+<p>Panics if <code>radix</code> is less than 2 or greater than 36.</p>
+<h5 id="examples-6"><a class="doc-anchor" href="#examples-6">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c1 = Complex::with_val(<span class="number">53</span>, <span class="number">0</span>);
+<span class="macro">assert_eq!</span>(c1.to_string_radix(<span class="number">10</span>, <span class="prelude-val">None</span>), <span class="string">"(0 0)"</span>);
+<span class="kw">let </span>c2 = Complex::with_val(<span class="number">12</span>, (<span class="number">15</span>, <span class="number">5</span>));
+<span class="macro">assert_eq!</span>(c2.to_string_radix(<span class="number">16</span>, <span class="prelude-val">None</span>), <span class="string">"(f.000 5.000)"</span>);
+<span class="kw">let </span>c3 = Complex::with_val(<span class="number">53</span>, (<span class="number">10</span>, -<span class="number">4</span>));
+<span class="macro">assert_eq!</span>(c3.to_string_radix(<span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="number">3</span>)), <span class="string">"(10.0 -4.00)"</span>);
+<span class="macro">assert_eq!</span>(c3.to_string_radix(<span class="number">5</span>, <span class="prelude-val">Some</span>(<span class="number">3</span>)), <span class="string">"(20.0 -4.00)"</span>);
+<span class="comment">// 2 raised to the power of 80 in hex is 1 followed by 20 zeros
+</span><span class="kw">let </span>c4 = Complex::with_val(<span class="number">53</span>, (<span class="number">80f64</span>.exp2(), <span class="number">0.25</span>));
+<span class="macro">assert_eq!</span>(c4.to_string_radix(<span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="number">3</span>)), <span class="string">"(1.21e24 2.50e-1)"</span>);
+<span class="macro">assert_eq!</span>(c4.to_string_radix(<span class="number">16</span>, <span class="prelude-val">Some</span>(<span class="number">3</span>)), <span class="string">"(1.00@20 4.00@-1)"</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.to_string_radix_round" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1074-1092">Source</a><h4 class="code-header">pub fn <a href="#method.to_string_radix_round" class="fn">to_string_radix_round</a>(
+    &amp;self,
+    radix: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.i32.html">i32</a>,
+    num_digits: <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.usize.html">usize</a>&gt;,
+    round: (<a class="enum" href="../float/enum.Round.html" title="enum rug::float::Round">Round</a>, <a class="enum" href="../float/enum.Round.html" title="enum rug::float::Round">Round</a>),
+) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.90.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a></h4></section></summary><div class="docblock"><p>Returns a string representation of the value for the specified <code>radix</code>
+applying the specified rounding method.</p>
+<p>The exponent is encoded in decimal. If the number of digits is not
+specified, the output string will have enough precision such that
+reading it again will give the exact same number.</p>
+<h5 id="panics-1"><a class="doc-anchor" href="#panics-1">§</a>Panics</h5>
+<p>Panics if <code>radix</code> is less than 2 or greater than 36.</p>
+<h5 id="examples-7"><a class="doc-anchor" href="#examples-7">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::float::Round;
+<span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">10</span>, <span class="number">10.4</span>);
+<span class="kw">let </span>down = (Round::Down, Round::Down);
+<span class="kw">let </span>nearest = (Round::Nearest, Round::Nearest);
+<span class="kw">let </span>up = (Round::Up, Round::Up);
+<span class="kw">let </span>nd = c.to_string_radix_round(<span class="number">10</span>, <span class="prelude-val">None</span>, down);
+<span class="macro">assert_eq!</span>(nd, <span class="string">"(10.406 0)"</span>);
+<span class="kw">let </span>nu = c.to_string_radix_round(<span class="number">10</span>, <span class="prelude-val">None</span>, up);
+<span class="macro">assert_eq!</span>(nu, <span class="string">"(10.407 0)"</span>);
+<span class="kw">let </span>sd = c.to_string_radix_round(<span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="number">2</span>), down);
+<span class="macro">assert_eq!</span>(sd, <span class="string">"(10 0)"</span>);
+<span class="kw">let </span>sn = c.to_string_radix_round(<span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="number">2</span>), nearest);
+<span class="macro">assert_eq!</span>(sn, <span class="string">"(10 0)"</span>);
+<span class="kw">let </span>su = c.to_string_radix_round(<span class="number">10</span>, <span class="prelude-val">Some</span>(<span class="number">2</span>), up);
+<span class="macro">assert_eq!</span>(su, <span class="string">"(11 0)"</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.real" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1104-1106">Source</a><h4 class="code-header">pub fn <a href="#method.real" class="fn">real</a>(&amp;self) -&gt; &amp;<a class="struct" href="../struct.Float.html" title="struct rug::Float">Float</a></h4></section></summary><div class="docblock"><p>Borrows the real part as a <a href="../struct.Float.html" title="struct rug::Float"><code>Float</code></a>.</p>
+<h5 id="examples-8"><a class="doc-anchor" href="#examples-8">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">12.5</span>, -<span class="number">20.75</span>));
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>c.real(), <span class="number">12.5</span>)</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.imag" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1118-1120">Source</a><h4 class="code-header">pub fn <a href="#method.imag" class="fn">imag</a>(&amp;self) -&gt; &amp;<a class="struct" href="../struct.Float.html" title="struct rug::Float">Float</a></h4></section></summary><div class="docblock"><p>Borrows the imaginary part as a <a href="../struct.Float.html" title="struct rug::Float"><code>Float</code></a>.</p>
+<h5 id="examples-9"><a class="doc-anchor" href="#examples-9">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">12.5</span>, -<span class="number">20.75</span>));
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>c.imag(), -<span class="number">20.75</span>)</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.as_neg" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1295-1301">Source</a><h4 class="code-header">pub fn <a href="#method.as_neg" class="fn">as_neg</a>(&amp;self) -&gt; <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Borrows a negated copy of the <a href="../struct.Complex.html" title="struct rug::Complex"><code>Complex</code></a> number.</p>
+<p>The returned object implements <code><a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref">Deref</a>&lt;<a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html#associatedtype.Target" title="associated type core::ops::deref::Deref::Target">Target</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt;</code>.</p>
+<p>This method performs a shallow copy and negates it, and negation does
+not change the allocated data.</p>
+<p>Unlike the other negation methods (the <code>-</code> operator,
+<code><a href="https://doc.rust-lang.org/1.90.0/core/ops/arith/trait.Neg.html" title="trait core::ops::arith::Neg">Neg</a>::<a href="https://doc.rust-lang.org/1.90.0/core/ops/arith/trait.Neg.html#tymethod.neg" title="method core::ops::arith::Neg::neg">neg</a></code>, etc.), this method does not set the
+<a href="../../gmp_mpfr_sys/mpfr/fn.set_nanflag.html" title="fn gmp_mpfr_sys::mpfr::set_nanflag">MPFR NaN flag</a> if a NaN is encountered.</p>
+<h5 id="examples-10"><a class="doc-anchor" href="#examples-10">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">4.2</span>, -<span class="number">2.3</span>));
+<span class="kw">let </span>neg_c = c.as_neg();
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>neg_c, (-<span class="number">4.2</span>, <span class="number">2.3</span>));
+<span class="comment">// methods taking &amp;self can be used on the returned object
+</span><span class="kw">let </span>reneg_c = neg_c.as_neg();
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>reneg_c, (<span class="number">4.2</span>, -<span class="number">2.3</span>));
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>reneg_c, c);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.as_conj" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1331-1336">Source</a><h4 class="code-header">pub fn <a href="#method.as_conj" class="fn">as_conj</a>(&amp;self) -&gt; <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Borrows a conjugate copy of the <a href="../struct.Complex.html" title="struct rug::Complex"><code>Complex</code></a> number.</p>
+<p>The returned object implements <code><a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref">Deref</a>&lt;<a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html#associatedtype.Target" title="associated type core::ops::deref::Deref::Target">Target</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt;</code>.</p>
+<p>This method performs a shallow copy and negates its imaginary part, and
+negation does not change the allocated data.</p>
+<p>Unlike the other conjugate methods (<a href="../struct.Complex.html#method.conj" title="method rug::Complex::conj"><code>conj</code></a>, <a href="../struct.Complex.html#method.conj_mut" title="method rug::Complex::conj_mut"><code>conj_mut</code></a>, etc.), this
+method does not set the <a href="../../gmp_mpfr_sys/mpfr/fn.set_nanflag.html" title="fn gmp_mpfr_sys::mpfr::set_nanflag">MPFR NaN flag</a> if a NaN is encountered.</p>
+<h5 id="examples-11"><a class="doc-anchor" href="#examples-11">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">4.2</span>, -<span class="number">2.3</span>));
+<span class="kw">let </span>conj_c = c.as_conj();
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>conj_c, (<span class="number">4.2</span>, <span class="number">2.3</span>));
+<span class="comment">// methods taking &amp;self can be used on the returned object
+</span><span class="kw">let </span>reconj_c = conj_c.as_conj();
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>reconj_c, (<span class="number">4.2</span>, -<span class="number">2.3</span>));
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>reconj_c, c);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.as_mul_i" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1370-1382">Source</a><h4 class="code-header">pub fn <a href="#method.as_mul_i" class="fn">as_mul_i</a>(&amp;self, negative: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>) -&gt; <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Borrows a rotated copy of the <a href="../struct.Complex.html" title="struct rug::Complex"><code>Complex</code></a> number.</p>
+<p>The returned object implements <code><a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref">Deref</a>&lt;<a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html#associatedtype.Target" title="associated type core::ops::deref::Deref::Target">Target</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt;</code>.</p>
+<p>This method operates by performing some shallow copying; unlike other
+similar methods ( <a href="../struct.Complex.html#method.mul_i" title="method rug::Complex::mul_i"><code>mul_i</code></a>, <a href="../struct.Complex.html#method.mul_i_mut" title="method rug::Complex::mul_i_mut"><code>mul_i_mut</code></a>, etc.), this method swaps the
+precision of the real and imaginary parts if they have unequal
+precisions.</p>
+<p>Also, unlike other similar methods (<a href="../struct.Complex.html#method.mul_i" title="method rug::Complex::mul_i"><code>mul_i</code></a>, <a href="../struct.Complex.html#method.mul_i_mut" title="method rug::Complex::mul_i_mut"><code>mul_i_mut</code></a>, etc.),
+this method does not set the <a href="../../gmp_mpfr_sys/mpfr/fn.set_nanflag.html" title="fn gmp_mpfr_sys::mpfr::set_nanflag">MPFR NaN flag</a> if a NaN is encountered.</p>
+<h5 id="examples-12"><a class="doc-anchor" href="#examples-12">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">4.2</span>, -<span class="number">2.3</span>));
+<span class="kw">let </span>mul_i_c = c.as_mul_i(<span class="bool-val">false</span>);
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>mul_i_c, (<span class="number">2.3</span>, <span class="number">4.2</span>));
+<span class="comment">// methods taking &amp;self can be used on the returned object
+</span><span class="kw">let </span>mul_ii_c = mul_i_c.as_mul_i(<span class="bool-val">false</span>);
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>mul_ii_c, (-<span class="number">4.2</span>, <span class="number">2.3</span>));
+<span class="kw">let </span>mul_1_c = mul_i_c.as_mul_i(<span class="bool-val">true</span>);
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>mul_1_c, (<span class="number">4.2</span>, -<span class="number">2.3</span>));
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>mul_1_c, c);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.as_shl" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1416-1423">Source</a><h4 class="code-header">pub fn <a href="#method.as_shl" class="fn">as_shl</a>(&amp;self, shift: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.i32.html">i32</a>) -&gt; <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Borrows a copy of the <a href="../struct.Complex.html" title="struct rug::Complex"><code>Complex</code></a> number multiplied by
+2<sup><code>shift</code></sup>, rounding towards zero.</p>
+<p>The returned object implements <code><a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref">Deref</a>&lt;<a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html#associatedtype.Target" title="associated type core::ops::deref::Deref::Target">Target</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt;</code>.</p>
+<p>This method performs a shallow copy changing the exponents of the parts.</p>
+<p>If the required exponent is less than the minimum exponent, the returned
+part is zero (rounding is always towards zero for this method). If the
+required exponent is larger than the maximum exponent, the returned part
+is infinite.</p>
+<p>Unlike implementations of <a href="https://doc.rust-lang.org/1.90.0/core/ops/bit/trait.Shl.html" title="trait core::ops::bit::Shl"><code>Shl</code></a> and <a href="https://doc.rust-lang.org/1.90.0/core/ops/bit/trait.ShlAssign.html" title="trait core::ops::bit::ShlAssign"><code>ShlAssign</code></a>, this method does
+not set the <a href="../../gmp_mpfr_sys/mpfr/fn.set_nanflag.html" title="fn gmp_mpfr_sys::mpfr::set_nanflag">MPFR NaN flag</a> if a NaN is encountered.</p>
+<h5 id="examples-13"><a class="doc-anchor" href="#examples-13">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>f = Complex::with_val(<span class="number">53</span>, (<span class="number">13</span>, -<span class="number">12</span>));
+<span class="kw">let </span>shifted_f = f.as_shl(<span class="number">4</span>);
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>shifted_f, (<span class="number">13 </span>&lt;&lt; <span class="number">4</span>, -<span class="number">12 </span>&lt;&lt; <span class="number">4</span>));
+<span class="comment">// methods taking &amp;self can be used on the returned object
+</span><span class="kw">let </span>reshifted_f = shifted_f.as_shl(<span class="number">2</span>);
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>reshifted_f, (<span class="number">13 </span>&lt;&lt; <span class="number">6</span>, -<span class="number">12 </span>&lt;&lt; <span class="number">6</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.as_shr" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1457-1464">Source</a><h4 class="code-header">pub fn <a href="#method.as_shr" class="fn">as_shr</a>(&amp;self, shift: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.i32.html">i32</a>) -&gt; <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Borrows a copy of the <a href="../struct.Complex.html" title="struct rug::Complex"><code>Complex</code></a> number multiplied by
+2<sup>−<code>shift</code></sup>, rounding towards zero.</p>
+<p>The returned object implements <code><a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref">Deref</a>&lt;<a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html#associatedtype.Target" title="associated type core::ops::deref::Deref::Target">Target</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt;</code>.</p>
+<p>This method performs a shallow copy changing the exponents of the parts.</p>
+<p>If the required exponent is less than the minimum exponent, the returned
+part is zero (rounding is always towards zero for this method). If the
+required exponent is larger than the maximum exponent, the returned part
+is infinite.</p>
+<p>Unlike implementations of <a href="https://doc.rust-lang.org/1.90.0/core/ops/bit/trait.Shr.html" title="trait core::ops::bit::Shr"><code>Shr</code></a> and <a href="https://doc.rust-lang.org/1.90.0/core/ops/bit/trait.ShrAssign.html" title="trait core::ops::bit::ShrAssign"><code>ShrAssign</code></a>, this method does
+not set the <a href="../../gmp_mpfr_sys/mpfr/fn.set_nanflag.html" title="fn gmp_mpfr_sys::mpfr::set_nanflag">MPFR NaN flag</a> if a NaN is encountered.</p>
+<h5 id="examples-14"><a class="doc-anchor" href="#examples-14">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>f = Complex::with_val(<span class="number">53</span>, (<span class="number">13</span>, -<span class="number">12</span>));
+<span class="kw">let </span>shifted_f = f.as_shr(<span class="number">4</span>);
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>shifted_f, (<span class="number">13.0 </span>/ <span class="number">16.0</span>, -<span class="number">12.0 </span>/ <span class="number">16.0</span>));
+<span class="comment">// methods taking &amp;self can be used on the returned object
+</span><span class="kw">let </span>reshifted_f = shifted_f.as_shr(<span class="number">2</span>);
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>reshifted_f, (<span class="number">13.0 </span>/ <span class="number">64.0</span>, -<span class="number">12.0 </span>/ <span class="number">64.0</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.as_ord" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1495-1498">Source</a><h4 class="code-header">pub fn <a href="#method.as_ord" class="fn">as_ord</a>(&amp;self) -&gt; &amp;<a class="struct" href="struct.OrdComplex.html" title="struct rug::complex::OrdComplex">OrdComplex</a></h4></section></summary><div class="docblock"><p>Borrows the <a href="../struct.Complex.html" title="struct rug::Complex"><code>Complex</code></a> number as an ordered complex number of type
+<a href="struct.OrdComplex.html" title="struct rug::complex::OrdComplex"><code>OrdComplex</code></a>.</p>
+<p>The same result can be obtained using the implementation of
+<code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.AsRef.html" title="trait core::convert::AsRef">AsRef</a>&lt;<a href="struct.OrdComplex.html" title="struct rug::complex::OrdComplex">OrdComplex</a>&gt;</code> which is provided for <a href="../struct.Complex.html" title="struct rug::Complex"><code>Complex</code></a>.</p>
+<h5 id="examples-15"><a class="doc-anchor" href="#examples-15">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core::cmp::Ordering;
+<span class="kw">use </span>rug::float::Special;
+<span class="kw">use </span>rug::Complex;
+
+<span class="kw">let </span>nan_c = Complex::with_val(<span class="number">53</span>, (Special::Nan, Special::Nan));
+<span class="kw">let </span>nan = nan_c.as_ord();
+<span class="macro">assert_eq!</span>(nan.cmp(nan), Ordering::Equal);
+
+<span class="kw">let </span>one_neg0_c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, Special::NegZero));
+<span class="kw">let </span>one_neg0 = one_neg0_c.as_ord();
+<span class="kw">let </span>one_pos0_c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, Special::Zero));
+<span class="kw">let </span>one_pos0 = one_pos0_c.as_ord();
+<span class="macro">assert_eq!</span>(one_neg0.cmp(one_pos0), Ordering::Less);
+
+<span class="kw">let </span>zero_inf_s = (Special::Zero, Special::Infinity);
+<span class="kw">let </span>zero_inf_c = Complex::with_val(<span class="number">53</span>, zero_inf_s);
+<span class="kw">let </span>zero_inf = zero_inf_c.as_ord();
+<span class="macro">assert_eq!</span>(one_pos0.cmp(zero_inf), Ordering::Greater);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.is_zero" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1516-1518">Source</a><h4 class="code-header">pub fn <a href="#method.is_zero" class="fn">is_zero</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Returns <a href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html" title="primitive bool"><code>true</code></a> if both the real and imaginary parts are plus or minus
+zero.</p>
+<h5 id="examples-16"><a class="doc-anchor" href="#examples-16">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::float::Special;
+<span class="kw">use </span>rug::{Assign, Complex};
+<span class="kw">let </span><span class="kw-2">mut </span>c = Complex::with_val(<span class="number">53</span>, (Special::NegZero, Special::Zero));
+<span class="macro">assert!</span>(c.is_zero());
+c += <span class="number">5.2</span>;
+<span class="macro">assert!</span>(!c.is_zero());
+c.mut_real().assign(Special::Nan);
+<span class="macro">assert!</span>(!c.is_zero());</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.cmp_abs" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1536-1546">Source</a><h4 class="code-header">pub fn <a href="#method.cmp_abs" class="fn">cmp_abs</a>(&amp;self, other: &amp;Self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="enum" href="https://doc.rust-lang.org/1.90.0/core/cmp/enum.Ordering.html" title="enum core::cmp::Ordering">Ordering</a>&gt;</h4></section></summary><div class="docblock"><p>Compares the absolute values of <code>self</code> and <code>other</code>.</p>
+<h5 id="examples-17"><a class="doc-anchor" href="#examples-17">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core::cmp::Ordering;
+<span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>five = Complex::with_val(<span class="number">53</span>, (<span class="number">5</span>, <span class="number">0</span>));
+<span class="kw">let </span>five_rotated = Complex::with_val(<span class="number">53</span>, (<span class="number">3</span>, -<span class="number">4</span>));
+<span class="kw">let </span>greater_than_five = Complex::with_val(<span class="number">53</span>, (-<span class="number">4</span>, -<span class="number">4</span>));
+<span class="kw">let </span>has_nan = Complex::with_val(<span class="number">53</span>, (<span class="number">5</span>, <span class="number">0.0 </span>/ <span class="number">0.0</span>));
+<span class="macro">assert_eq!</span>(five.cmp_abs(<span class="kw-2">&amp;</span>five_rotated), <span class="prelude-val">Some</span>(Ordering::Equal));
+<span class="macro">assert_eq!</span>(five.cmp_abs(<span class="kw-2">&amp;</span>greater_than_five), <span class="prelude-val">Some</span>(Ordering::Less));
+<span class="macro">assert_eq!</span>(five.cmp_abs(<span class="kw-2">&amp;</span>has_nan), <span class="prelude-val">None</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.total_cmp" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1580-1584">Source</a><h4 class="code-header">pub fn <a href="#method.total_cmp" class="fn">total_cmp</a>(&amp;self, other: &amp;<a class="struct" href="../struct.Complex.html" title="struct rug::Complex">Complex</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/cmp/enum.Ordering.html" title="enum core::cmp::Ordering">Ordering</a></h4></section></summary><div class="docblock"><p>Returns the total ordering between <code>self</code> and <code>other</code>.</p>
+<p>For ordering, the real part has precedence over the imaginary part.
+Negative zero is ordered as less than positive zero. Negative NaN is
+ordered as less than negative infinity, while positive NaN is ordered as
+greater than positive infinity. Comparing two negative NaNs or two
+positive NaNs produces equality.</p>
+<h5 id="examples-18"><a class="doc-anchor" href="#examples-18">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::float::Special;
+<span class="kw">use </span>rug::Complex;
+<span class="kw">let </span><span class="kw-2">mut </span>values = <span class="macro">vec!</span>[
+    Complex::with_val(<span class="number">53</span>, (Special::Zero, Special::Zero)),
+    Complex::with_val(<span class="number">53</span>, (Special::Zero, Special::NegZero)),
+    Complex::with_val(<span class="number">53</span>, (Special::NegZero, Special::Infinity)),
+];
+
+values.sort_by(Complex::total_cmp);
+
+<span class="comment">// (-0, +∞)
+</span><span class="macro">assert!</span>(values[<span class="number">0</span>].real().is_zero() &amp;&amp; values[<span class="number">0</span>].real().is_sign_negative());
+<span class="macro">assert!</span>(values[<span class="number">0</span>].imag().is_infinite() &amp;&amp; values[<span class="number">0</span>].imag().is_sign_positive());
+<span class="comment">// (+0, -0)
+</span><span class="macro">assert!</span>(values[<span class="number">1</span>].real().is_zero() &amp;&amp; values[<span class="number">1</span>].real().is_sign_positive());
+<span class="macro">assert!</span>(values[<span class="number">1</span>].imag().is_zero() &amp;&amp; values[<span class="number">1</span>].imag().is_sign_negative());
+<span class="comment">// (+0, +0)
+</span><span class="macro">assert!</span>(values[<span class="number">2</span>].real().is_zero() &amp;&amp; values[<span class="number">2</span>].real().is_sign_positive());
+<span class="macro">assert!</span>(values[<span class="number">2</span>].imag().is_zero() &amp;&amp; values[<span class="number">2</span>].imag().is_sign_positive());</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.mul_add_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1801-1803">Source</a><h4 class="code-header">pub fn <a href="#method.mul_add_ref" class="fn">mul_add_ref</a>&lt;'a&gt;(
+    &amp;'a self,
+    mul: &amp;'a Self,
+    add: &amp;'a Self,
+) -&gt; AddMulIncomplete&lt;'a&gt;</h4></section></summary><div class="docblock"><p>Multiplies and adds in one fused operation.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<p><code>a.mul_add_ref(&amp;b, &amp;c)</code> produces the exact same result as
+<code>&amp;a * &amp;b + &amp;c</code>.</p>
+<h5 id="examples-19"><a class="doc-anchor" href="#examples-19">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>a = Complex::with_val(<span class="number">53</span>, (<span class="number">10</span>, <span class="number">0</span>));
+<span class="kw">let </span>b = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, -<span class="number">1</span>));
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1000</span>, <span class="number">1000</span>));
+<span class="comment">// (10 + 0i) × (1 - i) + (1000 + 1000i) = (1010 + 990i)
+</span><span class="kw">let </span>ans = Complex::with_val(<span class="number">53</span>, a.mul_add_ref(<span class="kw-2">&amp;</span>b, <span class="kw-2">&amp;</span>c));
+<span class="macro">assert_eq!</span>(ans, (<span class="number">1010</span>, <span class="number">990</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.mul_sub_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1903-1905">Source</a><h4 class="code-header">pub fn <a href="#method.mul_sub_ref" class="fn">mul_sub_ref</a>&lt;'a&gt;(
+    &amp;'a self,
+    mul: &amp;'a Self,
+    sub: &amp;'a Self,
+) -&gt; SubMulFromIncomplete&lt;'a&gt;</h4></section></summary><div class="docblock"><p>Multiplies and subtracts in one fused operation.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<p><code>a.mul_sub_ref(&amp;b, &amp;c)</code> produces the exact same result as <code>&amp;a * &amp;b - &amp;c</code>.</p>
+<h5 id="examples-20"><a class="doc-anchor" href="#examples-20">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>a = Complex::with_val(<span class="number">53</span>, (<span class="number">10</span>, <span class="number">0</span>));
+<span class="kw">let </span>b = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, -<span class="number">1</span>));
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1000</span>, <span class="number">1000</span>));
+<span class="comment">// (10 + 0i) × (1 - i) - (1000 + 1000i) = (-990 - 1010i)
+</span><span class="kw">let </span>ans = Complex::with_val(<span class="number">53</span>, a.mul_sub_ref(<span class="kw-2">&amp;</span>b, <span class="kw-2">&amp;</span>c));
+<span class="macro">assert_eq!</span>(ans, (-<span class="number">990</span>, -<span class="number">1010</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.proj_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#1988-1990">Source</a><h4 class="code-header">pub fn <a href="#method.proj_ref" class="fn">proj_ref</a>(&amp;self) -&gt; ProjIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the projection onto the Riemann sphere.</p>
+<p>If no parts of the number are infinite, the result is unchanged. If any
+part is infinite, the real part of the result is set to +∞ and the
+imaginary part of the result is set to 0 with the same sign as the
+imaginary part of the input.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-21"><a class="doc-anchor" href="#examples-21">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c1 = Complex::with_val(<span class="number">53</span>, (f64::INFINITY, <span class="number">50</span>));
+<span class="kw">let </span>proj1 = Complex::with_val(<span class="number">53</span>, c1.proj_ref());
+<span class="macro">assert_eq!</span>(proj1, (f64::INFINITY, <span class="number">0.0</span>));
+<span class="kw">let </span>c2 = Complex::with_val(<span class="number">53</span>, (f64::NAN, f64::NEG_INFINITY));
+<span class="kw">let </span>proj2 = Complex::with_val(<span class="number">53</span>, c2.proj_ref());
+<span class="macro">assert_eq!</span>(proj2, (f64::INFINITY, <span class="number">0.0</span>));
+<span class="comment">// imaginary was negative, so now it is minus zero
+</span><span class="macro">assert!</span>(proj2.imag().is_sign_negative());</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.square_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2072-2074">Source</a><h4 class="code-header">pub fn <a href="#method.square_ref" class="fn">square_ref</a>(&amp;self) -&gt; SquareIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the square.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-22"><a class="doc-anchor" href="#examples-22">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core::cmp::Ordering;
+<span class="kw">use </span>rug::float::Round;
+<span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1.25</span>, <span class="number">1.25</span>));
+<span class="comment">// (1.25 + 1.25i) squared is (0 + 3.125i).
+</span><span class="kw">let </span>r = c.square_ref();
+<span class="comment">// With 4 bits of precision, 3.125 is rounded down to 3.
+</span><span class="kw">let </span>round = (Round::Down, Round::Down);
+<span class="kw">let </span>(square, dir) = Complex::with_val_round(<span class="number">4</span>, r, round);
+<span class="macro">assert_eq!</span>(square, (<span class="number">0</span>, <span class="number">3</span>));
+<span class="macro">assert_eq!</span>(dir, (Ordering::Equal, Ordering::Less));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.sqrt_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2156-2158">Source</a><h4 class="code-header">pub fn <a href="#method.sqrt_ref" class="fn">sqrt_ref</a>(&amp;self) -&gt; SqrtIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the square root.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-23"><a class="doc-anchor" href="#examples-23">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core::cmp::Ordering;
+<span class="kw">use </span>rug::float::Round;
+<span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">2</span>, <span class="number">2.25</span>));
+<span class="comment">// Square root of (2 + 2.25i) is (1.5828 + 0.7108i).
+</span><span class="kw">let </span>r = c.sqrt_ref();
+<span class="comment">// Nearest with 4 bits of precision: (1.625 + 0.6875i)
+</span><span class="kw">let </span>nearest = (Round::Nearest, Round::Nearest);
+<span class="kw">let </span>(sqrt, dir) = Complex::with_val_round(<span class="number">4</span>, r, nearest);
+<span class="macro">assert_eq!</span>(sqrt, (<span class="number">1.625</span>, <span class="number">0.6875</span>));
+<span class="macro">assert_eq!</span>(dir, (Ordering::Greater, Ordering::Less));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.conj_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2211-2213">Source</a><h4 class="code-header">pub fn <a href="#method.conj_ref" class="fn">conj_ref</a>(&amp;self) -&gt; ConjIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the complex conjugate.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-24"><a class="doc-anchor" href="#examples-24">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1.5</span>, <span class="number">2.5</span>));
+<span class="kw">let </span>conj = Complex::with_val(<span class="number">53</span>, c.conj_ref());
+<span class="macro">assert_eq!</span>(conj, (<span class="number">1.5</span>, -<span class="number">2.5</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.abs_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2302-2304">Source</a><h4 class="code-header">pub fn <a href="#method.abs_ref" class="fn">abs_ref</a>(&amp;self) -&gt; AbsIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the absolute value.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Float.html" title="struct rug::Float">Float</a></code></li>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Float.html" title="struct rug::Float">Float</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-25"><a class="doc-anchor" href="#examples-25">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::{Complex, Float};
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">30</span>, <span class="number">40</span>));
+<span class="kw">let </span>f = Float::with_val(<span class="number">53</span>, c.abs_ref());
+<span class="macro">assert_eq!</span>(f, <span class="number">50</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.arg_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2407-2409">Source</a><h4 class="code-header">pub fn <a href="#method.arg_ref" class="fn">arg_ref</a>(&amp;self) -&gt; ArgIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the argument.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Float.html" title="struct rug::Float">Float</a></code></li>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Float.html" title="struct rug::Float">Float</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-26"><a class="doc-anchor" href="#examples-26">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core::f64;
+<span class="kw">use </span>rug::{Assign, Complex, Float};
+<span class="comment">// f has precision 53, just like f64, so PI constants match.
+</span><span class="kw">let </span><span class="kw-2">mut </span>arg = Float::new(<span class="number">53</span>);
+<span class="kw">let </span>c_pos = Complex::with_val(<span class="number">53</span>, <span class="number">1</span>);
+arg.assign(c_pos.arg_ref());
+<span class="macro">assert!</span>(arg.is_zero());
+<span class="kw">let </span>c_neg = Complex::with_val(<span class="number">53</span>, -<span class="number">1.3</span>);
+arg.assign(c_neg.arg_ref());
+<span class="macro">assert_eq!</span>(arg, f64::consts::PI);
+<span class="kw">let </span>c_pi_4 = Complex::with_val(<span class="number">53</span>, (<span class="number">1.333</span>, <span class="number">1.333</span>));
+arg.assign(c_pi_4.arg_ref());
+<span class="macro">assert_eq!</span>(arg, f64::consts::FRAC_PI_4);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.mul_i_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2494-2499">Source</a><h4 class="code-header">pub fn <a href="#method.mul_i_ref" class="fn">mul_i_ref</a>(&amp;self, negative: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>) -&gt; MulIIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Multiplies the complex number by ±<i>i</i>.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-27"><a class="doc-anchor" href="#examples-27">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">13</span>, <span class="number">24</span>));
+<span class="kw">let </span>rotated = Complex::with_val(<span class="number">53</span>, c.mul_i_ref(<span class="bool-val">false</span>));
+<span class="macro">assert_eq!</span>(rotated, (-<span class="number">24</span>, <span class="number">13</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.recip_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2575-2577">Source</a><h4 class="code-header">pub fn <a href="#method.recip_ref" class="fn">recip_ref</a>(&amp;self) -&gt; RecipIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the reciprocal.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-28"><a class="doc-anchor" href="#examples-28">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="comment">// 1/(1 + i) = (0.5 - 0.5i)
+</span><span class="kw">let </span>recip = Complex::with_val(<span class="number">53</span>, c.recip_ref());
+<span class="macro">assert_eq!</span>(recip, (<span class="number">0.5</span>, -<span class="number">0.5</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.norm_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2665-2667">Source</a><h4 class="code-header">pub fn <a href="#method.norm_ref" class="fn">norm_ref</a>(&amp;self) -&gt; NormIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the norm, that is the square of the absolute value.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Float.html" title="struct rug::Float">Float</a></code></li>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Float.html" title="struct rug::Float">Float</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-29"><a class="doc-anchor" href="#examples-29">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::{Complex, Float};
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">3</span>, <span class="number">4</span>));
+<span class="kw">let </span>f = Float::with_val(<span class="number">53</span>, c.norm_ref());
+<span class="macro">assert_eq!</span>(f, <span class="number">25</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.ln_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2744-2746">Source</a><h4 class="code-header">pub fn <a href="#method.ln_ref" class="fn">ln_ref</a>(&amp;self) -&gt; LnIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the natural logarithm.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-30"><a class="doc-anchor" href="#examples-30">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1.5</span>, -<span class="number">0.5</span>));
+<span class="kw">let </span>ln = Complex::with_val(<span class="number">53</span>, c.ln_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">0.4581</span>, -<span class="number">0.3218</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(ln - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.log10_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2824-2826">Source</a><h4 class="code-header">pub fn <a href="#method.log10_ref" class="fn">log10_ref</a>(&amp;self) -&gt; Log10Incomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the logarithm to base 10.</p>
+<p>The following are implemented with the returned
+<a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-31"><a class="doc-anchor" href="#examples-31">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1.5</span>, -<span class="number">0.5</span>));
+<span class="kw">let </span>log10 = Complex::with_val(<span class="number">53</span>, c.log10_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">0.1990</span>, -<span class="number">0.1397</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(log10 - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.exp_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#2931-2933">Source</a><h4 class="code-header">pub fn <a href="#method.exp_ref" class="fn">exp_ref</a>(&amp;self) -&gt; ExpIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the exponential.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-32"><a class="doc-anchor" href="#examples-32">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">0.5</span>, -<span class="number">0.75</span>));
+<span class="kw">let </span>exp = Complex::with_val(<span class="number">53</span>, c.exp_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">1.2064</span>, -<span class="number">1.1238</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(exp - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.sin_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3010-3012">Source</a><h4 class="code-header">pub fn <a href="#method.sin_ref" class="fn">sin_ref</a>(&amp;self) -&gt; SinIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the sine.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-33"><a class="doc-anchor" href="#examples-33">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>sin = Complex::with_val(<span class="number">53</span>, c.sin_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">1.2985</span>, <span class="number">0.6350</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(sin - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.cos_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3089-3091">Source</a><h4 class="code-header">pub fn <a href="#method.cos_ref" class="fn">cos_ref</a>(&amp;self) -&gt; CosIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the cosine.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-34"><a class="doc-anchor" href="#examples-34">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>cos = Complex::with_val(<span class="number">53</span>, c.cos_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">0.8337</span>, -<span class="number">0.9889</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(cos - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.sin_cos_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3215-3217">Source</a><h4 class="code-header">pub fn <a href="#method.sin_cos_ref" class="fn">sin_cos_ref</a>(&amp;self) -&gt; SinCosIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the sine and cosine.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>, <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a>&amp;mut <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>, &amp;mut <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>, <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a>&amp;mut <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>, &amp;mut <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>, <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-35"><a class="doc-anchor" href="#examples-35">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>core::cmp::Ordering;
+<span class="kw">use </span>rug::float::Round;
+<span class="kw">use </span>rug::ops::AssignRound;
+<span class="kw">use </span>rug::{Assign, Complex};
+<span class="kw">let </span>phase = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+
+<span class="kw">let </span>(<span class="kw-2">mut </span>sin, <span class="kw-2">mut </span>cos) = (Complex::new(<span class="number">53</span>), Complex::new(<span class="number">53</span>));
+<span class="kw">let </span>sin_cos = phase.sin_cos_ref();
+(<span class="kw-2">&amp;mut </span>sin, <span class="kw-2">&amp;mut </span>cos).assign(sin_cos);
+<span class="kw">let </span>expected_sin = Complex::with_val(<span class="number">53</span>, (<span class="number">1.2985</span>, <span class="number">0.6350</span>));
+<span class="kw">let </span>expected_cos = Complex::with_val(<span class="number">53</span>, (<span class="number">0.8337</span>, -<span class="number">0.9889</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(sin - expected_sin).abs().real() &lt; <span class="number">0.0001</span>);
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(cos - expected_cos).abs().real() &lt; <span class="number">0.0001</span>);
+
+<span class="comment">// using 4 significant bits: sin = (1.25 + 0.625i)
+// using 4 significant bits: cos = (0.8125 - i)
+</span><span class="kw">let </span>(<span class="kw-2">mut </span>sin_4, <span class="kw-2">mut </span>cos_4) = (Complex::new(<span class="number">4</span>), Complex::new(<span class="number">4</span>));
+<span class="kw">let </span>sin_cos = phase.sin_cos_ref();
+<span class="kw">let </span>(dir_sin, dir_cos) = (<span class="kw-2">&amp;mut </span>sin_4, <span class="kw-2">&amp;mut </span>cos_4)
+    .assign_round(sin_cos, (Round::Nearest, Round::Nearest));
+<span class="macro">assert_eq!</span>(sin_4, (<span class="number">1.25</span>, <span class="number">0.625</span>));
+<span class="macro">assert_eq!</span>(dir_sin, (Ordering::Less, Ordering::Less));
+<span class="macro">assert_eq!</span>(cos_4, (<span class="number">0.8125</span>, -<span class="number">1</span>));
+<span class="macro">assert_eq!</span>(dir_cos, (Ordering::Less, Ordering::Less));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.tan_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3294-3296">Source</a><h4 class="code-header">pub fn <a href="#method.tan_ref" class="fn">tan_ref</a>(&amp;self) -&gt; TanIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the tangent.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-36"><a class="doc-anchor" href="#examples-36">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>tan = Complex::with_val(<span class="number">53</span>, c.tan_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">0.2718</span>, <span class="number">1.0839</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(tan - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.sinh_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3373-3375">Source</a><h4 class="code-header">pub fn <a href="#method.sinh_ref" class="fn">sinh_ref</a>(&amp;self) -&gt; SinhIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the hyperbolic sine.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-37"><a class="doc-anchor" href="#examples-37">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>sinh = Complex::with_val(<span class="number">53</span>, c.sinh_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">0.6350</span>, <span class="number">1.2985</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(sinh - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.cosh_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3452-3454">Source</a><h4 class="code-header">pub fn <a href="#method.cosh_ref" class="fn">cosh_ref</a>(&amp;self) -&gt; CoshIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the hyperbolic cosine.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-38"><a class="doc-anchor" href="#examples-38">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>cosh = Complex::with_val(<span class="number">53</span>, c.cosh_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">0.8337</span>, <span class="number">0.9889</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(cosh - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.tanh_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3531-3533">Source</a><h4 class="code-header">pub fn <a href="#method.tanh_ref" class="fn">tanh_ref</a>(&amp;self) -&gt; TanhIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the hyperbolic tangent.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-39"><a class="doc-anchor" href="#examples-39">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>tanh = Complex::with_val(<span class="number">53</span>, c.tanh_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">1.0839</span>, <span class="number">0.2718</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(tanh - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.asin_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3610-3612">Source</a><h4 class="code-header">pub fn <a href="#method.asin_ref" class="fn">asin_ref</a>(&amp;self) -&gt; AsinIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the inverse sine.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-40"><a class="doc-anchor" href="#examples-40">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>asin = Complex::with_val(<span class="number">53</span>, c.asin_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">0.6662</span>, <span class="number">1.0613</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(asin - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.acos_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3689-3691">Source</a><h4 class="code-header">pub fn <a href="#method.acos_ref" class="fn">acos_ref</a>(&amp;self) -&gt; AcosIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the inverse cosine.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-41"><a class="doc-anchor" href="#examples-41">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>acos = Complex::with_val(<span class="number">53</span>, c.acos_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">0.9046</span>, -<span class="number">1.0613</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(acos - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.atan_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3768-3770">Source</a><h4 class="code-header">pub fn <a href="#method.atan_ref" class="fn">atan_ref</a>(&amp;self) -&gt; AtanIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the inverse tangent.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-42"><a class="doc-anchor" href="#examples-42">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>atan = Complex::with_val(<span class="number">53</span>, c.atan_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">1.0172</span>, <span class="number">0.4024</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(atan - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.asinh_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3848-3850">Source</a><h4 class="code-header">pub fn <a href="#method.asinh_ref" class="fn">asinh_ref</a>(&amp;self) -&gt; AsinhIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the inverse hyperboic sine.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-43"><a class="doc-anchor" href="#examples-43">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>asinh = Complex::with_val(<span class="number">53</span>, c.asinh_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">1.0613</span>, <span class="number">0.6662</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(asinh - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.acosh_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#3928-3930">Source</a><h4 class="code-header">pub fn <a href="#method.acosh_ref" class="fn">acosh_ref</a>(&amp;self) -&gt; AcoshIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the inverse hyperbolic cosine.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-44"><a class="doc-anchor" href="#examples-44">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>acosh = Complex::with_val(<span class="number">53</span>, c.acosh_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">1.0613</span>, <span class="number">0.9046</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(acosh - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.atanh_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#4008-4010">Source</a><h4 class="code-header">pub fn <a href="#method.atanh_ref" class="fn">atanh_ref</a>(&amp;self) -&gt; AtanhIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the inverse hyperbolic tangent.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.CompleteRound.html" title="trait rug::ops::CompleteRound">CompleteRound</a>&lt;<a href="../ops/trait.CompleteRound.html#associatedtype.Completed" title="associated type rug::ops::CompleteRound::Completed">Completed</a> = <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a>&gt; for Src</code></li>
+</ul>
+<h5 id="examples-45"><a class="doc-anchor" href="#examples-45">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>c = Complex::with_val(<span class="number">53</span>, (<span class="number">1</span>, <span class="number">1</span>));
+<span class="kw">let </span>atanh = Complex::with_val(<span class="number">53</span>, c.atanh_ref());
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">0.4024</span>, <span class="number">1.0172</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(atanh - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.agm_ref" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#4093-4098">Source</a><h4 class="code-header">pub fn <a href="#method.agm_ref" class="fn">agm_ref</a>&lt;'a&gt;(&amp;'a self, other: &amp;'a Self) -&gt; AgmIncomplete&lt;'a&gt;</h4></section></summary><div class="docblock"><p>Computes the arithmetic-geometric mean.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+<li><code><a href="../ops/trait.AssignRound.html" title="trait rug::ops::AssignRound">AssignRound</a>&lt;Src&gt; for <a href="../struct.Complex.html" title="struct rug::Complex">Complex</a></code></li>
+</ul>
+<h5 id="examples-46"><a class="doc-anchor" href="#examples-46">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::Complex;
+<span class="kw">let </span>f = Complex::with_val(<span class="number">53</span>, (<span class="number">1.25</span>, <span class="number">1.0</span>));
+<span class="kw">let </span>g = Complex::with_val(<span class="number">53</span>, (<span class="number">3.75</span>, -<span class="number">1.0</span>));
+<span class="kw">let </span>agm = Complex::with_val(<span class="number">53</span>, f.agm_ref(<span class="kw-2">&amp;</span>g));
+<span class="kw">let </span>expected = Complex::with_val(<span class="number">53</span>, (<span class="number">2.4763</span>, <span class="number">0.2571</span>));
+<span class="macro">assert!</span>(<span class="kw-2">*</span>(agm - expected).abs().real() &lt; <span class="number">0.0001</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="method.eq0" class="method"><a class="src rightside" href="../../src/rug/complex/big.rs.html#4206-4208">Source</a><h4 class="code-header">pub fn <a href="#method.eq0" class="fn">eq0</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a></h4></section><span class="item-info"><div class="stab deprecated"><span class="emoji">👎</span><span>Deprecated since 1.22.0: renamed to <code>is_zero</code></span></div></span></summary><div class="docblock"><p>This method has been renamed to <a href="../struct.Complex.html#method.is_zero" title="method rug::Complex::is_zero"><code>is_zero</code></a>.</p>
+</div></details></div></details><h2 id="trait-implementations" class="section-header">Trait Implementations<a href="#trait-implementations" class="anchor">§</a></h2><div id="trait-implementations-list"><details class="toggle implementors-toggle" open><summary><section id="impl-Binary-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#202-206">Source</a><a href="#impl-Binary-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Binary.html" title="trait core::fmt::Binary">Binary</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt-3" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#203-205">Source</a><a href="#method.fmt-3" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Binary.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.90.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.90.0/core/fmt/type.Result.html" title="type core::fmt::Result">FmtResult</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Binary.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Clone-for-BorrowComplex%3C'a%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#44">Source</a><a href="#impl-Clone-for-BorrowComplex%3C'a%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'a&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#44">Source</a><a href="#method.clone" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/clone/trait.Clone.html#tymethod.clone" class="fn">clone</a>(&amp;self) -&gt; <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'a&gt;</h4></section></summary><div class='docblock'>Returns a duplicate of the value. <a href="https://doc.rust-lang.org/1.90.0/core/clone/trait.Clone.html#tymethod.clone">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_from" class="method trait-impl"><span class="rightside"><span class="since" title="Stable since Rust version 1.0.0">1.0.0</span> · <a class="src" href="https://doc.rust-lang.org/1.90.0/src/core/clone.rs.html#213-215">Source</a></span><a href="#method.clone_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/clone/trait.Clone.html#method.clone_from" class="fn">clone_from</a>(&amp;mut self, source: &amp;Self)</h4></section></summary><div class='docblock'>Performs copy-assignment from <code>source</code>. <a href="https://doc.rust-lang.org/1.90.0/core/clone/trait.Clone.html#method.clone_from">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Debug-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#196-200">Source</a><a href="#impl-Debug-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Debug.html" title="trait core::fmt::Debug">Debug</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt-2" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#197-199">Source</a><a href="#method.fmt-2" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Debug.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.90.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.90.0/core/fmt/type.Result.html" title="type core::fmt::Result">FmtResult</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Debug.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Deref-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#176-182">Source</a><a href="#impl-Deref-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref">Deref</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Target" class="associatedtype trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#177">Source</a><a href="#associatedtype.Target" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html#associatedtype.Target" class="associatedtype">Target</a> = <a class="struct" href="../struct.Complex.html" title="struct rug::Complex">Complex</a></h4></section></summary><div class='docblock'>The resulting type after dereferencing.</div></details><details class="toggle method-toggle" open><summary><section id="method.deref" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#179-181">Source</a><a href="#method.deref" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html#tymethod.deref" class="fn">deref</a>(&amp;self) -&gt; &amp;<a class="struct" href="../struct.Complex.html" title="struct rug::Complex">Complex</a></h4></section></summary><div class='docblock'>Dereferences the value.</div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Display-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#190-194">Source</a><a href="#impl-Display-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt-1" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#191-193">Source</a><a href="#method.fmt-1" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Display.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.90.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.90.0/core/fmt/type.Result.html" title="type core::fmt::Result">FmtResult</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Display.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-LowerExp-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#226-230">Source</a><a href="#impl-LowerExp-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.LowerExp.html" title="trait core::fmt::LowerExp">LowerExp</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt-7" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#227-229">Source</a><a href="#method.fmt-7" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.LowerExp.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.90.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.90.0/core/fmt/type.Result.html" title="type core::fmt::Result">FmtResult</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.LowerExp.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-LowerHex-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#214-218">Source</a><a href="#impl-LowerHex-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.LowerHex.html" title="trait core::fmt::LowerHex">LowerHex</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt-5" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#215-217">Source</a><a href="#method.fmt-5" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.LowerHex.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.90.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.90.0/core/fmt/type.Result.html" title="type core::fmt::Result">FmtResult</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.LowerHex.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Octal-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#208-212">Source</a><a href="#impl-Octal-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Octal.html" title="trait core::fmt::Octal">Octal</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt-4" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#209-211">Source</a><a href="#method.fmt-4" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Octal.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.90.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.90.0/core/fmt/type.Result.html" title="type core::fmt::Result">FmtResult</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Octal.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-Pointer-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#184-188">Source</a><a href="#impl-Pointer-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Pointer.html" title="trait core::fmt::Pointer">Pointer</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#185-187">Source</a><a href="#method.fmt" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Pointer.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.90.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.90.0/core/fmt/type.Result.html" title="type core::fmt::Result">FmtResult</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Pointer.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-UpperExp-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#232-236">Source</a><a href="#impl-UpperExp-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.UpperExp.html" title="trait core::fmt::UpperExp">UpperExp</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt-8" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#233-235">Source</a><a href="#method.fmt-8" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.UpperExp.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.90.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.90.0/core/fmt/type.Result.html" title="type core::fmt::Result">FmtResult</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.UpperExp.html#tymethod.fmt">Read more</a></div></details></div></details><details class="toggle implementors-toggle" open><summary><section id="impl-UpperHex-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#220-224">Source</a><a href="#impl-UpperHex-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.UpperHex.html" title="trait core::fmt::UpperHex">UpperHex</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.fmt-6" class="method trait-impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#221-223">Source</a><a href="#method.fmt-6" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.UpperHex.html#tymethod.fmt" class="fn">fmt</a>(&amp;self, f: &amp;mut <a class="struct" href="https://doc.rust-lang.org/1.90.0/core/fmt/struct.Formatter.html" title="struct core::fmt::Formatter">Formatter</a>&lt;'_&gt;) -&gt; <a class="type" href="https://doc.rust-lang.org/1.90.0/core/fmt/type.Result.html" title="type core::fmt::Result">FmtResult</a></h4></section></summary><div class='docblock'>Formats the value using the given formatter. <a href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.UpperHex.html#tymethod.fmt">Read more</a></div></details></div></details><section id="impl-Copy-for-BorrowComplex%3C'a%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#44">Source</a><a href="#impl-Copy-for-BorrowComplex%3C'a%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Copy.html" title="trait core::marker::Copy">Copy</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'a&gt;</h3></section><section id="impl-Send-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#239">Source</a><a href="#impl-Send-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Send.html" title="trait core::marker::Send">Send</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section><section id="impl-Sync-for-BorrowComplex%3C'_%3E" class="impl"><a class="src rightside" href="../../src/rug/complex/borrow.rs.html#240">Source</a><a href="#impl-Sync-for-BorrowComplex%3C'_%3E" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Sync.html" title="trait core::marker::Sync">Sync</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'_&gt;</h3></section></div><h2 id="synthetic-implementations" class="section-header">Auto Trait Implementations<a href="#synthetic-implementations" class="anchor">§</a></h2><div id="synthetic-implementations-list"><section id="impl-Freeze-for-BorrowComplex%3C'a%3E" class="impl"><a href="#impl-Freeze-for-BorrowComplex%3C'a%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Freeze.html" title="trait core::marker::Freeze">Freeze</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'a&gt;</h3></section><section id="impl-RefUnwindSafe-for-BorrowComplex%3C'a%3E" class="impl"><a href="#impl-RefUnwindSafe-for-BorrowComplex%3C'a%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/panic/unwind_safe/trait.RefUnwindSafe.html" title="trait core::panic::unwind_safe::RefUnwindSafe">RefUnwindSafe</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'a&gt;</h3></section><section id="impl-Unpin-for-BorrowComplex%3C'a%3E" class="impl"><a href="#impl-Unpin-for-BorrowComplex%3C'a%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Unpin.html" title="trait core::marker::Unpin">Unpin</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'a&gt;</h3></section><section id="impl-UnwindSafe-for-BorrowComplex%3C'a%3E" class="impl"><a href="#impl-UnwindSafe-for-BorrowComplex%3C'a%3E" class="anchor">§</a><h3 class="code-header">impl&lt;'a&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/panic/unwind_safe/trait.UnwindSafe.html" title="trait core::panic::unwind_safe::UnwindSafe">UnwindSafe</a> for <a class="struct" href="struct.BorrowComplex.html" title="struct rug::complex::BorrowComplex">BorrowComplex</a>&lt;'a&gt;</h3></section></div><h2 id="blanket-implementations" class="section-header">Blanket Implementations<a href="#blanket-implementations" class="anchor">§</a></h2><div id="blanket-implementations-list"><details class="toggle implementors-toggle"><summary><section id="impl-Any-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/any.rs.html#138">Source</a><a href="#impl-Any-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/any/trait.Any.html" title="trait core::any::Any">Any</a> for T<div class="where">where
+    T: 'static + ?<a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.type_id" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/any.rs.html#139">Source</a><a href="#method.type_id" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/any/trait.Any.html#tymethod.type_id" class="fn">type_id</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.90.0/core/any/struct.TypeId.html" title="struct core::any::TypeId">TypeId</a></h4></section></summary><div class='docblock'>Gets the <code>TypeId</code> of <code>self</code>. <a href="https://doc.rust-lang.org/1.90.0/core/any/trait.Any.html#tymethod.type_id">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Az-for-T" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#599">Source</a><a href="#impl-Az-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="../../az/trait.Az.html" title="trait az::Az">Az</a> for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.az" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#602-604">Source</a><a href="#method.az" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.Az.html#tymethod.az" class="fn">az</a>&lt;Dst&gt;(self) -&gt; Dst<div class="where">where
+    T: <a class="trait" href="../../az/trait.Cast.html" title="trait az::Cast">Cast</a>&lt;Dst&gt;,</div></h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Borrow%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/borrow.rs.html#209">Source</a><a href="#impl-Borrow%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/borrow/trait.Borrow.html" title="trait core::borrow::Borrow">Borrow</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/borrow.rs.html#211">Source</a><a href="#method.borrow" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/borrow/trait.Borrow.html#tymethod.borrow" class="fn">borrow</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.reference.html">&amp;T</a></h4></section></summary><div class='docblock'>Immutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.90.0/core/borrow/trait.Borrow.html#tymethod.borrow">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-BorrowMut%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/borrow.rs.html#217">Source</a><a href="#impl-BorrowMut%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/borrow/trait.BorrowMut.html" title="trait core::borrow::BorrowMut">BorrowMut</a>&lt;T&gt; for T<div class="where">where
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.borrow_mut" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/borrow.rs.html#218">Source</a><a href="#method.borrow_mut" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut" class="fn">borrow_mut</a>(&amp;mut self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.reference.html">&amp;mut T</a></h4></section></summary><div class='docblock'>Mutably borrows from an owned value. <a href="https://doc.rust-lang.org/1.90.0/core/borrow/trait.BorrowMut.html#tymethod.borrow_mut">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CastFrom%3CSrc%3E-for-Dst" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#330">Source</a><a href="#impl-CastFrom%3CSrc%3E-for-Dst" class="anchor">§</a><h3 class="code-header">impl&lt;Src, Dst&gt; <a class="trait" href="../../az/trait.CastFrom.html" title="trait az::CastFrom">CastFrom</a>&lt;Src&gt; for Dst<div class="where">where
+    Src: <a class="trait" href="../../az/trait.Cast.html" title="trait az::Cast">Cast</a>&lt;Dst&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.cast_from" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#333">Source</a><a href="#method.cast_from" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.CastFrom.html#tymethod.cast_from" class="fn">cast_from</a>(src: Src) -&gt; Dst</h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CheckedAs-for-T" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#672">Source</a><a href="#impl-CheckedAs-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="../../az/trait.CheckedAs.html" title="trait az::CheckedAs">CheckedAs</a> for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.checked_as" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#675-677">Source</a><a href="#method.checked_as" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.CheckedAs.html#tymethod.checked_as" class="fn">checked_as</a>&lt;Dst&gt;(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;Dst&gt;<div class="where">where
+    T: <a class="trait" href="../../az/trait.CheckedCast.html" title="trait az::CheckedCast">CheckedCast</a>&lt;Dst&gt;,</div></h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CheckedCastFrom%3CSrc%3E-for-Dst" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#366">Source</a><a href="#impl-CheckedCastFrom%3CSrc%3E-for-Dst" class="anchor">§</a><h3 class="code-header">impl&lt;Src, Dst&gt; <a class="trait" href="../../az/trait.CheckedCastFrom.html" title="trait az::CheckedCastFrom">CheckedCastFrom</a>&lt;Src&gt; for Dst<div class="where">where
+    Src: <a class="trait" href="../../az/trait.CheckedCast.html" title="trait az::CheckedCast">CheckedCast</a>&lt;Dst&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.checked_cast_from" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#369">Source</a><a href="#method.checked_cast_from" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.CheckedCastFrom.html#tymethod.checked_cast_from" class="fn">checked_cast_from</a>(src: Src) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;Dst&gt;</h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-CloneToUninit-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/clone.rs.html#483">Source</a><a href="#impl-CloneToUninit-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/clone/trait.CloneToUninit.html" title="trait core::clone::CloneToUninit">CloneToUninit</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.clone_to_uninit" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/clone.rs.html#485">Source</a><a href="#method.clone_to_uninit" class="anchor">§</a><h4 class="code-header">unsafe fn <a href="https://doc.rust-lang.org/1.90.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit" class="fn">clone_to_uninit</a>(&amp;self, dest: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.pointer.html">*mut </a><a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u8.html">u8</a>)</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>clone_to_uninit</code>)</span></div></span><div class='docblock'>Performs copy-assignment from <code>self</code> to <code>dest</code>. <a href="https://doc.rust-lang.org/1.90.0/core/clone/trait.CloneToUninit.html#tymethod.clone_to_uninit">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-From%3CT%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/convert/mod.rs.html#791">Source</a><a href="#impl-From%3CT%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/convert/mod.rs.html#794">Source</a><a href="#method.from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html#tymethod.from" class="fn">from</a>(t: T) -&gt; T</h4></section></summary><div class="docblock"><p>Returns the argument unchanged.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Into%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/convert/mod.rs.html#773-775">Source</a><a href="#impl-Into%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/convert/mod.rs.html#783">Source</a><a href="#method.into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.Into.html#tymethod.into" class="fn">into</a>(self) -&gt; U</h4></section></summary><div class="docblock"><p>Calls <code>U::from(self)</code>.</p>
+<p>That is, this conversion is whatever the implementation of
+<code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;T&gt; for U</code> chooses to do.</p>
+</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-OverflowingAs-for-T" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#897">Source</a><a href="#impl-OverflowingAs-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="../../az/trait.OverflowingAs.html" title="trait az::OverflowingAs">OverflowingAs</a> for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.overflowing_as" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#900-902">Source</a><a href="#method.overflowing_as" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.OverflowingAs.html#tymethod.overflowing_as" class="fn">overflowing_as</a>&lt;Dst&gt;(self) -&gt; (Dst, <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>)<div class="where">where
+    T: <a class="trait" href="../../az/trait.OverflowingCast.html" title="trait az::OverflowingCast">OverflowingCast</a>&lt;Dst&gt;,</div></h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-OverflowingCastFrom%3CSrc%3E-for-Dst" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#474">Source</a><a href="#impl-OverflowingCastFrom%3CSrc%3E-for-Dst" class="anchor">§</a><h3 class="code-header">impl&lt;Src, Dst&gt; <a class="trait" href="../../az/trait.OverflowingCastFrom.html" title="trait az::OverflowingCastFrom">OverflowingCastFrom</a>&lt;Src&gt; for Dst<div class="where">where
+    Src: <a class="trait" href="../../az/trait.OverflowingCast.html" title="trait az::OverflowingCast">OverflowingCast</a>&lt;Dst&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.overflowing_cast_from" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#477">Source</a><a href="#method.overflowing_cast_from" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.OverflowingCastFrom.html#tymethod.overflowing_cast_from" class="fn">overflowing_cast_from</a>(src: Src) -&gt; (Dst, <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>)</h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-Receiver-for-P" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/ops/deref.rs.html#380-382">Source</a><a href="#impl-Receiver-for-P" class="anchor">§</a><h3 class="code-header">impl&lt;P, T&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Receiver.html" title="trait core::ops::deref::Receiver">Receiver</a> for P<div class="where">where
+    P: <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Deref.html" title="trait core::ops::deref::Deref">Deref</a>&lt;Target = T&gt; + ?<a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,
+    T: ?<a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Target-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/ops/deref.rs.html#384">Source</a><a href="#associatedtype.Target-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.90.0/core/ops/deref/trait.Receiver.html#associatedtype.Target" class="associatedtype">Target</a> = T</h4></section></summary><span class="item-info"><div class="stab unstable"><span class="emoji">🔬</span><span>This is a nightly-only experimental API. (<code>arbitrary_self_types</code>)</span></div></span><div class='docblock'>The target type on which the method may be called.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-SaturatingAs-for-T" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#745">Source</a><a href="#impl-SaturatingAs-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="../../az/trait.SaturatingAs.html" title="trait az::SaturatingAs">SaturatingAs</a> for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.saturating_as" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#748-750">Source</a><a href="#method.saturating_as" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.SaturatingAs.html#tymethod.saturating_as" class="fn">saturating_as</a>&lt;Dst&gt;(self) -&gt; Dst<div class="where">where
+    T: <a class="trait" href="../../az/trait.SaturatingCast.html" title="trait az::SaturatingCast">SaturatingCast</a>&lt;Dst&gt;,</div></h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-SaturatingCastFrom%3CSrc%3E-for-Dst" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#402">Source</a><a href="#impl-SaturatingCastFrom%3CSrc%3E-for-Dst" class="anchor">§</a><h3 class="code-header">impl&lt;Src, Dst&gt; <a class="trait" href="../../az/trait.SaturatingCastFrom.html" title="trait az::SaturatingCastFrom">SaturatingCastFrom</a>&lt;Src&gt; for Dst<div class="where">where
+    Src: <a class="trait" href="../../az/trait.SaturatingCast.html" title="trait az::SaturatingCast">SaturatingCast</a>&lt;Dst&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.saturating_cast_from" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#405">Source</a><a href="#method.saturating_cast_from" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.SaturatingCastFrom.html#tymethod.saturating_cast_from" class="fn">saturating_cast_from</a>(src: Src) -&gt; Dst</h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToOwned-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/alloc/borrow.rs.html#82-84">Source</a><a href="#impl-ToOwned-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/alloc/borrow/trait.ToOwned.html" title="trait alloc::borrow::ToOwned">ToOwned</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/clone/trait.Clone.html" title="trait core::clone::Clone">Clone</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Owned" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/alloc/borrow.rs.html#86">Source</a><a href="#associatedtype.Owned" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.90.0/alloc/borrow/trait.ToOwned.html#associatedtype.Owned" class="associatedtype">Owned</a> = T</h4></section></summary><div class='docblock'>The resulting type after obtaining ownership.</div></details><details class="toggle method-toggle" open><summary><section id="method.to_owned" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/alloc/borrow.rs.html#87">Source</a><a href="#method.to_owned" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned" class="fn">to_owned</a>(&amp;self) -&gt; T</h4></section></summary><div class='docblock'>Creates owned data from borrowed data, usually by cloning. <a href="https://doc.rust-lang.org/1.90.0/alloc/borrow/trait.ToOwned.html#tymethod.to_owned">Read more</a></div></details><details class="toggle method-toggle" open><summary><section id="method.clone_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/alloc/borrow.rs.html#91">Source</a><a href="#method.clone_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/alloc/borrow/trait.ToOwned.html#method.clone_into" class="fn">clone_into</a>(&amp;self, target: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.reference.html">&amp;mut T</a>)</h4></section></summary><div class='docblock'>Uses borrowed data to replace owned data, usually by cloning. <a href="https://doc.rust-lang.org/1.90.0/alloc/borrow/trait.ToOwned.html#method.clone_into">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-ToString-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/alloc/string.rs.html#2806">Source</a><a href="#impl-ToString-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/alloc/string/trait.ToString.html" title="trait alloc::string::ToString">ToString</a> for T<div class="where">where
+    T: <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/fmt/trait.Display.html" title="trait core::fmt::Display">Display</a> + ?<a class="trait" href="https://doc.rust-lang.org/1.90.0/core/marker/trait.Sized.html" title="trait core::marker::Sized">Sized</a>,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.to_string" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/alloc/string.rs.html#2808">Source</a><a href="#method.to_string" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/alloc/string/trait.ToString.html#tymethod.to_string" class="fn">to_string</a>(&amp;self) -&gt; <a class="struct" href="https://doc.rust-lang.org/1.90.0/alloc/string/struct.String.html" title="struct alloc::string::String">String</a></h4></section></summary><div class='docblock'>Converts the given value to a <code>String</code>. <a href="https://doc.rust-lang.org/1.90.0/alloc/string/trait.ToString.html#tymethod.to_string">Read more</a></div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryFrom%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/convert/mod.rs.html#833-835">Source</a><a href="#impl-TryFrom%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.Into.html" title="trait core::convert::Into">Into</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error-1" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/convert/mod.rs.html#837">Source</a><a href="#associatedtype.Error-1" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryFrom.html#associatedtype.Error" class="associatedtype">Error</a> = <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/convert/enum.Infallible.html" title="enum core::convert::Infallible">Infallible</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_from" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/convert/mod.rs.html#840">Source</a><a href="#method.try_from" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryFrom.html#tymethod.try_from" class="fn">try_from</a>(value: U) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;T, &lt;T as <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;U&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-TryInto%3CU%3E-for-T" class="impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/convert/mod.rs.html#817-819">Source</a><a href="#impl-TryInto%3CU%3E-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T, U&gt; <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryInto.html" title="trait core::convert::TryInto">TryInto</a>&lt;U&gt; for T<div class="where">where
+    U: <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle" open><summary><section id="associatedtype.Error" class="associatedtype trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/convert/mod.rs.html#821">Source</a><a href="#associatedtype.Error" class="anchor">§</a><h4 class="code-header">type <a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryInto.html#associatedtype.Error" class="associatedtype">Error</a> = &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a></h4></section></summary><div class='docblock'>The type returned in the event of a conversion error.</div></details><details class="toggle method-toggle" open><summary><section id="method.try_into" class="method trait-impl"><a class="src rightside" href="https://doc.rust-lang.org/1.90.0/src/core/convert/mod.rs.html#824">Source</a><a href="#method.try_into" class="anchor">§</a><h4 class="code-header">fn <a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryInto.html#tymethod.try_into" class="fn">try_into</a>(self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/result/enum.Result.html" title="enum core::result::Result">Result</a>&lt;U, &lt;U as <a class="trait" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryFrom.html" title="trait core::convert::TryFrom">TryFrom</a>&lt;T&gt;&gt;::<a class="associatedtype" href="https://doc.rust-lang.org/1.90.0/core/convert/trait.TryFrom.html#associatedtype.Error" title="type core::convert::TryFrom::Error">Error</a>&gt;</h4></section></summary><div class='docblock'>Performs the conversion.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-UnwrappedAs-for-T" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#977">Source</a><a href="#impl-UnwrappedAs-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="../../az/trait.UnwrappedAs.html" title="trait az::UnwrappedAs">UnwrappedAs</a> for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.unwrapped_as" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#979-981">Source</a><a href="#method.unwrapped_as" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.UnwrappedAs.html#tymethod.unwrapped_as" class="fn">unwrapped_as</a>&lt;Dst&gt;(self) -&gt; Dst<div class="where">where
+    T: <a class="trait" href="../../az/trait.UnwrappedCast.html" title="trait az::UnwrappedCast">UnwrappedCast</a>&lt;Dst&gt;,</div></h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-UnwrappedCastFrom%3CSrc%3E-for-Dst" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#526">Source</a><a href="#impl-UnwrappedCastFrom%3CSrc%3E-for-Dst" class="anchor">§</a><h3 class="code-header">impl&lt;Src, Dst&gt; <a class="trait" href="../../az/trait.UnwrappedCastFrom.html" title="trait az::UnwrappedCastFrom">UnwrappedCastFrom</a>&lt;Src&gt; for Dst<div class="where">where
+    Src: <a class="trait" href="../../az/trait.UnwrappedCast.html" title="trait az::UnwrappedCast">UnwrappedCast</a>&lt;Dst&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.unwrapped_cast_from" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#529">Source</a><a href="#method.unwrapped_cast_from" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.UnwrappedCastFrom.html#tymethod.unwrapped_cast_from" class="fn">unwrapped_cast_from</a>(src: Src) -&gt; Dst</h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-WrappingAs-for-T" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#818">Source</a><a href="#impl-WrappingAs-for-T" class="anchor">§</a><h3 class="code-header">impl&lt;T&gt; <a class="trait" href="../../az/trait.WrappingAs.html" title="trait az::WrappingAs">WrappingAs</a> for T</h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.wrapping_as" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#821-823">Source</a><a href="#method.wrapping_as" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.WrappingAs.html#tymethod.wrapping_as" class="fn">wrapping_as</a>&lt;Dst&gt;(self) -&gt; Dst<div class="where">where
+    T: <a class="trait" href="../../az/trait.WrappingCast.html" title="trait az::WrappingCast">WrappingCast</a>&lt;Dst&gt;,</div></h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details><details class="toggle implementors-toggle"><summary><section id="impl-WrappingCastFrom%3CSrc%3E-for-Dst" class="impl"><a class="src rightside" href="../../src/az/lib.rs.html#438">Source</a><a href="#impl-WrappingCastFrom%3CSrc%3E-for-Dst" class="anchor">§</a><h3 class="code-header">impl&lt;Src, Dst&gt; <a class="trait" href="../../az/trait.WrappingCastFrom.html" title="trait az::WrappingCastFrom">WrappingCastFrom</a>&lt;Src&gt; for Dst<div class="where">where
+    Src: <a class="trait" href="../../az/trait.WrappingCast.html" title="trait az::WrappingCast">WrappingCast</a>&lt;Dst&gt;,</div></h3></section></summary><div class="impl-items"><details class="toggle method-toggle" open><summary><section id="method.wrapping_cast_from" class="method trait-impl"><a class="src rightside" href="../../src/az/lib.rs.html#441">Source</a><a href="#method.wrapping_cast_from" class="anchor">§</a><h4 class="code-header">fn <a href="../../az/trait.WrappingCastFrom.html#tymethod.wrapping_cast_from" class="fn">wrapping_cast_from</a>(src: Src) -&gt; Dst</h4></section></summary><div class='docblock'>Casts the value.</div></details></div></details></div></section></div></main></body></html>

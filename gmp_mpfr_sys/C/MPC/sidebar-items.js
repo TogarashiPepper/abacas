@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["Ball_Arithmetic","Complex_Functions","Concept_Index","Copying","Function_Index","GNU_Free_Documentation_License","GNU_MPC_Basics","Installing_GNU_MPC","Introduction_to_GNU_MPC","References","Reporting_Bugs"]};

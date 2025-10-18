@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"mod":["complex","float","integer","ops","rand","rational"],"struct":["Complex","Float","Integer","Rational"],"trait":["Assign","Complete"]};

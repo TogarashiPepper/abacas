@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["API_Compatibility","Concept_Index","Contributors","Copying","Function_and_Type_Index","GNU_Free_Documentation_License","Installing_MPFR","Introduction_to_MPFR","MPFR_Basics","MPFR_Interface","MPFR_and_the_IEEE_754_Standard","References","Reporting_Bugs"]};

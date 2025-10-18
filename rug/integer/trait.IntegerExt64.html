@@ -1,0 +1,1095 @@
+<!DOCTYPE html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><meta name="generator" content="rustdoc"><meta name="description" content="`Integer` extension trait with 64-bit alternatives of some methods."><title>IntegerExt64 in rug::integer - Rust</title><script>if(window.location.protocol!=="file:")document.head.insertAdjacentHTML("beforeend","SourceSerif4-Regular-6b053e98.ttf.woff2,FiraSans-Italic-81dc35de.woff2,FiraSans-Regular-0fe48ade.woff2,FiraSans-MediumItalic-ccf7e434.woff2,FiraSans-Medium-e1aa3f0a.woff2,SourceCodePro-Regular-8badfe75.ttf.woff2,SourceCodePro-Semibold-aa29a496.ttf.woff2".split(",").map(f=>`<link rel="preload" as="font" type="font/woff2" crossorigin href="../../static.files/${f}">`).join(""))</script><link rel="stylesheet" href="../../static.files/normalize-9960930a.css"><link rel="stylesheet" href="../../static.files/rustdoc-aa0817cf.css"><meta name="rustdoc-vars" data-root-path="../../" data-static-root-path="../../static.files/" data-current-crate="rug" data-themes="" data-resource-suffix="" data-rustdoc-version="1.90.0 (1159e78c4 2025-09-14)" data-channel="1.90.0" data-search-js="search-fa3e91e5.js" data-settings-js="settings-5514c975.js" ><script src="../../static.files/storage-68b7e25d.js"></script><script defer src="sidebar-items.js"></script><script defer src="../../static.files/main-eebb9057.js"></script><noscript><link rel="stylesheet" href="../../static.files/noscript-32bb7600.css"></noscript><link rel="alternate icon" type="image/png" href="../../static.files/favicon-32x32-6580c154.png"><link rel="icon" type="image/svg+xml" href="../../static.files/favicon-044be391.svg"></head><body class="rustdoc trait"><!--[if lte IE 11]><div class="warning">This old browser is unsupported and will most likely display funky things.</div><![endif]--><nav class="mobile-topbar"><button class="sidebar-menu-toggle" title="show sidebar"></button><a class="logo-container" href="../../rug/index.html"><img src="data:image/svg+xml;base64,
+PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMzMuODY3IDMzLjg2NyIgeG1s
+bnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIC0yNjMuMTMpIj48Y2lyY2xl
+IGN4PSIxNi45MzMiIGN5PSIyODAuMDciIHI9IjE2LjkzMyIgZmlsbD0iI2Y3ZjFhMSIvPjxnIGZpbGw9IiMwMDcyYjIiIHN0cm9r
+ZS13aWR0aD0iLjI2NDU4cHgiPjxnIHN0cm9rZT0iIzAwMCI+PGcgYXJpYS1sYWJlbD0iNiI+PHBhdGggZD0ibTE0LjM2MSAyNzgu
+NzFjMC42NjA0IDAgMS4yODQxIDAuMjc1MTYgMS4yODQxIDEuMzk0MiAwIDEuMjI5MS0wLjU4NzAyIDEuNjE0My0xLjI0NzQgMS42
+MTQzLTAuNTY4NjggMC0xLjI2NTgtMC4zODUyMy0xLjUyMjYtMi4wMTc5IDAuMzY2ODktMC42OTcwOSAwLjkzNTU2LTAuOTkwNiAx
+LjQ4NTktMC45OTA2em0wLjExMDA3IDUuMzU2NmMyLjIwMTMgMCA0LjAzNTgtMS40Njc2IDQuMDM1OC0zLjk2MjRzLTEuNTQwOS0z
+LjU5NTUtMy41MjIxLTMuNTk1NWMtMC42MjM3MSAwLTEuNjE0MyAwLjQwMzU4LTIuMTgzIDEuMTU1NyAwLjEyODQxLTIuMzQ4MSAx
+LjAwODktMy4xMzY5IDIuMTQ2My0zLjEzNjkgMC42NjA0IDAgMS4zOTQyIDAuNDAzNTcgMS43NjExIDAuODA3MTVsMS42NTEtMS44
+NzExYy0wLjc3MDQ2LTAuNzcwNDYtMS45ODEyLTEuNDY3Ni0zLjYzMjItMS40Njc2LTIuNDk0OCAwLTQuODA2MiAyLjAxNzktNC44
+MDYyIDYuMjM3MSAwIDQuMjE5MiAyLjMxMTQgNS44MzM1IDQuNTQ5NCA1LjgzMzV6IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJh
+bnNmb3JtPSJyb3RhdGUoMTUuNTE1KSIgYXJpYS1sYWJlbD0iMiI+PHBhdGggZD0ibTk4LjAyOCAyNjcuOTVoNS4wNDYxdi0xLjM5
+OThoLTEuNjAzYy0wLjMyNzM4IDAtMC44MjQwOSAwLjA0NTEtMS4xOTY2IDAuMDkwMyAxLjI3NTYtMS4yNTMxIDIuNDQ5Ny0yLjQy
+NzEgMi40NDk3LTMuNzI1MyAwLTEuMzY2LTAuOTU5NTYtMi4yNjkxLTIuMzcwNy0yLjI2OTEtMS4wMDQ3IDAtMS42ODIgMC4zOTUx
+MS0yLjM3MDcgMS4xNzRsMC44NjkyNCAwLjg1Nzk2YzAuMzYxMjQtMC4zODM4MyAwLjc1NjM2LTAuNzMzNzggMS4yNzU2LTAuNzMz
+NzggMC42MjA4OSAwIDEuMDE2IDAuMzgzODIgMS4wMTYgMS4wODM3IDAgMS4wMDQ3LTEuMzA5NSAyLjI5MTYtMy4xMTU3IDMuODk0
+N3oiIGZpbGwtb3BhY2l0eT0iLjk3MjU1IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoLTExLjAzMyki
+IGFyaWEtbGFiZWw9IjgiPjxwYXRoIGQ9Im0tMzguOTIgMjkwLjc2YzEuMjc0MiAwIDIuMTIzNy0wLjc0MDgzIDIuMTIzNy0xLjcw
+ODggMC0wLjgzOTYyLTAuNTAzNzctMS4zMDM5LTEuMDg2Ni0xLjYyOTh2LTAuMDM5NWMwLjQwNDk5LTAuMjk2MzMgMC44Mzk2MS0w
+LjgxOTg2IDAuODM5NjEtMS40NDIyIDAtMS4wMTc0LTAuNzIxMDgtMS42OTktMS44NDcxLTEuNjk5LTEuMDg2NiAwLTEuODk2NSAw
+LjY1MTkzLTEuODk2NSAxLjY2OTMgMCAwLjY2MTgxIDAuMzg1MjMgMS4xMjYxIDAuODY5MjQgMS40NzE4djAuMDM5NWMtMC41OTI2
+NyAwLjMxNjA5LTEuMTM1OSAwLjgyOTc0LTEuMTM1OSAxLjYxMDEgMCAxLjAxNzQgMC45MDg3NiAxLjcyODYgMi4xMzM2IDEuNzI4
+NnptMC40MTQ4Ny0zLjY2NDdjLTAuNzAxMzItMC4yNzY1Ny0xLjI2NDQtMC41NTMxNS0xLjI2NDQtMS4xODUzIDAtMC41NDMyOCAw
+LjM3NTM2LTAuODU5MzcgMC44NTkzNy0wLjg1OTM3IDAuNTgyNzkgMCAwLjkyODUxIDAuNDA0OTkgMC45Mjg1MSAwLjk1ODE1IDAg
+MC4zOTUxMS0wLjE4NzY4IDAuNzUwNzEtMC41MjM1MiAxLjA4NjZ6bS0wLjM5NTExIDIuODU0N2MtMC42NDIwNiAwLTEuMTU1Ny0w
+LjQxNDg2LTEuMTU1Ny0xLjAzNzIgMC0wLjQ4NDAxIDAuMjg2NDYtMC44ODkgMC42ODE1Ny0xLjE3NTUgMC44NDk0OSAwLjM0NTcy
+IDEuNTExMyAwLjU5MjY3IDEuNTExMyAxLjI3NDIgMCAwLjU4Mjc5LTAuNDM0NjIgMC45MzgzOS0xLjAzNzIgMC45MzgzOXoiIGZp
+bGwtb3BhY2l0eT0iLjk0MTE4IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoNi41MDA4KSIgYXJpYS1s
+YWJlbD0iMyI+PHBhdGggZD0ibTM5LjMwMiAyODMuNjRjMS4wMzI5IDAgMS44ODgxLTAuNTc1NzMgMS44ODgxLTEuNTU3OSAwLTAu
+NzExMi0wLjQ4MjYtMS4xNjg0LTEuMTE3Ni0xLjMzNzd2LTAuMDMzOWMwLjU4NDItMC4yMjg2IDAuOTM5OC0wLjYzNSAwLjkzOTgt
+MS4yMzYxIDAtMC45MTQ0LTAuNzExMi0xLjQyMjQtMS43NDQxLTEuNDIyNC0wLjY0MzQ3IDAtMS4xNTk5IDAuMjcwOTMtMS42MTcx
+IDAuNjc3MzNsMC40OTk1MyAwLjYwMTE0YzAuMzMwMi0wLjMwNDggMC42NjA0LTAuNTA4IDEuMDgzNy0wLjUwOCAwLjQ5MTA3IDAg
+MC43OTU4NyAwLjI3MDkzIDAuNzk1ODcgMC43MTk2NiAwIDAuNDk5NTQtMC4zNDcxMyAwLjg2MzYtMS40MDU1IDAuODYzNnYwLjcx
+MTJjMS4yMjc3IDAgMS41ODMzIDAuMzU1NiAxLjU4MzMgMC45MTQ0IDAgMC41MDgtMC40MDY0IDAuODEyODEtMC45OTA2IDAuODEy
+ODEtMC41NDE4NyAwLTAuOTU2NzMtMC4yNjI0Ny0xLjI3ODUtMC41OTI2N2wtMC40NjU2NyAwLjYyNjUzYzAuMzgxIDAuNDIzMzQg
+MC45NTY3MyAwLjc2MiAxLjgyODggMC43NjJ6IiBmaWxsLW9wYWNpdHk9Ii44Nzg0MyIgc3Ryb2tlPSJub25lIi8+PC9nPjxnIHRy
+YW5zZm9ybT0icm90YXRlKDguMzU2KSIgYXJpYS1sYWJlbD0iMSI+PHBhdGggZD0ibTQ2LjQwNSAyNjguOWgzLjI0Mjd2LTAuNzk1
+ODdoLTEuMDU4M3YtNC41ODg5aC0wLjcyODEzYy0wLjMzODY3IDAuMjAzMi0wLjcxMTIgMC4zMzg2Ny0xLjI0NDYgMC40NDAyN3Yw
+LjYwOTZoMC45OTA2djMuNTM5MWgtMS4yMDIzeiIgZmlsbC1vcGFjaXR5PSIuNzUyOTQiIHN0cm9rZT0ibm9uZSIvPjwvZz48ZyB0
+cmFuc2Zvcm09InJvdGF0ZSgxMi44NjEpIiBhcmlhLWxhYmVsPSI4Ij48cGF0aCBkPSJtODUuMDM2IDI2MS42M2MxLjA5MjIgMCAx
+LjgyMDMtMC42MzUgMS44MjAzLTEuNDY0NyAwLTAuNzE5NjctMC40MzE4LTEuMTE3Ni0wLjkzMTMzLTEuMzk3di0wLjAzMzljMC4z
+NDcxMy0wLjI1NCAwLjcxOTY3LTAuNzAyNzMgMC43MTk2Ny0xLjIzNjEgMC0wLjg3MjA3LTAuNjE4MDctMS40NTYzLTEuNTgzMy0x
+LjQ1NjMtMC45MzEzMyAwLTEuNjI1NiAwLjU1ODgtMS42MjU2IDEuNDMwOSAwIDAuNTY3MjYgMC4zMzAyIDAuOTY1MiAwLjc0NTA3
+IDEuMjYxNXYwLjAzMzljLTAuNTA4IDAuMjcwOTMtMC45NzM2NyAwLjcxMTItMC45NzM2NyAxLjM4MDEgMCAwLjg3MjA3IDAuNzc4
+OTMgMS40ODE3IDEuODI4OCAxLjQ4MTd6bTAuMzU1Ni0zLjE0MTFjLTAuNjAxMTMtMC4yMzcwNy0xLjA4MzctMC40NzQxNC0xLjA4
+MzctMS4wMTYgMC0wLjQ2NTY3IDAuMzIxNzMtMC43MzY2IDAuNzM2Ni0wLjczNjYgMC40OTk1MyAwIDAuNzk1ODcgMC4zNDcxMyAw
+Ljc5NTg3IDAuODIxMjYgMCAwLjMzODY3LTAuMTYwODcgMC42NDM0Ny0wLjQ0ODczIDAuOTMxMzR6bS0wLjMzODY3IDIuNDQ2OWMt
+MC41NTAzMyAwLTAuOTkwNi0wLjM1NTYtMC45OTA2LTAuODg5IDAtMC40MTQ4NiAwLjI0NTUzLTAuNzYyIDAuNTg0Mi0xLjAwNzUg
+MC43MjgxMyAwLjI5NjMzIDEuMjk1NCAwLjUwOCAxLjI5NTQgMS4wOTIyIDAgMC40OTk1My0wLjM3MjUzIDAuODA0MzMtMC44ODkg
+MC44MDQzM3oiIGZpbGwtb3BhY2l0eT0iLjYyNzQ1IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoNC4z
+MDk5KSIgYXJpYS1sYWJlbD0iNSI+PHBhdGggZD0ibTQ2LjM0MSAyODkuNDljMC45OTA2IDAgMS44OTY1LTAuNjc3MzQgMS44OTY1
+LTEuODU0MiAwLTEuMTU5OS0wLjc3MDQ3LTEuNjg0OS0xLjY5MzMtMS42ODQ5LTAuMjc5NCAwLTAuNDgyNiAwLjA2NzctMC43MTEy
+IDAuMTc3OGwwLjExMDA3LTEuMzAzOWgyLjAzMnYtMC44MjEyN2gtMi44Nzg3bC0wLjE2MDg3IDIuNjU4NSAwLjQ2NTY3IDAuMjk2
+MzNjMC4zMjE3My0wLjIxMTY3IDAuNTE2NDctMC4zMDQ4IDAuODYzNi0wLjMwNDggMC41OTI2NyAwIDAuOTkwNiAwLjM2NDA3IDAu
+OTkwNiAxLjAwNzUgMCAwLjY1MTk0LTAuNDQwMjcgMS4wMzI5LTEuMDQxNCAxLjAzMjktMC41NDE4NyAwLTAuOTM5OC0wLjI3MDk0
+LTEuMjYxNS0wLjU3NTc0bC0wLjQ0ODczIDAuNjI2NTRjMC4zOTc5MyAwLjM5NzkzIDAuOTY1MiAwLjc0NTA3IDEuODM3MyAwLjc0
+NTA3eiIgZmlsbC1vcGFjaXR5PSIuNTAxOTYiIHN0cm9rZT0ibm9uZSIvPjwvZz48ZyBmaWxsLW9wYWNpdHk9Ii4zNzY0NyIgYXJp
+YS1sYWJlbD0iMyI+PHBhdGggZD0ibTkuODg1OSAyOTMuNDZjMS4wMzI5IDAgMS44ODgxLTAuNTc1NzQgMS44ODgxLTEuNTU3OSAw
+LTAuNzExMi0wLjQ4MjYtMS4xNjg0LTEuMTE3Ni0xLjMzNzd2LTAuMDMzOWMwLjU4NDItMC4yMjg2IDAuOTM5OC0wLjYzNSAwLjkz
+OTgtMS4yMzYxIDAtMC45MTQ0LTAuNzExMi0xLjQyMjQtMS43NDQxLTEuNDIyNC0wLjY0MzQ3IDAtMS4xNTk5IDAuMjcwOTQtMS42
+MTcxIDAuNjc3MzRsMC40OTk1MyAwLjYwMTEzYzAuMzMwMi0wLjMwNDggMC42NjA0LTAuNTA4IDEuMDgzNy0wLjUwOCAwLjQ5MTA3
+IDAgMC43OTU4NyAwLjI3MDkzIDAuNzk1ODcgMC43MTk2NyAwIDAuNDk5NTMtMC4zNDcxMyAwLjg2MzYtMS40MDU1IDAuODYzNnYw
+LjcxMTJjMS4yMjc3IDAgMS41ODMzIDAuMzU1NiAxLjU4MzMgMC45MTQ0IDAgMC41MDgtMC40MDY0IDAuODEyOC0wLjk5MDYgMC44
+MTI4LTAuNTQxODcgMC0wLjk1NjczLTAuMjYyNDctMS4yNzg1LTAuNTkyNjdsLTAuNDY1NjcgMC42MjY1NGMwLjM4MSAwLjQyMzMz
+IDAuOTU2NzMgMC43NjIgMS44Mjg4IDAuNzYyeiIgc3Ryb2tlPSJub25lIi8+PC9nPjxnIHRyYW5zZm9ybT0icm90YXRlKC0xMS4z
+NTIpIiBhcmlhLWxhYmVsPSIwIj48cGF0aCBkPSJtLTUxLjQ3MSAyNzYuMTdjMS4xMTc2IDAgMS44Mjg4LTAuOTk5MDcgMS44Mjg4
+LTIuODE5NCAwLTEuODExOS0wLjcxMTItMi43Njg2LTEuODI4OC0yLjc2ODYtMS4xMTc2IDAtMS44Mjg4IDAuOTQ4MjYtMS44Mjg4
+IDIuNzY4NiAwIDEuODIwMyAwLjcxMTIgMi44MTk0IDEuODI4OCAyLjgxOTR6bTAtMC43NjJjLTAuNTE2NDcgMC0wLjg5NzQ3LTAu
+NTMzNC0wLjg5NzQ3LTIuMDU3NHMwLjM4MS0yLjAwNjYgMC44OTc0Ny0yLjAwNjZjMC41MjQ5MyAwIDAuODk3NDcgMC40ODI2IDAu
+ODk3NDcgMi4wMDY2cy0wLjM3MjUzIDIuMDU3NC0wLjg5NzQ3IDIuMDU3NHoiIGZpbGwtb3BhY2l0eT0iLjI1MDk4IiBzdHJva2U9
+Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoMjIuNTA2KSIgYXJpYS1sYWJlbD0iNyI+PHBhdGggZD0ibTExOC4xNSAy
+NDMuMDhoMC45OTA2YzAuMDkzMS0yLjA5OTcgMC4zNDcxMy0zLjIwODkgMS42NDI1LTQuNzkyMXYtMC41OTI2NmgtMy42MTUzdjAu
+ODIxMjZoMi41NTY5Yy0xLjA3NTMgMS40NjQ3LTEuNDczMiAyLjY1MDEtMS41NzQ4IDQuNTYzNXoiIGZpbGwtb3BhY2l0eT0iLjEy
+NTQ5IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoLTkuNzI3MykiIGFyaWEtbGFiZWw9IjEiPjxwYXRo
+IGQ9Im0tMTguMjk5IDI4Mi43OWgzLjI0Mjd2LTAuNzk1ODdoLTEuMDU4M3YtNC41ODg5aC0wLjcyODEzYy0wLjMzODY3IDAuMjAz
+Mi0wLjcxMTIgMC4zMzg2Ni0xLjI0NDYgMC40NDAyNnYwLjYwOTZoMC45OTA2djMuNTM5MWgtMS4yMDIzeiIgZmlsbC1vcGFjaXR5
+PSIuMDYyNzQ1IiBzdHJva2U9Im5vbmUiLz48L2c+PC9nPjxnIGFyaWEtbGFiZWw9Ii4iPjxwYXRoIGQ9Im0yMC45MiAyODMuOThj
+MC42NTQ3NiAwIDEuMTI4OS0wLjUxOTI5IDEuMTI4OS0xLjE3NCAwLTAuNjU0NzYtMC40NzQxMy0xLjE3NC0xLjEyODktMS4xNzQt
+MC42NTQ3NiAwLTEuMTI4OSAwLjUxOTI5LTEuMTI4OSAxLjE3NCAwIDAuNjU0NzUgMC40NzQxMyAxLjE3NCAxLjEyODkgMS4xNzR6
+Ii8+PC9nPjwvZz48L2c+PC9zdmc+Cg==
+" alt=""></a></nav><nav class="sidebar"><div class="sidebar-crate"><a class="logo-container" href="../../rug/index.html"><img src="data:image/svg+xml;base64,
+PHN2ZyB3aWR0aD0iMTI4IiBoZWlnaHQ9IjEyOCIgdmVyc2lvbj0iMS4xIiB2aWV3Qm94PSIwIDAgMzMuODY3IDMzLjg2NyIgeG1s
+bnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgwIC0yNjMuMTMpIj48Y2lyY2xl
+IGN4PSIxNi45MzMiIGN5PSIyODAuMDciIHI9IjE2LjkzMyIgZmlsbD0iI2Y3ZjFhMSIvPjxnIGZpbGw9IiMwMDcyYjIiIHN0cm9r
+ZS13aWR0aD0iLjI2NDU4cHgiPjxnIHN0cm9rZT0iIzAwMCI+PGcgYXJpYS1sYWJlbD0iNiI+PHBhdGggZD0ibTE0LjM2MSAyNzgu
+NzFjMC42NjA0IDAgMS4yODQxIDAuMjc1MTYgMS4yODQxIDEuMzk0MiAwIDEuMjI5MS0wLjU4NzAyIDEuNjE0My0xLjI0NzQgMS42
+MTQzLTAuNTY4NjggMC0xLjI2NTgtMC4zODUyMy0xLjUyMjYtMi4wMTc5IDAuMzY2ODktMC42OTcwOSAwLjkzNTU2LTAuOTkwNiAx
+LjQ4NTktMC45OTA2em0wLjExMDA3IDUuMzU2NmMyLjIwMTMgMCA0LjAzNTgtMS40Njc2IDQuMDM1OC0zLjk2MjRzLTEuNTQwOS0z
+LjU5NTUtMy41MjIxLTMuNTk1NWMtMC42MjM3MSAwLTEuNjE0MyAwLjQwMzU4LTIuMTgzIDEuMTU1NyAwLjEyODQxLTIuMzQ4MSAx
+LjAwODktMy4xMzY5IDIuMTQ2My0zLjEzNjkgMC42NjA0IDAgMS4zOTQyIDAuNDAzNTcgMS43NjExIDAuODA3MTVsMS42NTEtMS44
+NzExYy0wLjc3MDQ2LTAuNzcwNDYtMS45ODEyLTEuNDY3Ni0zLjYzMjItMS40Njc2LTIuNDk0OCAwLTQuODA2MiAyLjAxNzktNC44
+MDYyIDYuMjM3MSAwIDQuMjE5MiAyLjMxMTQgNS44MzM1IDQuNTQ5NCA1LjgzMzV6IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJh
+bnNmb3JtPSJyb3RhdGUoMTUuNTE1KSIgYXJpYS1sYWJlbD0iMiI+PHBhdGggZD0ibTk4LjAyOCAyNjcuOTVoNS4wNDYxdi0xLjM5
+OThoLTEuNjAzYy0wLjMyNzM4IDAtMC44MjQwOSAwLjA0NTEtMS4xOTY2IDAuMDkwMyAxLjI3NTYtMS4yNTMxIDIuNDQ5Ny0yLjQy
+NzEgMi40NDk3LTMuNzI1MyAwLTEuMzY2LTAuOTU5NTYtMi4yNjkxLTIuMzcwNy0yLjI2OTEtMS4wMDQ3IDAtMS42ODIgMC4zOTUx
+MS0yLjM3MDcgMS4xNzRsMC44NjkyNCAwLjg1Nzk2YzAuMzYxMjQtMC4zODM4MyAwLjc1NjM2LTAuNzMzNzggMS4yNzU2LTAuNzMz
+NzggMC42MjA4OSAwIDEuMDE2IDAuMzgzODIgMS4wMTYgMS4wODM3IDAgMS4wMDQ3LTEuMzA5NSAyLjI5MTYtMy4xMTU3IDMuODk0
+N3oiIGZpbGwtb3BhY2l0eT0iLjk3MjU1IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoLTExLjAzMyki
+IGFyaWEtbGFiZWw9IjgiPjxwYXRoIGQ9Im0tMzguOTIgMjkwLjc2YzEuMjc0MiAwIDIuMTIzNy0wLjc0MDgzIDIuMTIzNy0xLjcw
+ODggMC0wLjgzOTYyLTAuNTAzNzctMS4zMDM5LTEuMDg2Ni0xLjYyOTh2LTAuMDM5NWMwLjQwNDk5LTAuMjk2MzMgMC44Mzk2MS0w
+LjgxOTg2IDAuODM5NjEtMS40NDIyIDAtMS4wMTc0LTAuNzIxMDgtMS42OTktMS44NDcxLTEuNjk5LTEuMDg2NiAwLTEuODk2NSAw
+LjY1MTkzLTEuODk2NSAxLjY2OTMgMCAwLjY2MTgxIDAuMzg1MjMgMS4xMjYxIDAuODY5MjQgMS40NzE4djAuMDM5NWMtMC41OTI2
+NyAwLjMxNjA5LTEuMTM1OSAwLjgyOTc0LTEuMTM1OSAxLjYxMDEgMCAxLjAxNzQgMC45MDg3NiAxLjcyODYgMi4xMzM2IDEuNzI4
+NnptMC40MTQ4Ny0zLjY2NDdjLTAuNzAxMzItMC4yNzY1Ny0xLjI2NDQtMC41NTMxNS0xLjI2NDQtMS4xODUzIDAtMC41NDMyOCAw
+LjM3NTM2LTAuODU5MzcgMC44NTkzNy0wLjg1OTM3IDAuNTgyNzkgMCAwLjkyODUxIDAuNDA0OTkgMC45Mjg1MSAwLjk1ODE1IDAg
+MC4zOTUxMS0wLjE4NzY4IDAuNzUwNzEtMC41MjM1MiAxLjA4NjZ6bS0wLjM5NTExIDIuODU0N2MtMC42NDIwNiAwLTEuMTU1Ny0w
+LjQxNDg2LTEuMTU1Ny0xLjAzNzIgMC0wLjQ4NDAxIDAuMjg2NDYtMC44ODkgMC42ODE1Ny0xLjE3NTUgMC44NDk0OSAwLjM0NTcy
+IDEuNTExMyAwLjU5MjY3IDEuNTExMyAxLjI3NDIgMCAwLjU4Mjc5LTAuNDM0NjIgMC45MzgzOS0xLjAzNzIgMC45MzgzOXoiIGZp
+bGwtb3BhY2l0eT0iLjk0MTE4IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoNi41MDA4KSIgYXJpYS1s
+YWJlbD0iMyI+PHBhdGggZD0ibTM5LjMwMiAyODMuNjRjMS4wMzI5IDAgMS44ODgxLTAuNTc1NzMgMS44ODgxLTEuNTU3OSAwLTAu
+NzExMi0wLjQ4MjYtMS4xNjg0LTEuMTE3Ni0xLjMzNzd2LTAuMDMzOWMwLjU4NDItMC4yMjg2IDAuOTM5OC0wLjYzNSAwLjkzOTgt
+MS4yMzYxIDAtMC45MTQ0LTAuNzExMi0xLjQyMjQtMS43NDQxLTEuNDIyNC0wLjY0MzQ3IDAtMS4xNTk5IDAuMjcwOTMtMS42MTcx
+IDAuNjc3MzNsMC40OTk1MyAwLjYwMTE0YzAuMzMwMi0wLjMwNDggMC42NjA0LTAuNTA4IDEuMDgzNy0wLjUwOCAwLjQ5MTA3IDAg
+MC43OTU4NyAwLjI3MDkzIDAuNzk1ODcgMC43MTk2NiAwIDAuNDk5NTQtMC4zNDcxMyAwLjg2MzYtMS40MDU1IDAuODYzNnYwLjcx
+MTJjMS4yMjc3IDAgMS41ODMzIDAuMzU1NiAxLjU4MzMgMC45MTQ0IDAgMC41MDgtMC40MDY0IDAuODEyODEtMC45OTA2IDAuODEy
+ODEtMC41NDE4NyAwLTAuOTU2NzMtMC4yNjI0Ny0xLjI3ODUtMC41OTI2N2wtMC40NjU2NyAwLjYyNjUzYzAuMzgxIDAuNDIzMzQg
+MC45NTY3MyAwLjc2MiAxLjgyODggMC43NjJ6IiBmaWxsLW9wYWNpdHk9Ii44Nzg0MyIgc3Ryb2tlPSJub25lIi8+PC9nPjxnIHRy
+YW5zZm9ybT0icm90YXRlKDguMzU2KSIgYXJpYS1sYWJlbD0iMSI+PHBhdGggZD0ibTQ2LjQwNSAyNjguOWgzLjI0Mjd2LTAuNzk1
+ODdoLTEuMDU4M3YtNC41ODg5aC0wLjcyODEzYy0wLjMzODY3IDAuMjAzMi0wLjcxMTIgMC4zMzg2Ny0xLjI0NDYgMC40NDAyN3Yw
+LjYwOTZoMC45OTA2djMuNTM5MWgtMS4yMDIzeiIgZmlsbC1vcGFjaXR5PSIuNzUyOTQiIHN0cm9rZT0ibm9uZSIvPjwvZz48ZyB0
+cmFuc2Zvcm09InJvdGF0ZSgxMi44NjEpIiBhcmlhLWxhYmVsPSI4Ij48cGF0aCBkPSJtODUuMDM2IDI2MS42M2MxLjA5MjIgMCAx
+LjgyMDMtMC42MzUgMS44MjAzLTEuNDY0NyAwLTAuNzE5NjctMC40MzE4LTEuMTE3Ni0wLjkzMTMzLTEuMzk3di0wLjAzMzljMC4z
+NDcxMy0wLjI1NCAwLjcxOTY3LTAuNzAyNzMgMC43MTk2Ny0xLjIzNjEgMC0wLjg3MjA3LTAuNjE4MDctMS40NTYzLTEuNTgzMy0x
+LjQ1NjMtMC45MzEzMyAwLTEuNjI1NiAwLjU1ODgtMS42MjU2IDEuNDMwOSAwIDAuNTY3MjYgMC4zMzAyIDAuOTY1MiAwLjc0NTA3
+IDEuMjYxNXYwLjAzMzljLTAuNTA4IDAuMjcwOTMtMC45NzM2NyAwLjcxMTItMC45NzM2NyAxLjM4MDEgMCAwLjg3MjA3IDAuNzc4
+OTMgMS40ODE3IDEuODI4OCAxLjQ4MTd6bTAuMzU1Ni0zLjE0MTFjLTAuNjAxMTMtMC4yMzcwNy0xLjA4MzctMC40NzQxNC0xLjA4
+MzctMS4wMTYgMC0wLjQ2NTY3IDAuMzIxNzMtMC43MzY2IDAuNzM2Ni0wLjczNjYgMC40OTk1MyAwIDAuNzk1ODcgMC4zNDcxMyAw
+Ljc5NTg3IDAuODIxMjYgMCAwLjMzODY3LTAuMTYwODcgMC42NDM0Ny0wLjQ0ODczIDAuOTMxMzR6bS0wLjMzODY3IDIuNDQ2OWMt
+MC41NTAzMyAwLTAuOTkwNi0wLjM1NTYtMC45OTA2LTAuODg5IDAtMC40MTQ4NiAwLjI0NTUzLTAuNzYyIDAuNTg0Mi0xLjAwNzUg
+MC43MjgxMyAwLjI5NjMzIDEuMjk1NCAwLjUwOCAxLjI5NTQgMS4wOTIyIDAgMC40OTk1My0wLjM3MjUzIDAuODA0MzMtMC44ODkg
+MC44MDQzM3oiIGZpbGwtb3BhY2l0eT0iLjYyNzQ1IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoNC4z
+MDk5KSIgYXJpYS1sYWJlbD0iNSI+PHBhdGggZD0ibTQ2LjM0MSAyODkuNDljMC45OTA2IDAgMS44OTY1LTAuNjc3MzQgMS44OTY1
+LTEuODU0MiAwLTEuMTU5OS0wLjc3MDQ3LTEuNjg0OS0xLjY5MzMtMS42ODQ5LTAuMjc5NCAwLTAuNDgyNiAwLjA2NzctMC43MTEy
+IDAuMTc3OGwwLjExMDA3LTEuMzAzOWgyLjAzMnYtMC44MjEyN2gtMi44Nzg3bC0wLjE2MDg3IDIuNjU4NSAwLjQ2NTY3IDAuMjk2
+MzNjMC4zMjE3My0wLjIxMTY3IDAuNTE2NDctMC4zMDQ4IDAuODYzNi0wLjMwNDggMC41OTI2NyAwIDAuOTkwNiAwLjM2NDA3IDAu
+OTkwNiAxLjAwNzUgMCAwLjY1MTk0LTAuNDQwMjcgMS4wMzI5LTEuMDQxNCAxLjAzMjktMC41NDE4NyAwLTAuOTM5OC0wLjI3MDk0
+LTEuMjYxNS0wLjU3NTc0bC0wLjQ0ODczIDAuNjI2NTRjMC4zOTc5MyAwLjM5NzkzIDAuOTY1MiAwLjc0NTA3IDEuODM3MyAwLjc0
+NTA3eiIgZmlsbC1vcGFjaXR5PSIuNTAxOTYiIHN0cm9rZT0ibm9uZSIvPjwvZz48ZyBmaWxsLW9wYWNpdHk9Ii4zNzY0NyIgYXJp
+YS1sYWJlbD0iMyI+PHBhdGggZD0ibTkuODg1OSAyOTMuNDZjMS4wMzI5IDAgMS44ODgxLTAuNTc1NzQgMS44ODgxLTEuNTU3OSAw
+LTAuNzExMi0wLjQ4MjYtMS4xNjg0LTEuMTE3Ni0xLjMzNzd2LTAuMDMzOWMwLjU4NDItMC4yMjg2IDAuOTM5OC0wLjYzNSAwLjkz
+OTgtMS4yMzYxIDAtMC45MTQ0LTAuNzExMi0xLjQyMjQtMS43NDQxLTEuNDIyNC0wLjY0MzQ3IDAtMS4xNTk5IDAuMjcwOTQtMS42
+MTcxIDAuNjc3MzRsMC40OTk1MyAwLjYwMTEzYzAuMzMwMi0wLjMwNDggMC42NjA0LTAuNTA4IDEuMDgzNy0wLjUwOCAwLjQ5MTA3
+IDAgMC43OTU4NyAwLjI3MDkzIDAuNzk1ODcgMC43MTk2NyAwIDAuNDk5NTMtMC4zNDcxMyAwLjg2MzYtMS40MDU1IDAuODYzNnYw
+LjcxMTJjMS4yMjc3IDAgMS41ODMzIDAuMzU1NiAxLjU4MzMgMC45MTQ0IDAgMC41MDgtMC40MDY0IDAuODEyOC0wLjk5MDYgMC44
+MTI4LTAuNTQxODcgMC0wLjk1NjczLTAuMjYyNDctMS4yNzg1LTAuNTkyNjdsLTAuNDY1NjcgMC42MjY1NGMwLjM4MSAwLjQyMzMz
+IDAuOTU2NzMgMC43NjIgMS44Mjg4IDAuNzYyeiIgc3Ryb2tlPSJub25lIi8+PC9nPjxnIHRyYW5zZm9ybT0icm90YXRlKC0xMS4z
+NTIpIiBhcmlhLWxhYmVsPSIwIj48cGF0aCBkPSJtLTUxLjQ3MSAyNzYuMTdjMS4xMTc2IDAgMS44Mjg4LTAuOTk5MDcgMS44Mjg4
+LTIuODE5NCAwLTEuODExOS0wLjcxMTItMi43Njg2LTEuODI4OC0yLjc2ODYtMS4xMTc2IDAtMS44Mjg4IDAuOTQ4MjYtMS44Mjg4
+IDIuNzY4NiAwIDEuODIwMyAwLjcxMTIgMi44MTk0IDEuODI4OCAyLjgxOTR6bTAtMC43NjJjLTAuNTE2NDcgMC0wLjg5NzQ3LTAu
+NTMzNC0wLjg5NzQ3LTIuMDU3NHMwLjM4MS0yLjAwNjYgMC44OTc0Ny0yLjAwNjZjMC41MjQ5MyAwIDAuODk3NDcgMC40ODI2IDAu
+ODk3NDcgMi4wMDY2cy0wLjM3MjUzIDIuMDU3NC0wLjg5NzQ3IDIuMDU3NHoiIGZpbGwtb3BhY2l0eT0iLjI1MDk4IiBzdHJva2U9
+Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoMjIuNTA2KSIgYXJpYS1sYWJlbD0iNyI+PHBhdGggZD0ibTExOC4xNSAy
+NDMuMDhoMC45OTA2YzAuMDkzMS0yLjA5OTcgMC4zNDcxMy0zLjIwODkgMS42NDI1LTQuNzkyMXYtMC41OTI2NmgtMy42MTUzdjAu
+ODIxMjZoMi41NTY5Yy0xLjA3NTMgMS40NjQ3LTEuNDczMiAyLjY1MDEtMS41NzQ4IDQuNTYzNXoiIGZpbGwtb3BhY2l0eT0iLjEy
+NTQ5IiBzdHJva2U9Im5vbmUiLz48L2c+PGcgdHJhbnNmb3JtPSJyb3RhdGUoLTkuNzI3MykiIGFyaWEtbGFiZWw9IjEiPjxwYXRo
+IGQ9Im0tMTguMjk5IDI4Mi43OWgzLjI0Mjd2LTAuNzk1ODdoLTEuMDU4M3YtNC41ODg5aC0wLjcyODEzYy0wLjMzODY3IDAuMjAz
+Mi0wLjcxMTIgMC4zMzg2Ni0xLjI0NDYgMC40NDAyNnYwLjYwOTZoMC45OTA2djMuNTM5MWgtMS4yMDIzeiIgZmlsbC1vcGFjaXR5
+PSIuMDYyNzQ1IiBzdHJva2U9Im5vbmUiLz48L2c+PC9nPjxnIGFyaWEtbGFiZWw9Ii4iPjxwYXRoIGQ9Im0yMC45MiAyODMuOThj
+MC42NTQ3NiAwIDEuMTI4OS0wLjUxOTI5IDEuMTI4OS0xLjE3NCAwLTAuNjU0NzYtMC40NzQxMy0xLjE3NC0xLjEyODktMS4xNzQt
+MC42NTQ3NiAwLTEuMTI4OSAwLjUxOTI5LTEuMTI4OSAxLjE3NCAwIDAuNjU0NzUgMC40NzQxMyAxLjE3NCAxLjEyODkgMS4xNzR6
+Ii8+PC9nPjwvZz48L2c+PC9zdmc+Cg==
+" alt="logo"></a><h2><a href="../../rug/index.html">rug</a><span class="version">1.28.0</span></h2></div><div class="sidebar-elems"><section id="rustdoc-toc"><h2 class="location"><a href="#">Integer<wbr>Ext64</a></h2><h3><a href="#required-methods">Required Methods</a></h3><ul class="block"><li><a href="#tymethod.binomial_64" title="binomial_64">binomial_64</a></li><li><a href="#tymethod.binomial_64_mut" title="binomial_64_mut">binomial_64_mut</a></li><li><a href="#tymethod.binomial_64_ref" title="binomial_64_ref">binomial_64_ref</a></li><li><a href="#tymethod.binomial_u64" title="binomial_u64">binomial_u64</a></li><li><a href="#tymethod.count_ones_64" title="count_ones_64">count_ones_64</a></li><li><a href="#tymethod.count_zeros_64" title="count_zeros_64">count_zeros_64</a></li><li><a href="#tymethod.div_exact_u64" title="div_exact_u64">div_exact_u64</a></li><li><a href="#tymethod.div_exact_u64_mut" title="div_exact_u64_mut">div_exact_u64_mut</a></li><li><a href="#tymethod.div_exact_u64_ref" title="div_exact_u64_ref">div_exact_u64_ref</a></li><li><a href="#tymethod.factorial_2_64" title="factorial_2_64">factorial_2_64</a></li><li><a href="#tymethod.factorial_64" title="factorial_64">factorial_64</a></li><li><a href="#tymethod.factorial_m_64" title="factorial_m_64">factorial_m_64</a></li><li><a href="#tymethod.fibonacci_2_64" title="fibonacci_2_64">fibonacci_2_64</a></li><li><a href="#tymethod.fibonacci_64" title="fibonacci_64">fibonacci_64</a></li><li><a href="#tymethod.find_one_64" title="find_one_64">find_one_64</a></li><li><a href="#tymethod.find_zero_64" title="find_zero_64">find_zero_64</a></li><li><a href="#tymethod.gcd_u64" title="gcd_u64">gcd_u64</a></li><li><a href="#tymethod.gcd_u64_mut" title="gcd_u64_mut">gcd_u64_mut</a></li><li><a href="#tymethod.gcd_u64_ref" title="gcd_u64_ref">gcd_u64_ref</a></li><li><a href="#tymethod.get_bit_64" title="get_bit_64">get_bit_64</a></li><li><a href="#tymethod.hamming_dist_64" title="hamming_dist_64">hamming_dist_64</a></li><li><a href="#tymethod.i64_pow_u64" title="i64_pow_u64">i64_pow_u64</a></li><li><a href="#tymethod.is_congruent_2pow_64" title="is_congruent_2pow_64">is_congruent_2pow_64</a></li><li><a href="#tymethod.is_congruent_u64" title="is_congruent_u64">is_congruent_u64</a></li><li><a href="#tymethod.is_divisible_2pow_64" title="is_divisible_2pow_64">is_divisible_2pow_64</a></li><li><a href="#tymethod.is_divisible_u64" title="is_divisible_u64">is_divisible_u64</a></li><li><a href="#tymethod.keep_bits_64" title="keep_bits_64">keep_bits_64</a></li><li><a href="#tymethod.keep_bits_64_mut" title="keep_bits_64_mut">keep_bits_64_mut</a></li><li><a href="#tymethod.keep_bits_64_ref" title="keep_bits_64_ref">keep_bits_64_ref</a></li><li><a href="#tymethod.keep_signed_bits_64" title="keep_signed_bits_64">keep_signed_bits_64</a></li><li><a href="#tymethod.keep_signed_bits_64_mut" title="keep_signed_bits_64_mut">keep_signed_bits_64_mut</a></li><li><a href="#tymethod.keep_signed_bits_64_ref" title="keep_signed_bits_64_ref">keep_signed_bits_64_ref</a></li><li><a href="#tymethod.lcm_u64" title="lcm_u64">lcm_u64</a></li><li><a href="#tymethod.lcm_u64_mut" title="lcm_u64_mut">lcm_u64_mut</a></li><li><a href="#tymethod.lcm_u64_ref" title="lcm_u64_ref">lcm_u64_ref</a></li><li><a href="#tymethod.lucas_2_64" title="lucas_2_64">lucas_2_64</a></li><li><a href="#tymethod.lucas_64" title="lucas_64">lucas_64</a></li><li><a href="#tymethod.mod_u64" title="mod_u64">mod_u64</a></li><li><a href="#tymethod.primorial_64" title="primorial_64">primorial_64</a></li><li><a href="#tymethod.random_bits_64" title="random_bits_64">random_bits_64</a></li><li><a href="#tymethod.remove_factor_64" title="remove_factor_64">remove_factor_64</a></li><li><a href="#tymethod.remove_factor_64_mut" title="remove_factor_64_mut">remove_factor_64_mut</a></li><li><a href="#tymethod.remove_factor_64_ref" title="remove_factor_64_ref">remove_factor_64_ref</a></li><li><a href="#tymethod.root_64" title="root_64">root_64</a></li><li><a href="#tymethod.root_64_mut" title="root_64_mut">root_64_mut</a></li><li><a href="#tymethod.root_64_ref" title="root_64_ref">root_64_ref</a></li><li><a href="#tymethod.root_rem_64" title="root_rem_64">root_rem_64</a></li><li><a href="#tymethod.root_rem_64_mut" title="root_rem_64_mut">root_rem_64_mut</a></li><li><a href="#tymethod.root_rem_64_ref" title="root_rem_64_ref">root_rem_64_ref</a></li><li><a href="#tymethod.set_bit_64" title="set_bit_64">set_bit_64</a></li><li><a href="#tymethod.signed_bits_64" title="signed_bits_64">signed_bits_64</a></li><li><a href="#tymethod.significant_bits_64" title="significant_bits_64">significant_bits_64</a></li><li><a href="#tymethod.to_f32_exp64" title="to_f32_exp64">to_f32_exp64</a></li><li><a href="#tymethod.to_f64_exp64" title="to_f64_exp64">to_f64_exp64</a></li><li><a href="#tymethod.toggle_bit_64" title="toggle_bit_64">toggle_bit_64</a></li><li><a href="#tymethod.u64_pow_u64" title="u64_pow_u64">u64_pow_u64</a></li></ul><h3><a href="#dyn-compatibility">Dyn Compatibility</a></h3><h3><a href="#implementors">Implementors</a></h3></section><div id="rustdoc-modnav"><h2><a href="index.html">In rug::<wbr>integer</a></h2></div></div></nav><div class="sidebar-resizer" title="Drag to resize sidebar"></div><main><div class="width-limiter"><rustdoc-search></rustdoc-search><section id="main-content" class="content"><div class="main-heading"><div class="rustdoc-breadcrumbs"><a href="../index.html">rug</a>::<wbr><a href="index.html">integer</a></div><h1>Trait <span class="trait">IntegerExt64</span><button id="copy-path" title="Copy item path to clipboard">Copy item path</button></h1><rustdoc-toolbar></rustdoc-toolbar><span class="sub-heading"><a class="src" href="../../src/rug/integer/long64.rs.html#38-1355">Source</a> </span></div><pre class="rust item-decl"><code>pub trait IntegerExt64: Sealed {
+<details class="toggle type-contents-toggle"><summary class="hideme"><span>Show 56 methods</span></summary>    // Required methods
+    fn <a href="#tymethod.to_f32_exp64" class="fn">to_f32_exp64</a>(&amp;self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.f32.html">f32</a>, <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.to_f64_exp64" class="fn">to_f64_exp64</a>(&amp;self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.f64.html">f64</a>, <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.is_divisible_u64" class="fn">is_divisible_u64</a>(&amp;self, divisor: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.is_divisible_2pow_64" class="fn">is_divisible_2pow_64</a>(&amp;self, b: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.is_congruent_u64" class="fn">is_congruent_u64</a>(&amp;self, c: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, divisor: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.is_congruent_2pow_64" class="fn">is_congruent_2pow_64</a>(&amp;self, c: &amp;Self, b: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.significant_bits_64" class="fn">significant_bits_64</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.signed_bits_64" class="fn">signed_bits_64</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.count_ones_64" class="fn">count_ones_64</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.count_zeros_64" class="fn">count_zeros_64</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.find_zero_64" class="fn">find_zero_64</a>(&amp;self, start: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.find_one_64" class="fn">find_one_64</a>(&amp;self, start: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.set_bit_64" class="fn">set_bit_64</a>(&amp;mut self, index: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, val: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.get_bit_64" class="fn">get_bit_64</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.toggle_bit_64" class="fn">toggle_bit_64</a>(&amp;mut self, index: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; &amp;mut Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.hamming_dist_64" class="fn">hamming_dist_64</a>(&amp;self, other: &amp;Self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.keep_bits_64" class="fn">keep_bits_64</a>(self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.keep_bits_64_mut" class="fn">keep_bits_64_mut</a>(&amp;mut self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.keep_bits_64_ref" class="fn">keep_bits_64_ref</a>(&amp;self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; KeepBitsIncomplete&lt;'_&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.keep_signed_bits_64" class="fn">keep_signed_bits_64</a>(self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.keep_signed_bits_64_mut" class="fn">keep_signed_bits_64_mut</a>(&amp;mut self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.keep_signed_bits_64_ref" class="fn">keep_signed_bits_64_ref</a>(&amp;self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; KeepSignedBitsIncomplete&lt;'_&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.mod_u64" class="fn">mod_u64</a>(&amp;self, modulo: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.div_exact_u64" class="fn">div_exact_u64</a>(self, divisor: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.div_exact_u64_mut" class="fn">div_exact_u64_mut</a>(&amp;mut self, divisor: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.div_exact_u64_ref" class="fn">div_exact_u64_ref</a>(&amp;self, divisor: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; DivExactUIncomplete&lt;'_&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.u64_pow_u64" class="fn">u64_pow_u64</a>(base: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, exponent: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; UPowUIncomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.i64_pow_u64" class="fn">i64_pow_u64</a>(base: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.i64.html">i64</a>, exponent: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; IPowUIncomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.root_64" class="fn">root_64</a>(self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.root_64_mut" class="fn">root_64_mut</a>(&amp;mut self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.root_64_ref" class="fn">root_64_ref</a>(&amp;self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; RootIncomplete&lt;'_&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.root_rem_64" class="fn">root_rem_64</a>(self, remainder: Self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; (Self, Self);
+<span class="item-spacer"></span>    fn <a href="#tymethod.root_rem_64_mut" class="fn">root_rem_64_mut</a>(&amp;mut self, remainder: &amp;mut Self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.root_rem_64_ref" class="fn">root_rem_64_ref</a>(&amp;self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; RootRemIncomplete&lt;'_&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.gcd_u64" class="fn">gcd_u64</a>(self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.gcd_u64_mut" class="fn">gcd_u64_mut</a>(&amp;mut self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.gcd_u64_ref" class="fn">gcd_u64_ref</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; GcdUIncomplete&lt;'_&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.lcm_u64" class="fn">lcm_u64</a>(self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.lcm_u64_mut" class="fn">lcm_u64_mut</a>(&amp;mut self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.lcm_u64_ref" class="fn">lcm_u64_ref</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; LcmUIncomplete&lt;'_&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.remove_factor_64" class="fn">remove_factor_64</a>(self, factor: &amp;Self) -&gt; (Self, <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.remove_factor_64_mut" class="fn">remove_factor_64_mut</a>(&amp;mut self, factor: &amp;Self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>;
+<span class="item-spacer"></span>    fn <a href="#tymethod.remove_factor_64_ref" class="fn">remove_factor_64_ref</a>&lt;'a&gt;(
+        &amp;'a self,
+        factor: &amp;'a Self,
+    ) -&gt; RemoveFactorIncomplete&lt;'a&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.factorial_64" class="fn">factorial_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; FactorialIncomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.factorial_2_64" class="fn">factorial_2_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Factorial2Incomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.factorial_m_64" class="fn">factorial_m_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, m: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; FactorialMIncomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.primorial_64" class="fn">primorial_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; PrimorialIncomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.binomial_64" class="fn">binomial_64</a>(self, k: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self;
+<span class="item-spacer"></span>    fn <a href="#tymethod.binomial_64_mut" class="fn">binomial_64_mut</a>(&amp;mut self, k: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>);
+<span class="item-spacer"></span>    fn <a href="#tymethod.binomial_64_ref" class="fn">binomial_64_ref</a>(&amp;self, k: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; BinomialIncomplete&lt;'_&gt;;
+<span class="item-spacer"></span>    fn <a href="#tymethod.binomial_u64" class="fn">binomial_u64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, k: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; BinomialUIncomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.fibonacci_64" class="fn">fibonacci_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; FibonacciIncomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.fibonacci_2_64" class="fn">fibonacci_2_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Fibonacci2Incomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.lucas_64" class="fn">lucas_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; LucasIncomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.lucas_2_64" class="fn">lucas_2_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Lucas2Incomplete;
+<span class="item-spacer"></span>    fn <a href="#tymethod.random_bits_64" class="fn">random_bits_64</a>(
+        bits: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>,
+        rng: &amp;mut dyn <a class="trait" href="../rand/trait.MutRandState.html" title="trait rug::rand::MutRandState">MutRandState</a>,
+    ) -&gt; RandomBitsIncomplete&lt;'_&gt;;
+</details>}</code></pre><details class="toggle top-doc" open><summary class="hideme"><span>Expand description</span></summary><div class="docblock"><p><a href="../struct.Integer.html" title="struct rug::Integer"><code>Integer</code></a> extension trait with 64-bit alternatives of some methods.</p>
+<p>Various <a href="../struct.Integer.html" title="struct rug::Integer"><code>Integer</code></a> methods use 32-bit values for things like bit count or
+exponents. On 64-bit platforms except Windows, alternatives of these methods
+using 64-bit values are supported. This trait is only implemented on 64-bit
+platforms except Windows.</p>
+<p>This trait is sealed and is only implemented for <a href="../struct.Integer.html" title="struct rug::Integer"><code>Integer</code></a>.</p>
+</div></details><h2 id="required-methods" class="section-header">Required Methods<a href="#required-methods" class="anchor">§</a></h2><div class="methods"><details class="toggle method-toggle" open><summary><section id="tymethod.to_f32_exp64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#60">Source</a><h4 class="code-header">fn <a href="#tymethod.to_f32_exp64" class="fn">to_f32_exp64</a>(&amp;self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.f32.html">f32</a>, <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Converts to an <a href="https://doc.rust-lang.org/1.90.0/std/primitive.f32.html" title="primitive f32"><code>f32</code></a> and an exponent, rounding towards zero.</p>
+<p>The returned <a href="https://doc.rust-lang.org/1.90.0/std/primitive.f32.html" title="primitive f32"><code>f32</code></a> is in the range
+0.5 ≤ <i>x</i> &lt; 1. If the value is zero, <code>(0.0, 0)</code>
+is returned.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.to_f32_exp" title="method rug::Integer::to_f32_exp"><code>to_f32_exp</code></a> but
+returns the exponent as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples"><a class="doc-anchor" href="#examples">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>zero = Integer::new();
+<span class="kw">let </span>(d0, exp0) = zero.to_f32_exp64();
+<span class="macro">assert_eq!</span>((d0, exp0), (<span class="number">0.0</span>, <span class="number">0</span>));
+<span class="kw">let </span>fifteen = Integer::from(<span class="number">15</span>);
+<span class="kw">let </span>(d15, exp15) = fifteen.to_f32_exp64();
+<span class="macro">assert_eq!</span>((d15, exp15), (<span class="number">15.0 </span>/ <span class="number">16.0</span>, <span class="number">4</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.to_f64_exp64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#83">Source</a><h4 class="code-header">fn <a href="#tymethod.to_f64_exp64" class="fn">to_f64_exp64</a>(&amp;self) -&gt; (<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.f64.html">f64</a>, <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Converts to an <a href="https://doc.rust-lang.org/1.90.0/std/primitive.f64.html" title="primitive f64"><code>f64</code></a> and an exponent, rounding towards zero.</p>
+<p>The returned <a href="https://doc.rust-lang.org/1.90.0/std/primitive.f64.html" title="primitive f64"><code>f64</code></a> is in the range
+0.5 ≤ <i>x</i> &lt; 1. If the value is zero, <code>(0.0, 0)</code>
+is returned.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.to_f64_exp" title="method rug::Integer::to_f64_exp"><code>to_f64_exp</code></a> but
+returns the exponent as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-1"><a class="doc-anchor" href="#examples-1">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>zero = Integer::new();
+<span class="kw">let </span>(d0, exp0) = zero.to_f64_exp64();
+<span class="macro">assert_eq!</span>((d0, exp0), (<span class="number">0.0</span>, <span class="number">0</span>));
+<span class="kw">let </span>fifteen = Integer::from(<span class="number">15</span>);
+<span class="kw">let </span>(d15, exp15) = fifteen.to_f64_exp64();
+<span class="macro">assert_eq!</span>((d15, exp15), (<span class="number">15.0 </span>/ <span class="number">16.0</span>, <span class="number">4</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.is_divisible_u64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#101">Source</a><h4 class="code-header">fn <a href="#tymethod.is_divisible_u64" class="fn">is_divisible_u64</a>(&amp;self, divisor: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Returns <a href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html" title="primitive bool"><code>true</code></a> if the number is divisible by <code>divisor</code>. Unlike other
+division functions, <code>divisor</code> can be zero.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.is_divisible_u" title="method rug::Integer::is_divisible_u"><code>is_divisible_u</code></a>
+but takes the divisor as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-2"><a class="doc-anchor" href="#examples-2">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">230</span>);
+<span class="macro">assert!</span>(i.is_divisible_u64(<span class="number">23</span>));
+<span class="macro">assert!</span>(!i.is_divisible_u64(<span class="number">100</span>));
+<span class="macro">assert!</span>(!i.is_divisible_u64(<span class="number">0</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.is_divisible_2pow_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#119">Source</a><h4 class="code-header">fn <a href="#tymethod.is_divisible_2pow_64" class="fn">is_divisible_2pow_64</a>(&amp;self, b: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Returns <a href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html" title="primitive bool"><code>true</code></a> if the number is divisible by 2<sup><i>b</i></sup>.</p>
+<p>This method is similar to
+<a href="../struct.Integer.html#method.is_divisible_2pow" title="method rug::Integer::is_divisible_2pow"><code>is_divisible_2pow</code></a> but takes <code>b</code> as
+<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-3"><a class="doc-anchor" href="#examples-3">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">15 </span>&lt;&lt; <span class="number">17</span>);
+<span class="macro">assert!</span>(i.is_divisible_2pow_64(<span class="number">16</span>));
+<span class="macro">assert!</span>(i.is_divisible_2pow_64(<span class="number">17</span>));
+<span class="macro">assert!</span>(!i.is_divisible_2pow_64(<span class="number">18</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.is_congruent_u64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#140">Source</a><h4 class="code-header">fn <a href="#tymethod.is_congruent_u64" class="fn">is_congruent_u64</a>(&amp;self, c: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, divisor: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Returns <a href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html" title="primitive bool"><code>true</code></a> if the number is congruent to <i>c</i> mod
+<i>divisor</i>, that is, if there exists a <i>q</i> such that <code>self</code> =
+<i>c</i> + <i>q</i> × <i>divisor</i>. Unlike other division functions,
+<code>divisor</code> can be zero.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.is_congruent_u" title="method rug::Integer::is_congruent_u"><code>is_congruent_u</code></a>
+but takes <code>c</code> and the divisor as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-4"><a class="doc-anchor" href="#examples-4">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>n = Integer::from(<span class="number">105</span>);
+<span class="macro">assert!</span>(n.is_congruent_u64(<span class="number">3335</span>, <span class="number">10</span>));
+<span class="macro">assert!</span>(!n.is_congruent_u64(<span class="number">107</span>, <span class="number">10</span>));
+<span class="comment">// n is congruent to itself if divisor is 0
+</span><span class="macro">assert!</span>(n.is_congruent_u64(<span class="number">105</span>, <span class="number">0</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.is_congruent_2pow_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#159">Source</a><h4 class="code-header">fn <a href="#tymethod.is_congruent_2pow_64" class="fn">is_congruent_2pow_64</a>(&amp;self, c: &amp;Self, b: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Returns <a href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html" title="primitive bool"><code>true</code></a> if the number is congruent to <i>c</i> mod
+2<sup><i>b</i></sup>, that is, if there exists a <i>q</i> such that
+<code>self</code> = <i>c</i> + <i>q</i> × 2<sup><i>b</i></sup>.</p>
+<p>This method is similar to
+<a href="../struct.Integer.html#method.is_congruent_2pow" title="method rug::Integer::is_congruent_2pow"><code>is_congruent_2pow</code></a> but takes <code>b</code> as
+<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-5"><a class="doc-anchor" href="#examples-5">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>n = Integer::from(<span class="number">13 </span>&lt;&lt; <span class="number">17 </span>| <span class="number">21</span>);
+<span class="macro">assert!</span>(n.is_congruent_2pow_64(<span class="kw-2">&amp;</span>Integer::from(<span class="number">7 </span>&lt;&lt; <span class="number">17 </span>| <span class="number">21</span>), <span class="number">17</span>));
+<span class="macro">assert!</span>(!n.is_congruent_2pow_64(<span class="kw-2">&amp;</span>Integer::from(<span class="number">13 </span>&lt;&lt; <span class="number">17 </span>| <span class="number">22</span>), <span class="number">17</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.significant_bits_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#180">Source</a><h4 class="code-header">fn <a href="#tymethod.significant_bits_64" class="fn">significant_bits_64</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a></h4></section></summary><div class="docblock"><p>Returns the number of bits required to represent the absolute value.</p>
+<p>This method is similar to
+<a href="../struct.Integer.html#method.significant_bits" title="method rug::Integer::significant_bits"><code>significant_bits</code></a> but returns a <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-6"><a class="doc-anchor" href="#examples-6">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+
+<span class="macro">assert_eq!</span>(Integer::from(<span class="number">0</span>).significant_bits_64(), <span class="number">0</span>);  <span class="comment">//    “”
+</span><span class="macro">assert_eq!</span>(Integer::from(<span class="number">1</span>).significant_bits_64(), <span class="number">1</span>);  <span class="comment">//   “1”
+</span><span class="macro">assert_eq!</span>(Integer::from(<span class="number">4</span>).significant_bits_64(), <span class="number">3</span>);  <span class="comment">// “100”
+</span><span class="macro">assert_eq!</span>(Integer::from(<span class="number">7</span>).significant_bits_64(), <span class="number">3</span>);  <span class="comment">// “111”
+</span><span class="macro">assert_eq!</span>(Integer::from(-<span class="number">1</span>).significant_bits_64(), <span class="number">1</span>); <span class="comment">//   “1”
+</span><span class="macro">assert_eq!</span>(Integer::from(-<span class="number">4</span>).significant_bits_64(), <span class="number">3</span>); <span class="comment">// “100”
+</span><span class="macro">assert_eq!</span>(Integer::from(-<span class="number">7</span>).significant_bits_64(), <span class="number">3</span>); <span class="comment">// “111”</span></code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.signed_bits_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#211">Source</a><h4 class="code-header">fn <a href="#tymethod.signed_bits_64" class="fn">signed_bits_64</a>(&amp;self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a></h4></section></summary><div class="docblock"><p>Returns the number of bits required to represent the value using a
+two’s-complement representation.</p>
+<p>For non-negative numbers, this method returns one more than
+the <a href="../struct.Integer.html#method.significant_bits_64" title="method rug::Integer::significant_bits_64"><code>significant_bits_64</code></a> method, since an extra zero is needed
+before the most significant bit.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.signed_bits" title="method rug::Integer::signed_bits"><code>signed_bits</code></a> but
+returns a <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-7"><a class="doc-anchor" href="#examples-7">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+
+<span class="macro">assert_eq!</span>(Integer::from(-<span class="number">5</span>).signed_bits_64(), <span class="number">4</span>); <span class="comment">// “1011”
+</span><span class="macro">assert_eq!</span>(Integer::from(-<span class="number">4</span>).signed_bits_64(), <span class="number">3</span>); <span class="comment">//  “100”
+</span><span class="macro">assert_eq!</span>(Integer::from(-<span class="number">3</span>).signed_bits_64(), <span class="number">3</span>); <span class="comment">//  “101”
+</span><span class="macro">assert_eq!</span>(Integer::from(-<span class="number">2</span>).signed_bits_64(), <span class="number">2</span>); <span class="comment">//   “10”
+</span><span class="macro">assert_eq!</span>(Integer::from(-<span class="number">1</span>).signed_bits_64(), <span class="number">1</span>); <span class="comment">//    “1”
+</span><span class="macro">assert_eq!</span>(Integer::from(<span class="number">0</span>).signed_bits_64(), <span class="number">1</span>);  <span class="comment">//    “0”
+</span><span class="macro">assert_eq!</span>(Integer::from(<span class="number">1</span>).signed_bits_64(), <span class="number">2</span>);  <span class="comment">//   “01”
+</span><span class="macro">assert_eq!</span>(Integer::from(<span class="number">2</span>).signed_bits_64(), <span class="number">3</span>);  <span class="comment">//  “010”
+</span><span class="macro">assert_eq!</span>(Integer::from(<span class="number">3</span>).signed_bits_64(), <span class="number">3</span>);  <span class="comment">//  “011”
+</span><span class="macro">assert_eq!</span>(Integer::from(<span class="number">4</span>).signed_bits_64(), <span class="number">4</span>);  <span class="comment">// “0100”</span></code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.count_ones_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#227">Source</a><h4 class="code-header">fn <a href="#tymethod.count_ones_64" class="fn">count_ones_64</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the number of one bits if the value ≥ 0.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.count_ones" title="method rug::Integer::count_ones"><code>count_ones</code></a> but
+returns a <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-8"><a class="doc-anchor" href="#examples-8">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="macro">assert_eq!</span>(Integer::from(<span class="number">0</span>).count_ones_64(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
+<span class="macro">assert_eq!</span>(Integer::from(<span class="number">15</span>).count_ones_64(), <span class="prelude-val">Some</span>(<span class="number">4</span>));
+<span class="macro">assert_eq!</span>(Integer::from(-<span class="number">1</span>).count_ones_64(), <span class="prelude-val">None</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.count_zeros_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#246">Source</a><h4 class="code-header">fn <a href="#tymethod.count_zeros_64" class="fn">count_zeros_64</a>(&amp;self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the number of zero bits if the value &lt; 0.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.count_zeros" title="method rug::Integer::count_zeros"><code>count_zeros</code></a> but
+returns a <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-9"><a class="doc-anchor" href="#examples-9">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="macro">assert_eq!</span>(Integer::from(<span class="number">0</span>).count_zeros_64(), <span class="prelude-val">None</span>);
+<span class="macro">assert_eq!</span>(Integer::from(<span class="number">1</span>).count_zeros_64(), <span class="prelude-val">None</span>);
+<span class="macro">assert_eq!</span>(Integer::from(-<span class="number">1</span>).count_zeros_64(), <span class="prelude-val">Some</span>(<span class="number">0</span>));
+<span class="macro">assert_eq!</span>(Integer::from(-<span class="number">2</span>).count_zeros_64(), <span class="prelude-val">Some</span>(<span class="number">1</span>));
+<span class="macro">assert_eq!</span>(Integer::from(-<span class="number">7</span>).count_zeros_64(), <span class="prelude-val">Some</span>(<span class="number">2</span>));
+<span class="macro">assert_eq!</span>(Integer::from(-<span class="number">8</span>).count_zeros_64(), <span class="prelude-val">Some</span>(<span class="number">3</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.find_zero_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#266">Source</a><h4 class="code-header">fn <a href="#tymethod.find_zero_64" class="fn">find_zero_64</a>(&amp;self, start: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the location of the first zero, starting at <code>start</code>. If the bit
+at location <code>start</code> is zero, returns <code>start</code>.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.find_zero" title="method rug::Integer::find_zero"><code>find_zero</code></a> but takes
+<code>start</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a> and returns a <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-10"><a class="doc-anchor" href="#examples-10">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="comment">// -2 is ...11111110
+</span><span class="macro">assert_eq!</span>(Integer::from(-<span class="number">2</span>).find_zero_64(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">0</span>));
+<span class="macro">assert_eq!</span>(Integer::from(-<span class="number">2</span>).find_zero_64(<span class="number">1</span>), <span class="prelude-val">None</span>);
+<span class="comment">// 15 is ...00001111
+</span><span class="macro">assert_eq!</span>(Integer::from(<span class="number">15</span>).find_zero_64(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">4</span>));
+<span class="macro">assert_eq!</span>(Integer::from(<span class="number">15</span>).find_zero_64(<span class="number">20</span>), <span class="prelude-val">Some</span>(<span class="number">20</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.find_one_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#286">Source</a><h4 class="code-header">fn <a href="#tymethod.find_one_64" class="fn">find_one_64</a>(&amp;self, start: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>&gt;</h4></section></summary><div class="docblock"><p>Returns the location of the first one, starting at <code>start</code>. If the bit
+at location <code>start</code> is one, returns <code>start</code>.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.find_one" title="method rug::Integer::find_one"><code>find_one</code></a> but takes
+<code>start</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a> and returns a <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-11"><a class="doc-anchor" href="#examples-11">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="comment">// 1 is ...00000001
+</span><span class="macro">assert_eq!</span>(Integer::from(<span class="number">1</span>).find_one_64(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">0</span>));
+<span class="macro">assert_eq!</span>(Integer::from(<span class="number">1</span>).find_one_64(<span class="number">1</span>), <span class="prelude-val">None</span>);
+<span class="comment">// -16 is ...11110000
+</span><span class="macro">assert_eq!</span>(Integer::from(-<span class="number">16</span>).find_one_64(<span class="number">0</span>), <span class="prelude-val">Some</span>(<span class="number">4</span>));
+<span class="macro">assert_eq!</span>(Integer::from(-<span class="number">16</span>).find_one_64(<span class="number">20</span>), <span class="prelude-val">Some</span>(<span class="number">20</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.set_bit_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#304">Source</a><h4 class="code-header">fn <a href="#tymethod.set_bit_64" class="fn">set_bit_64</a>(&amp;mut self, index: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, val: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a>) -&gt; &amp;mut Self</h4></section></summary><div class="docblock"><p>Sets the bit at location <code>index</code> to 1 if <code>val</code> is <a href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html" title="primitive bool"><code>true</code></a> or 0 if <code>val</code>
+is <a href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html" title="primitive bool"><code>false</code></a>.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.set_bit" title="method rug::Integer::set_bit"><code>set_bit</code></a> but takes
+<code>index</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-12"><a class="doc-anchor" href="#examples-12">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Assign, Integer};
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(-<span class="number">1</span>);
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>i.set_bit_64(<span class="number">0</span>, <span class="bool-val">false</span>), -<span class="number">2</span>);
+i.assign(<span class="number">0xff</span>);
+<span class="macro">assert_eq!</span>(<span class="kw-2">*</span>i.set_bit_64(<span class="number">11</span>, <span class="bool-val">true</span>), <span class="number">0x8ff</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.get_bit_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#324">Source</a><h4 class="code-header">fn <a href="#tymethod.get_bit_64" class="fn">get_bit_64</a>(&amp;self, index: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Returns <a href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html" title="primitive bool"><code>true</code></a> if the bit at location <code>index</code> is 1 or <a href="https://doc.rust-lang.org/1.90.0/std/primitive.bool.html" title="primitive bool"><code>false</code></a> if the
+bit is 0.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.get_bit" title="method rug::Integer::get_bit"><code>get_bit</code></a> but takes
+<code>index</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-13"><a class="doc-anchor" href="#examples-13">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">0b100101</span>);
+<span class="macro">assert!</span>(i.get_bit_64(<span class="number">0</span>));
+<span class="macro">assert!</span>(!i.get_bit_64(<span class="number">1</span>));
+<span class="macro">assert!</span>(i.get_bit_64(<span class="number">5</span>));
+<span class="kw">let </span>neg = Integer::from(-<span class="number">1</span>);
+<span class="macro">assert!</span>(neg.get_bit_64(<span class="number">1000</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.toggle_bit_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#340">Source</a><h4 class="code-header">fn <a href="#tymethod.toggle_bit_64" class="fn">toggle_bit_64</a>(&amp;mut self, index: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; &amp;mut Self</h4></section></summary><div class="docblock"><p>Toggles the bit at location <code>index</code>.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.toggle_bit" title="method rug::Integer::toggle_bit"><code>toggle_bit</code></a> but takes
+<code>index</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-14"><a class="doc-anchor" href="#examples-14">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(<span class="number">0b100101</span>);
+i.toggle_bit_64(<span class="number">5</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">0b101</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.hamming_dist_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#360">Source</a><h4 class="code-header">fn <a href="#tymethod.hamming_dist_64" class="fn">hamming_dist_64</a>(&amp;self, other: &amp;Self) -&gt; <a class="enum" href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>&gt;</h4></section></summary><div class="docblock"><p>Retuns the Hamming distance if the two numbers have the same sign.</p>
+<p>The Hamming distance is the number of different bits.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.hamming_dist" title="method rug::Integer::hamming_dist"><code>hamming_dist</code></a> but
+returns a <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-15"><a class="doc-anchor" href="#examples-15">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(-<span class="number">1</span>);
+<span class="macro">assert_eq!</span>(Integer::from(<span class="number">0</span>).hamming_dist_64(<span class="kw-2">&amp;</span>i), <span class="prelude-val">None</span>);
+<span class="macro">assert_eq!</span>(Integer::from(-<span class="number">1</span>).hamming_dist_64(<span class="kw-2">&amp;</span>i), <span class="prelude-val">Some</span>(<span class="number">0</span>));
+<span class="comment">// -1 is ...11111111 and -13 is ...11110011
+</span><span class="macro">assert_eq!</span>(Integer::from(-<span class="number">13</span>).hamming_dist_64(<span class="kw-2">&amp;</span>i), <span class="prelude-val">Some</span>(<span class="number">2</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.keep_bits_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#378">Source</a><h4 class="code-header">fn <a href="#tymethod.keep_bits_64" class="fn">keep_bits_64</a>(self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Keeps the <i>n</i> least significant bits only, producing a result that
+is greater or equal to 0.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.keep_bits" title="method rug::Integer::keep_bits"><code>keep_bits</code></a> but takes
+<code>n</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-16"><a class="doc-anchor" href="#examples-16">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(-<span class="number">1</span>);
+<span class="kw">let </span>keep_8 = i.keep_bits_64(<span class="number">8</span>);
+<span class="macro">assert_eq!</span>(keep_8, <span class="number">0xff</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.keep_bits_64_mut" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#395">Source</a><h4 class="code-header">fn <a href="#tymethod.keep_bits_64_mut" class="fn">keep_bits_64_mut</a>(&amp;mut self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Keeps the <i>n</i> least significant bits only, producing a result that
+is greater or equal to 0.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.keep_bits_mut" title="method rug::Integer::keep_bits_mut"><code>keep_bits_mut</code></a> but
+takes <code>n</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-17"><a class="doc-anchor" href="#examples-17">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(-<span class="number">1</span>);
+i.keep_bits_64_mut(<span class="number">8</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">0xff</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.keep_bits_64_ref" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#421">Source</a><h4 class="code-header">fn <a href="#tymethod.keep_bits_64_ref" class="fn">keep_bits_64_ref</a>(&amp;self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; KeepBitsIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Keeps the <i>n</i> least significant bits only, producing a result that
+is greater or equal to 0.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.keep_bits_ref" title="method rug::Integer::keep_bits_ref"><code>keep_bits_ref</code></a> but
+takes <code>n</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-18"><a class="doc-anchor" href="#examples-18">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(-<span class="number">1</span>);
+<span class="kw">let </span>r = i.keep_bits_64_ref(<span class="number">8</span>);
+<span class="kw">let </span>eight_bits = Integer::from(r);
+<span class="macro">assert_eq!</span>(eight_bits, <span class="number">0xff</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.keep_signed_bits_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#443">Source</a><h4 class="code-header">fn <a href="#tymethod.keep_signed_bits_64" class="fn">keep_signed_bits_64</a>(self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Keeps the <i>n</i> least significant bits only, producing a negative
+result if the <i>n</i>th least significant bit is one.</p>
+<p>This method is similar to
+<a href="../struct.Integer.html#method.keep_signed_bits" title="method rug::Integer::keep_signed_bits"><code>keep_signed_bits</code></a> but takes <code>n</code> as
+<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-19"><a class="doc-anchor" href="#examples-19">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(-<span class="number">1</span>);
+<span class="kw">let </span>i_keep_8 = i.keep_signed_bits_64(<span class="number">8</span>);
+<span class="macro">assert_eq!</span>(i_keep_8, -<span class="number">1</span>);
+<span class="kw">let </span>j = Integer::from(<span class="number">15 </span>&lt;&lt; <span class="number">8 </span>| <span class="number">15</span>);
+<span class="kw">let </span>j_keep_8 = j.keep_signed_bits_64(<span class="number">8</span>);
+<span class="macro">assert_eq!</span>(j_keep_8, <span class="number">15</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.keep_signed_bits_64_mut" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#464">Source</a><h4 class="code-header">fn <a href="#tymethod.keep_signed_bits_64_mut" class="fn">keep_signed_bits_64_mut</a>(&amp;mut self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Keeps the <i>n</i> least significant bits only, producing a negative
+result if the <i>n</i>th least significant bit is one.</p>
+<p>This method is similar to
+<a href="../struct.Integer.html#method.keep_signed_bits_mut" title="method rug::Integer::keep_signed_bits_mut"><code>keep_signed_bits_mut</code></a> but takes <code>n</code> as
+<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-20"><a class="doc-anchor" href="#examples-20">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(-<span class="number">1</span>);
+i.keep_signed_bits_64_mut(<span class="number">8</span>);
+<span class="macro">assert_eq!</span>(i, -<span class="number">1</span>);
+<span class="kw">let </span><span class="kw-2">mut </span>j = Integer::from(<span class="number">15 </span>&lt;&lt; <span class="number">8 </span>| <span class="number">15</span>);
+j.keep_signed_bits_64_mut(<span class="number">8</span>);
+<span class="macro">assert_eq!</span>(j, <span class="number">15</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.keep_signed_bits_64_ref" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#491">Source</a><h4 class="code-header">fn <a href="#tymethod.keep_signed_bits_64_ref" class="fn">keep_signed_bits_64_ref</a>(&amp;self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; KeepSignedBitsIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Keeps the <i>n</i> least significant bits only, producing a negative
+result if the <i>n</i>th least significant bit is one.</p>
+<p>The following are implemented with the returned
+<a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to
+<a href="../struct.Integer.html#method.keep_signed_bits_ref" title="method rug::Integer::keep_signed_bits_ref"><code>keep_signed_bits_ref</code></a> but takes <code>n</code> as
+<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-21"><a class="doc-anchor" href="#examples-21">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(-<span class="number">1</span>);
+<span class="kw">let </span>r = i.keep_signed_bits_64_ref(<span class="number">8</span>);
+<span class="kw">let </span>eight_bits = Integer::from(r);
+<span class="macro">assert_eq!</span>(eight_bits, -<span class="number">1</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.mod_u64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#518">Source</a><h4 class="code-header">fn <a href="#tymethod.mod_u64" class="fn">mod_u64</a>(&amp;self, modulo: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a></h4></section></summary><div class="docblock"><p>Returns the modulo, or the remainder of Euclidean division by a <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<p>The result is always zero or positive.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.mod_u" title="method rug::Integer::mod_u"><code>mod_u</code></a> but takes <code>modulo</code>
+as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a> and returns a <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="panics"><a class="doc-anchor" href="#panics">§</a>Panics</h5>
+<p>Panics if <code>modulo</code> is zero.</p>
+<h5 id="examples-22"><a class="doc-anchor" href="#examples-22">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>pos = Integer::from(<span class="number">23</span>);
+<span class="macro">assert_eq!</span>(pos.mod_u64(<span class="number">1</span>), <span class="number">0</span>);
+<span class="macro">assert_eq!</span>(pos.mod_u64(<span class="number">10</span>), <span class="number">3</span>);
+<span class="macro">assert_eq!</span>(pos.mod_u64(<span class="number">100</span>), <span class="number">23</span>);
+<span class="kw">let </span>neg = Integer::from(-<span class="number">23</span>);
+<span class="macro">assert_eq!</span>(neg.mod_u64(<span class="number">1</span>), <span class="number">0</span>);
+<span class="macro">assert_eq!</span>(neg.mod_u64(<span class="number">10</span>), <span class="number">7</span>);
+<span class="macro">assert_eq!</span>(neg.mod_u64(<span class="number">100</span>), <span class="number">77</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.div_exact_u64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#542">Source</a><h4 class="code-header">fn <a href="#tymethod.div_exact_u64" class="fn">div_exact_u64</a>(self, divisor: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Performs an exact division.</p>
+<p>This is much faster than normal division, but produces correct results
+only when the division is exact.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.div_exact_u" title="method rug::Integer::div_exact_u"><code>div_exact_u</code></a> but
+takes the divisor as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="panics-1"><a class="doc-anchor" href="#panics-1">§</a>Panics</h5>
+<p>Panics if <code>divisor</code> is zero.</p>
+<h5 id="examples-23"><a class="doc-anchor" href="#examples-23">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">12345 </span>* <span class="number">54321</span>);
+<span class="kw">let </span>q = i.div_exact_u64(<span class="number">12345</span>);
+<span class="macro">assert_eq!</span>(q, <span class="number">54321</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.div_exact_u64_mut" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#565">Source</a><h4 class="code-header">fn <a href="#tymethod.div_exact_u64_mut" class="fn">div_exact_u64_mut</a>(&amp;mut self, divisor: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Performs an exact division.</p>
+<p>This is much faster than normal division, but produces correct results
+only when the division is exact.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.div_exact_u_mut" title="method rug::Integer::div_exact_u_mut"><code>div_exact_u_mut</code></a>
+but takes the divisor as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="panics-2"><a class="doc-anchor" href="#panics-2">§</a>Panics</h5>
+<p>Panics if <code>divisor</code> is zero.</p>
+<h5 id="examples-24"><a class="doc-anchor" href="#examples-24">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(<span class="number">12345 </span>* <span class="number">54321</span>);
+i.div_exact_u64_mut(<span class="number">12345</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">54321</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.div_exact_u64_ref" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#592">Source</a><h4 class="code-header">fn <a href="#tymethod.div_exact_u64_ref" class="fn">div_exact_u64_ref</a>(&amp;self, divisor: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; DivExactUIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Performs an exact division.</p>
+<p>This is much faster than normal division, but produces correct results
+only when the division is exact.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.div_exact_u_ref" title="method rug::Integer::div_exact_u_ref"><code>div_exact_u_ref</code></a>
+but takes the divisor as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-25"><a class="doc-anchor" href="#examples-25">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">12345 </span>* <span class="number">54321</span>);
+<span class="kw">let </span>r = i.div_exact_u64_ref(<span class="number">12345</span>);
+<span class="macro">assert_eq!</span>(Integer::from(r), <span class="number">54321</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.u64_pow_u64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#614">Source</a><h4 class="code-header">fn <a href="#tymethod.u64_pow_u64" class="fn">u64_pow_u64</a>(base: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, exponent: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; UPowUIncomplete</h4></section></summary><div class="docblock"><p>Raises <code>base</code> to the power of <code>exponent</code>.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.u_pow_u" title="associated function rug::Integer::u_pow_u"><code>u_pow_u</code></a> but takes <code>base</code>
+and <code>exponent</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-26"><a class="doc-anchor" href="#examples-26">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Complete, Integer};
+<span class="macro">assert_eq!</span>(Integer::u64_pow_u64(<span class="number">13</span>, <span class="number">12</span>).complete(), <span class="number">13_u64</span>.pow(<span class="number">12</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.i64_pow_u64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#640">Source</a><h4 class="code-header">fn <a href="#tymethod.i64_pow_u64" class="fn">i64_pow_u64</a>(base: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.i64.html">i64</a>, exponent: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; IPowUIncomplete</h4></section></summary><div class="docblock"><p>Raises <code>base</code> to the power of <code>exponent</code>.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.i_pow_u" title="associated function rug::Integer::i_pow_u"><code>i_pow_u</code></a> but takes <code>base</code>
+as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.i64.html" title="primitive i64"><code>i64</code></a> and <code>exponent</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-27"><a class="doc-anchor" href="#examples-27">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Assign, Integer};
+<span class="kw">let </span><span class="kw-2">mut </span>ans = Integer::new();
+ans.assign(Integer::i64_pow_u64(-<span class="number">13</span>, <span class="number">13</span>));
+<span class="macro">assert_eq!</span>(ans, (-<span class="number">13_i64</span>).pow(<span class="number">13</span>));
+ans.assign(Integer::i64_pow_u64(<span class="number">13</span>, <span class="number">13</span>));
+<span class="macro">assert_eq!</span>(ans, (<span class="number">13_i64</span>).pow(<span class="number">13</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.root_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#662">Source</a><h4 class="code-header">fn <a href="#tymethod.root_64" class="fn">root_64</a>(self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Computes the <i>n</i>th root and truncates the result.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.root" title="method rug::Integer::root"><code>root</code></a> but takes <code>n</code> as
+<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="panics-3"><a class="doc-anchor" href="#panics-3">§</a>Panics</h5>
+<p>Panics if <i>n</i> is zero or if <i>n</i> is even and the value is
+negative.</p>
+<h5 id="examples-28"><a class="doc-anchor" href="#examples-28">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">1004</span>);
+<span class="kw">let </span>root = i.root_64(<span class="number">3</span>);
+<span class="macro">assert_eq!</span>(root, <span class="number">10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.root_64_mut" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#683">Source</a><h4 class="code-header">fn <a href="#tymethod.root_64_mut" class="fn">root_64_mut</a>(&amp;mut self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Computes the <i>n</i>th root and truncates the result.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.root_mut" title="method rug::Integer::root_mut"><code>root_mut</code></a> but takes <code>n</code>
+as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="panics-4"><a class="doc-anchor" href="#panics-4">§</a>Panics</h5>
+<p>Panics if <i>n</i> is zero or if <i>n</i> is even and the value is
+negative.</p>
+<h5 id="examples-29"><a class="doc-anchor" href="#examples-29">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(<span class="number">1004</span>);
+i.root_64_mut(<span class="number">3</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.root_64_ref" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#706">Source</a><h4 class="code-header">fn <a href="#tymethod.root_64_ref" class="fn">root_64_ref</a>(&amp;self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; RootIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the <i>n</i>th root and truncates the result.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.root_ref" title="method rug::Integer::root_ref"><code>root_ref</code></a> but takes <code>n</code>
+as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-30"><a class="doc-anchor" href="#examples-30">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">1004</span>);
+<span class="macro">assert_eq!</span>(Integer::from(i.root_64_ref(<span class="number">3</span>)), <span class="number">10</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.root_rem_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#734">Source</a><h4 class="code-header">fn <a href="#tymethod.root_rem_64" class="fn">root_rem_64</a>(self, remainder: Self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; (Self, Self)</h4></section></summary><div class="docblock"><p>Computes the <i>n</i>th root and returns the truncated root and the
+remainder.</p>
+<p>The remainder is the original number minus the truncated root raised to
+the power of <i>n</i>.</p>
+<p>The initial value of <code>remainder</code> is ignored.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.root_rem" title="method rug::Integer::root_rem"><code>root_rem</code></a> but takes <code>n</code>
+as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="panics-5"><a class="doc-anchor" href="#panics-5">§</a>Panics</h5>
+<p>Panics if <i>n</i> is zero or if <i>n</i> is even and the value is
+negative.</p>
+<h5 id="examples-31"><a class="doc-anchor" href="#examples-31">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">1004</span>);
+<span class="kw">let </span>(root, rem) = i.root_rem_64(Integer::new(), <span class="number">3</span>);
+<span class="macro">assert_eq!</span>(root, <span class="number">10</span>);
+<span class="macro">assert_eq!</span>(rem, <span class="number">4</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.root_rem_64_mut" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#763">Source</a><h4 class="code-header">fn <a href="#tymethod.root_rem_64_mut" class="fn">root_rem_64_mut</a>(&amp;mut self, remainder: &amp;mut Self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Computes the <i>n</i>th root and returns the truncated root and the
+remainder.</p>
+<p>The remainder is the original number minus the truncated root raised to
+the power of <i>n</i>.</p>
+<p>The initial value of <code>remainder</code> is ignored.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.root_rem_mut" title="method rug::Integer::root_rem_mut"><code>root_rem_mut</code></a> but
+takes <code>n</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="panics-6"><a class="doc-anchor" href="#panics-6">§</a>Panics</h5>
+<p>Panics if <i>n</i> is zero or if <i>n</i> is even and the value is
+negative.</p>
+<h5 id="examples-32"><a class="doc-anchor" href="#examples-32">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(<span class="number">1004</span>);
+<span class="kw">let </span><span class="kw-2">mut </span>rem = Integer::new();
+i.root_rem_64_mut(<span class="kw-2">&amp;mut </span>rem, <span class="number">3</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">10</span>);
+<span class="macro">assert_eq!</span>(rem, <span class="number">4</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.root_rem_64_ref" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#800">Source</a><h4 class="code-header">fn <a href="#tymethod.root_rem_64_ref" class="fn">root_rem_64_ref</a>(&amp;self, n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; RootRemIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the <i>n</i>th root and returns the truncated root and the
+remainder.</p>
+<p>The remainder is the original number minus the truncated root raised to
+the power of <i>n</i>.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a>&amp;mut <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, &amp;mut <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.root_rem_ref" title="method rug::Integer::root_rem_ref"><code>root_rem_ref</code></a> but
+takes <code>n</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-33"><a class="doc-anchor" href="#examples-33">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Assign, Complete, Integer};
+<span class="kw">let </span>i = Integer::from(<span class="number">1004</span>);
+<span class="kw">let </span><span class="kw-2">mut </span>root = Integer::new();
+<span class="kw">let </span><span class="kw-2">mut </span>rem = Integer::new();
+<span class="comment">// 1004 = 10^3 + 5
+</span>(<span class="kw-2">&amp;mut </span>root, <span class="kw-2">&amp;mut </span>rem).assign(i.root_rem_64_ref(<span class="number">3</span>));
+<span class="macro">assert_eq!</span>(root, <span class="number">10</span>);
+<span class="macro">assert_eq!</span>(rem, <span class="number">4</span>);
+<span class="comment">// 1004 = 3^6 + 275
+</span><span class="kw">let </span>(other_root, other_rem) = i.root_rem_64_ref(<span class="number">6</span>).complete();
+<span class="macro">assert_eq!</span>(other_root, <span class="number">3</span>);
+<span class="macro">assert_eq!</span>(other_rem, <span class="number">275</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.gcd_u64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#826">Source</a><h4 class="code-header">fn <a href="#tymethod.gcd_u64" class="fn">gcd_u64</a>(self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Finds the greatest common divisor.</p>
+<p>The result is always positive except when both inputs are zero.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.gcd_u" title="method rug::Integer::gcd_u"><code>gcd_u</code></a> but takes <code>other</code> as
+<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-34"><a class="doc-anchor" href="#examples-34">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::new();
+<span class="comment">// gcd of 0, 0 is 0
+</span><span class="kw">let </span>gcd1 = i.gcd_u64(<span class="number">0</span>);
+<span class="macro">assert_eq!</span>(gcd1, <span class="number">0</span>);
+<span class="comment">// gcd of 0, 10 is 10
+</span><span class="kw">let </span>gcd2 = gcd1.gcd_u64(<span class="number">10</span>);
+<span class="macro">assert_eq!</span>(gcd2, <span class="number">10</span>);
+<span class="comment">// gcd of 10, 25 is 5
+</span><span class="kw">let </span>gcd3 = gcd2.gcd_u64(<span class="number">25</span>);
+<span class="macro">assert_eq!</span>(gcd3, <span class="number">5</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.gcd_u64_mut" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#851">Source</a><h4 class="code-header">fn <a href="#tymethod.gcd_u64_mut" class="fn">gcd_u64_mut</a>(&amp;mut self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Finds the greatest common divisor.</p>
+<p>The result is always positive except when both inputs are zero.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.gcd_u_mut" title="method rug::Integer::gcd_u_mut"><code>gcd_u_mut</code></a> but takes
+<code>other</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-35"><a class="doc-anchor" href="#examples-35">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::new();
+<span class="comment">// gcd of 0, 0 is 0
+</span>i.gcd_u64_mut(<span class="number">0</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">0</span>);
+<span class="comment">// gcd of 0, 10 is 10
+</span>i.gcd_u64_mut(<span class="number">10</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">10</span>);
+<span class="comment">// gcd of 10, 25 is 5
+</span>i.gcd_u64_mut(<span class="number">25</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">5</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.gcd_u64_ref" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#886">Source</a><h4 class="code-header">fn <a href="#tymethod.gcd_u64_ref" class="fn">gcd_u64_ref</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; GcdUIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Finds the greatest common divisor.</p>
+<p>The result is always positive except when both inputs are zero.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64">u64</a>&gt;</code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>The implementation of <code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/core/option/enum.Option.html" title="enum core::option::Option">Option</a>&lt;<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64">u64</a>&gt;</code> is
+useful to obtain the result as a <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a> if it fits. If
+<code>other</code> &gt; 0 , the result always fits. If the result does not
+fit, it is equal to the absolute value of <code>self</code>.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.gcd_u_ref" title="method rug::Integer::gcd_u_ref"><code>gcd_u_ref</code></a> but takes
+<code>other</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-36"><a class="doc-anchor" href="#examples-36">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">100</span>);
+<span class="kw">let </span>r = i.gcd_u64_ref(<span class="number">125</span>);
+<span class="comment">// gcd of 100, 125 is 25
+</span><span class="macro">assert_eq!</span>(Integer::from(r), <span class="number">25</span>);
+<span class="kw">let </span>r = i.gcd_u64_ref(<span class="number">125</span>);
+<span class="macro">assert_eq!</span>(<span class="prelude-ty">Option</span>::&lt;u64&gt;::from(r), <span class="prelude-val">Some</span>(<span class="number">25</span>));</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.lcm_u64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#909">Source</a><h4 class="code-header">fn <a href="#tymethod.lcm_u64" class="fn">lcm_u64</a>(self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Finds the least common multiple.</p>
+<p>The result is always positive except when one or both inputs are zero.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.lcm_u" title="method rug::Integer::lcm_u"><code>lcm_u</code></a> but takes <code>other</code> as
+<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-37"><a class="doc-anchor" href="#examples-37">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">10</span>);
+<span class="comment">// lcm of 10, 25 is 50
+</span><span class="kw">let </span>lcm1 = i.lcm_u64(<span class="number">25</span>);
+<span class="macro">assert_eq!</span>(lcm1, <span class="number">50</span>);
+<span class="comment">// lcm of 50, 0 is 0
+</span><span class="kw">let </span>lcm2 = lcm1.lcm_u64(<span class="number">0</span>);
+<span class="macro">assert_eq!</span>(lcm2, <span class="number">0</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.lcm_u64_mut" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#931">Source</a><h4 class="code-header">fn <a href="#tymethod.lcm_u64_mut" class="fn">lcm_u64_mut</a>(&amp;mut self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Finds the least common multiple.</p>
+<p>The result is always positive except when one or both inputs are zero.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.lcm_u_mut" title="method rug::Integer::lcm_u_mut"><code>lcm_u_mut</code></a> but takes
+<code>other</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-38"><a class="doc-anchor" href="#examples-38">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(<span class="number">10</span>);
+<span class="comment">// lcm of 10, 25 is 50
+</span>i.lcm_u64_mut(<span class="number">25</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">50</span>);
+<span class="comment">// lcm of 50, 0 is 0
+</span>i.lcm_u64_mut(<span class="number">0</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">0</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.lcm_u64_ref" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#958">Source</a><h4 class="code-header">fn <a href="#tymethod.lcm_u64_ref" class="fn">lcm_u64_ref</a>(&amp;self, other: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; LcmUIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Finds the least common multiple.</p>
+<p>The result is always positive except when one or both inputs are zero.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.lcm_u_ref" title="method rug::Integer::lcm_u_ref"><code>lcm_u_ref</code></a> but takes
+<code>other</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-39"><a class="doc-anchor" href="#examples-39">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span>i = Integer::from(<span class="number">100</span>);
+<span class="kw">let </span>r = i.lcm_u64_ref(<span class="number">125</span>);
+<span class="comment">// lcm of 100, 125 is 500
+</span><span class="macro">assert_eq!</span>(Integer::from(r), <span class="number">500</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.remove_factor_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#977">Source</a><h4 class="code-header">fn <a href="#tymethod.remove_factor_64" class="fn">remove_factor_64</a>(self, factor: &amp;Self) -&gt; (Self, <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Removes all occurrences of <code>factor</code>, and returns the number of
+occurrences removed.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.remove_factor" title="method rug::Integer::remove_factor"><code>remove_factor</code></a> but
+returns the number of occurrences removed as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-40"><a class="doc-anchor" href="#examples-40">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(Integer::u_pow_u(<span class="number">13</span>, <span class="number">50</span>));
+i <span class="kw-2">*</span>= <span class="number">1000</span>;
+<span class="kw">let </span>(remove, count) = i.remove_factor_64(<span class="kw-2">&amp;</span>Integer::from(<span class="number">13</span>));
+<span class="macro">assert_eq!</span>(remove, <span class="number">1000</span>);
+<span class="macro">assert_eq!</span>(count, <span class="number">50</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.remove_factor_64_mut" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#997">Source</a><h4 class="code-header">fn <a href="#tymethod.remove_factor_64_mut" class="fn">remove_factor_64_mut</a>(&amp;mut self, factor: &amp;Self) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a></h4></section></summary><div class="docblock"><p>Removes all occurrences of <code>factor</code>, and returns the number of
+occurrences removed.</p>
+<p>This method is similar to
+<a href="../struct.Integer.html#method.remove_factor_mut" title="method rug::Integer::remove_factor_mut"><code>remove_factor_mut</code></a> but returns the number
+of occurrences removed as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-41"><a class="doc-anchor" href="#examples-41">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(Integer::u_pow_u(<span class="number">13</span>, <span class="number">50</span>));
+i <span class="kw-2">*</span>= <span class="number">1000</span>;
+<span class="kw">let </span>count = i.remove_factor_64_mut(<span class="kw-2">&amp;</span>Integer::from(<span class="number">13</span>));
+<span class="macro">assert_eq!</span>(i, <span class="number">1000</span>);
+<span class="macro">assert_eq!</span>(count, <span class="number">50</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.remove_factor_64_ref" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1029">Source</a><h4 class="code-header">fn <a href="#tymethod.remove_factor_64_ref" class="fn">remove_factor_64_ref</a>&lt;'a&gt;(
+    &amp;'a self,
+    factor: &amp;'a Self,
+) -&gt; RemoveFactorIncomplete&lt;'a&gt;</h4></section></summary><div class="docblock"><p>Removes all occurrences of <code>factor</code>, and counts the number of
+occurrences removed.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64">u64</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a>&amp;mut <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, &amp;mut <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64">u64</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64">u64</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64">u64</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to
+<a href="../struct.Integer.html#method.remove_factor_ref" title="method rug::Integer::remove_factor_ref"><code>remove_factor_ref</code></a> but returns the number
+of occurrences removed as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-42"><a class="doc-anchor" href="#examples-42">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Assign, Integer};
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(Integer::u_pow_u(<span class="number">13</span>, <span class="number">50</span>));
+i <span class="kw-2">*</span>= <span class="number">1000</span>;
+<span class="kw">let </span>factor = Integer::from(<span class="number">13</span>);
+<span class="kw">let </span>r = i.remove_factor_64_ref(<span class="kw-2">&amp;</span>factor);
+<span class="kw">let </span>(<span class="kw-2">mut </span>j, <span class="kw-2">mut </span>count) = (Integer::new(), <span class="number">0</span>);
+(<span class="kw-2">&amp;mut </span>j, <span class="kw-2">&amp;mut </span>count).assign(r);
+<span class="macro">assert_eq!</span>(count, <span class="number">50</span>);
+<span class="macro">assert_eq!</span>(j, <span class="number">1000</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.factorial_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1052">Source</a><h4 class="code-header">fn <a href="#tymethod.factorial_64" class="fn">factorial_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; FactorialIncomplete</h4></section></summary><div class="docblock"><p>Computes the factorial of <i>n</i>.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.factorial" title="associated function rug::Integer::factorial"><code>factorial</code></a> but takes
+<code>n</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-43"><a class="doc-anchor" href="#examples-43">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Complete, Integer};
+<span class="comment">// 10 × 9 × 8 × 7 × 6 × 5 × 4 × 3 × 2 × 1
+</span><span class="macro">assert_eq!</span>(Integer::factorial_64(<span class="number">10</span>).complete(), <span class="number">3628800</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.factorial_2_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1075">Source</a><h4 class="code-header">fn <a href="#tymethod.factorial_2_64" class="fn">factorial_2_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Factorial2Incomplete</h4></section></summary><div class="docblock"><p>Computes the double factorial of <i>n</i>.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.factorial_2" title="associated function rug::Integer::factorial_2"><code>factorial_2</code></a> but
+takes <code>n</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-44"><a class="doc-anchor" href="#examples-44">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Complete, Integer};
+<span class="comment">// 10 × 8 × 6 × 4 × 2
+</span><span class="macro">assert_eq!</span>(Integer::factorial_2_64(<span class="number">10</span>).complete(), <span class="number">3840</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.factorial_m_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1098">Source</a><h4 class="code-header">fn <a href="#tymethod.factorial_m_64" class="fn">factorial_m_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, m: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; FactorialMIncomplete</h4></section></summary><div class="docblock"><p>Computes the <i>m</i>-multi factorial of <i>n</i>.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.factorial_m" title="associated function rug::Integer::factorial_m"><code>factorial_m</code></a> but
+takes <code>n</code> and <code>m</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-45"><a class="doc-anchor" href="#examples-45">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Complete, Integer};
+<span class="comment">// 10 × 7 × 4 × 1
+</span><span class="macro">assert_eq!</span>(Integer::factorial_m_64(<span class="number">10</span>, <span class="number">3</span>).complete(), <span class="number">280</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.primorial_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1121">Source</a><h4 class="code-header">fn <a href="#tymethod.primorial_64" class="fn">primorial_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; PrimorialIncomplete</h4></section></summary><div class="docblock"><p>Computes the primorial of <i>n</i>.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.primorial" title="associated function rug::Integer::primorial"><code>primorial</code></a> but takes
+<code>n</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-46"><a class="doc-anchor" href="#examples-46">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Complete, Integer};
+<span class="comment">// 7 × 5 × 3 × 2
+</span><span class="macro">assert_eq!</span>(Integer::primorial_64(<span class="number">10</span>).complete(), <span class="number">210</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.binomial_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1139">Source</a><h4 class="code-header">fn <a href="#tymethod.binomial_64" class="fn">binomial_64</a>(self, k: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Self</h4></section></summary><div class="docblock"><p>Computes the binomial coefficient over <i>k</i>.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.binomial" title="method rug::Integer::binomial"><code>binomial</code></a> but takes <code>k</code>
+as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-47"><a class="doc-anchor" href="#examples-47">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="comment">// 7 choose 2 is 21
+</span><span class="kw">let </span>i = Integer::from(<span class="number">7</span>);
+<span class="kw">let </span>bin = i.binomial_64(<span class="number">2</span>);
+<span class="macro">assert_eq!</span>(bin, <span class="number">21</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.binomial_64_mut" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1156">Source</a><h4 class="code-header">fn <a href="#tymethod.binomial_64_mut" class="fn">binomial_64_mut</a>(&amp;mut self, k: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>)</h4></section></summary><div class="docblock"><p>Computes the binomial coefficient over <i>k</i>.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.binomial_mut" title="method rug::Integer::binomial_mut"><code>binomial_mut</code></a> but
+takes <code>k</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-48"><a class="doc-anchor" href="#examples-48">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="comment">// 7 choose 2 is 21
+</span><span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(<span class="number">7</span>);
+i.binomial_64_mut(<span class="number">2</span>);
+<span class="macro">assert_eq!</span>(i, <span class="number">21</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.binomial_64_ref" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1180">Source</a><h4 class="code-header">fn <a href="#tymethod.binomial_64_ref" class="fn">binomial_64_ref</a>(&amp;self, k: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; BinomialIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Computes the binomial coefficient over <i>k</i>.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.binomial_ref" title="method rug::Integer::binomial_ref"><code>binomial_ref</code></a> but
+takes <code>k</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-49"><a class="doc-anchor" href="#examples-49">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Complete, Integer};
+<span class="comment">// 7 choose 2 is 21
+</span><span class="kw">let </span>i = Integer::from(<span class="number">7</span>);
+<span class="macro">assert_eq!</span>(i.binomial_64_ref(<span class="number">2</span>).complete(), <span class="number">21</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.binomial_u64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1205">Source</a><h4 class="code-header">fn <a href="#tymethod.binomial_u64" class="fn">binomial_u64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>, k: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; BinomialUIncomplete</h4></section></summary><div class="docblock"><p>Computes the binomial coefficient <i>n</i> over <i>k</i>.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.binomial_u" title="associated function rug::Integer::binomial_u"><code>binomial_u</code></a> but takes
+<code>n</code> and <code>k</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-50"><a class="doc-anchor" href="#examples-50">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::Integer;
+<span class="comment">// 7 choose 2 is 21
+</span><span class="kw">let </span>b = Integer::binomial_u64(<span class="number">7</span>, <span class="number">2</span>);
+<span class="kw">let </span>i = Integer::from(b);
+<span class="macro">assert_eq!</span>(i, <span class="number">21</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.fibonacci_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1232">Source</a><h4 class="code-header">fn <a href="#tymethod.fibonacci_64" class="fn">fibonacci_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; FibonacciIncomplete</h4></section></summary><div class="docblock"><p>Computes the Fibonacci number.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This function is meant for an isolated number. If a sequence of
+Fibonacci numbers is required, the first two values of the sequence
+should be computed with the <a href="../struct.Integer.html#method.fibonacci_2_64" title="associated function rug::Integer::fibonacci_2_64"><code>fibonacci_2_64</code></a>
+method, then iterations should be used.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.fibonacci" title="associated function rug::Integer::fibonacci"><code>fibonacci</code></a> but takes
+<code>n</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-51"><a class="doc-anchor" href="#examples-51">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Complete, Integer};
+<span class="macro">assert_eq!</span>(Integer::fibonacci_64(<span class="number">12</span>).complete(), <span class="number">144</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.fibonacci_2_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1266">Source</a><h4 class="code-header">fn <a href="#tymethod.fibonacci_2_64" class="fn">fibonacci_2_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Fibonacci2Incomplete</h4></section></summary><div class="docblock"><p>Computes a Fibonacci number, and the previous Fibonacci number.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a>&amp;mut <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, &amp;mut <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a>&gt; for Src</code></li>
+</ul>
+<p>This function is meant to calculate isolated numbers. If a sequence of
+Fibonacci numbers is required, the first two values of the sequence
+should be computed with this function, then iterations should be used.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.fibonacci_2" title="associated function rug::Integer::fibonacci_2"><code>fibonacci_2</code></a> but
+takes <code>n</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-52"><a class="doc-anchor" href="#examples-52">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Assign, Integer};
+<span class="kw">let </span>f = Integer::fibonacci_2_64(<span class="number">12</span>);
+<span class="kw">let </span><span class="kw-2">mut </span>pair = &lt;(Integer, Integer)&gt;::from(f);
+<span class="macro">assert_eq!</span>(pair.<span class="number">0</span>, <span class="number">144</span>);
+<span class="macro">assert_eq!</span>(pair.<span class="number">1</span>, <span class="number">89</span>);
+<span class="comment">// Fibonacci number F[-1] is 1
+</span>pair.assign(Integer::fibonacci_2_64(<span class="number">0</span>));
+<span class="macro">assert_eq!</span>(pair.<span class="number">0</span>, <span class="number">0</span>);
+<span class="macro">assert_eq!</span>(pair.<span class="number">1</span>, <span class="number">1</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.lucas_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1293">Source</a><h4 class="code-header">fn <a href="#tymethod.lucas_64" class="fn">lucas_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; LucasIncomplete</h4></section></summary><div class="docblock"><p>Computes the Lucas number.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This function is meant for an isolated number. If a sequence of Lucas
+numbers is required, the first two values of the sequence should be
+computed with the <a href="../struct.Integer.html#method.lucas_2_64" title="associated function rug::Integer::lucas_2_64"><code>lucas_2_64</code></a> method, then
+iterations should be used.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.lucas" title="associated function rug::Integer::lucas"><code>lucas</code></a> but takes <code>n</code> as
+<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-53"><a class="doc-anchor" href="#examples-53">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Complete, Integer};
+<span class="macro">assert_eq!</span>(Integer::lucas_64(<span class="number">12</span>).complete(), <span class="number">322</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.lucas_2_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1326">Source</a><h4 class="code-header">fn <a href="#tymethod.lucas_2_64" class="fn">lucas_2_64</a>(n: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>) -&gt; Lucas2Incomplete</h4></section></summary><div class="docblock"><p>Computes a Lucas number, and the previous Lucas number.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a>&amp;mut <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, &amp;mut <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">(</a><a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>, <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a><a href="https://doc.rust-lang.org/1.90.0/std/primitive.tuple.html" title="primitive tuple">)</a>&gt; for Src</code></li>
+</ul>
+<p>This function is meant to calculate isolated numbers. If a sequence of
+Lucas numbers is required, the first two values of the sequence should
+be computed with this function, then iterations should be used.</p>
+<p>This method is similar to <a href="../struct.Integer.html#method.lucas_2" title="associated function rug::Integer::lucas_2"><code>lucas_2</code></a> but takes <code>n</code> as
+<a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-54"><a class="doc-anchor" href="#examples-54">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::{Assign, Integer};
+<span class="kw">let </span>l = Integer::lucas_2_64(<span class="number">12</span>);
+<span class="kw">let </span><span class="kw-2">mut </span>pair = &lt;(Integer, Integer)&gt;::from(l);
+<span class="macro">assert_eq!</span>(pair.<span class="number">0</span>, <span class="number">322</span>);
+<span class="macro">assert_eq!</span>(pair.<span class="number">1</span>, <span class="number">199</span>);
+pair.assign(Integer::lucas_2_64(<span class="number">0</span>));
+<span class="macro">assert_eq!</span>(pair.<span class="number">0</span>, <span class="number">2</span>);
+<span class="macro">assert_eq!</span>(pair.<span class="number">1</span>, -<span class="number">1</span>);</code></pre></div>
+</div></details><details class="toggle method-toggle" open><summary><section id="tymethod.random_bits_64" class="method"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1354">Source</a><h4 class="code-header">fn <a href="#tymethod.random_bits_64" class="fn">random_bits_64</a>(
+    bits: <a class="primitive" href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html">u64</a>,
+    rng: &amp;mut dyn <a class="trait" href="../rand/trait.MutRandState.html" title="trait rug::rand::MutRandState">MutRandState</a>,
+) -&gt; RandomBitsIncomplete&lt;'_&gt;</h4></section></summary><div class="docblock"><p>Generates a random number with a specified maximum number of bits.</p>
+<p>The following are implemented with the returned <a href="../index.html#incomplete-computation-values" title="mod rug">incomplete-computation
+value</a> as <code>Src</code>:</p>
+<ul>
+<li><code><a href="../trait.Assign.html" title="trait rug::Assign">Assign</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="https://doc.rust-lang.org/1.90.0/core/convert/trait.From.html" title="trait core::convert::From">From</a>&lt;Src&gt; for <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a></code></li>
+<li><code><a href="../trait.Complete.html" title="trait rug::Complete">Complete</a>&lt;<a href="../trait.Complete.html#associatedtype.Completed" title="associated type rug::Complete::Completed">Completed</a> = <a href="../struct.Integer.html" title="struct rug::Integer">Integer</a>&gt; for Src</code></li>
+</ul>
+<p>This method is similar to <a href="../struct.Integer.html#method.random_bits" title="associated function rug::Integer::random_bits"><code>random_bits</code></a> but
+takes <code>bits</code> as <a href="https://doc.rust-lang.org/1.90.0/std/primitive.u64.html" title="primitive u64"><code>u64</code></a>.</p>
+<h5 id="examples-55"><a class="doc-anchor" href="#examples-55">§</a>Examples</h5>
+<div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>rug::integer::IntegerExt64;
+<span class="kw">use </span>rug::rand::RandState;
+<span class="kw">use </span>rug::{Assign, Integer};
+<span class="kw">let </span><span class="kw-2">mut </span>rand = RandState::new();
+<span class="kw">let </span><span class="kw-2">mut </span>i = Integer::from(Integer::random_bits(<span class="number">0</span>, <span class="kw-2">&amp;mut </span>rand));
+<span class="macro">assert_eq!</span>(i, <span class="number">0</span>);
+i.assign(Integer::random_bits_64(<span class="number">80</span>, <span class="kw-2">&amp;mut </span>rand));
+<span class="macro">assert!</span>(i.significant_bits() &lt;= <span class="number">80</span>);</code></pre></div>
+</div></details></div><h2 id="dyn-compatibility" class="section-header">Dyn Compatibility<a href="#dyn-compatibility" class="anchor">§</a></h2><div class="dyn-compatibility-info"><p>This trait is <b>not</b> <a href="https://doc.rust-lang.org/1.90.0/reference/items/traits.html#dyn-compatibility">dyn compatible</a>.</p><p><i>In older versions of Rust, dyn compatibility was called "object safety", so this trait is not object safe.</i></p></div><h2 id="implementors" class="section-header">Implementors<a href="#implementors" class="anchor">§</a></h2><div id="implementors-list"><section id="impl-IntegerExt64-for-Integer" class="impl"><a class="src rightside" href="../../src/rug/integer/long64.rs.html#1357-1685">Source</a><a href="#impl-IntegerExt64-for-Integer" class="anchor">§</a><h3 class="code-header">impl <a class="trait" href="trait.IntegerExt64.html" title="trait rug::integer::IntegerExt64">IntegerExt64</a> for <a class="struct" href="../struct.Integer.html" title="struct rug::Integer">Integer</a></h3></section></div><script src="../../trait.impl/rug/integer/long64/trait.IntegerExt64.js" async></script></section></div></main></body></html>

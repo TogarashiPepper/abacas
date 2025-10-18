@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"struct":["BorrowComplex","MiniComplex","OrdComplex","ParseComplexError","SmallComplex"],"trait":["Prec","Prec64"]};

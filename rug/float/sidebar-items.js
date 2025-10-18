@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"enum":["Constant","FreeCache","Round","Special"],"fn":["allowed_exp_range","exp_max","exp_min","free_cache","prec_max","prec_max_64","prec_min","prec_min_64"],"struct":["BorrowFloat","MiniFloat","OrdFloat","ParseFloatError","SmallFloat"],"trait":["ToMini","ToSmall"]};
