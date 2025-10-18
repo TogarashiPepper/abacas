@@ -64,11 +64,6 @@ mod tests {
 
 		let same = p(expected.to_string().as_str());
 		assert_eq!(same, expected);
-<<<<<<< HEAD
-=======
-
-		assert_eq!(p("-4x^2 - 2 + 2x + 5x^9").to_string(), "5x^9 - 4x^2 + 2x - 2");
->>>>>>> e304095 (chore: reorganize src/* into structs)
 	}
 
 	#[test]
@@ -98,14 +93,10 @@ mod tests {
 	fn factor() {
 		let poly = p("4x^3 + 2x^2 + 16");
 
-<<<<<<< HEAD
 		let factored = p("2x^3 + x^2 + 8");
 		assert_eq!(poly.clone().factor().unwrap(), (2.0, factored));
 
 		let monic = p("x^3 + 0.5x^2 + 4");
 		assert_eq!(poly.clone().monic().unwrap(), (4.0, monic));
-=======
-		assert_eq!(poly.factor().unwrap(), (2.0, factored))
->>>>>>> e304095 (chore: reorganize src/* into structs)
 	}
 }
