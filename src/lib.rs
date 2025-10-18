@@ -94,9 +94,9 @@ mod tests {
 		let poly = p("4x^3 + 2x^2 + 16");
 
 		let factored = p("2x^3 + x^2 + 8");
-		assert_eq!(poly.factor().unwrap(), (2.0, factored));
+		assert_eq!(poly.clone().factor().unwrap(), (2.0, factored));
 
 		let monic = p("x^3 + 0.5x^2 + 4");
-		assert_eq!(poly.monic().unwrap(), (4.0, monic));
+		assert_eq!(poly.clone().monic().unwrap(), (4.0, monic));
 	}
 }

@@ -1,9 +1,9 @@
-use std::ops::{Div, DivAssign, Rem};
+use std::ops::{Div, DivAssign, Rem, RemAssign};
 
 use crate::structs::{Monomial, Polynomial};
 
 impl Div<Monomial> for Polynomial {
-	type Output = Polynomial;
+	type Output = Self;
 
 	fn div(mut self, rhs: Monomial) -> Self::Output {
 		self /= rhs;
@@ -21,11 +21,16 @@ impl DivAssign<Monomial> for Polynomial {
 
 impl Polynomial {
 	/// Calculates division and remainder at the same time, returning [`None`] if the divisor is zero.
-	pub fn div_rem(mut self, divisor: &Polynomial) -> Option<(Polynomial, Polynomial)> {
+	pub fn div_rem(mut self, divisor: &Self) -> Option<(Self, Self)> {
+		self.div_rem_mut(divisor).map(|remainder| (self, remainder))
+	}
+
+	/// Calculates division in-place and returns the remainder, or [`None`] if the divisor is zero.
+	pub fn div_rem_mut(&mut self, divisor: &Self) -> Option<Self> {
 		let (normalizer, remaining) = divisor.0.split_first()?;
 
 		let Some(degree) = self.degree() else {
-			return Some((Polynomial::ZERO, Polynomial::ZERO));
+			return Some(Self::ZERO);
 		};
 
 		for degree in (normalizer.degree..=degree).rev() {
@@ -46,25 +51,40 @@ impl Polynomial {
 			.binary_search_by(|mono| normalizer.degree.cmp(&mono.degree))
 			.map_or_else(|index| index, |index| index + 1);
 
-		let remainder = Polynomial::new(self.0.split_off(self.0.len().min(index)));
-		let quotient = self / Monomial::new(1.0, normalizer.degree);
+		let remainder = Self::new(self.0.split_off(index));
 
-		Some((quotient, remainder))
+		*self /= Monomial::new(1.0, normalizer.degree);
+
+		Some(remainder)
 	}
 }
 
 impl Div for Polynomial {
-	type Output = Polynomial;
+	type Output = Self;
 
-	fn div(self, rhs: Self) -> Self::Output {
-		self.div_rem(&rhs).expect("abacas: cannot divide by zero").0
+	fn div(mut self, rhs: Self) -> Self::Output {
+		self /= rhs;
+		self
+	}
+}
+
+impl DivAssign for Polynomial {
+	fn div_assign(&mut self, rhs: Self) {
+		self.div_rem_mut(&rhs).expect("abacas: cannot divide by zero");
 	}
 }
 
 impl Rem for Polynomial {
-	type Output = Polynomial;
+	type Output = Self;
 
-	fn rem(self, rhs: Self) -> Self::Output {
-		self.div_rem(&rhs).expect("abacas: cannot divide by zero").1
+	fn rem(mut self, rhs: Self) -> Self::Output {
+		self %= rhs;
+		self
+	}
+}
+
+impl RemAssign for Polynomial {
+	fn rem_assign(&mut self, rhs: Self) {
+		*self = self.div_rem_mut(&rhs).expect("abacas: cannot divide by zero");
 	}
 }

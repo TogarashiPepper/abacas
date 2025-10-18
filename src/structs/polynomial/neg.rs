@@ -5,7 +5,7 @@ use rug::ops::NegAssign;
 use crate::structs::Polynomial;
 
 impl Neg for Polynomial {
-	type Output = Polynomial;
+	type Output = Self;
 
 	fn neg(mut self) -> Self::Output {
 		self.neg_assign();

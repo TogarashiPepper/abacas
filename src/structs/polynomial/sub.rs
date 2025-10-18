@@ -3,7 +3,7 @@ use std::ops::{Sub, SubAssign};
 use crate::structs::{Monomial, Polynomial};
 
 impl Sub<Monomial> for Polynomial {
-	type Output = Polynomial;
+	type Output = Self;
 
 	fn sub(mut self, rhs: Monomial) -> Self::Output {
 		self -= rhs;
@@ -23,7 +23,7 @@ impl SubAssign<Monomial> for Polynomial {
 }
 
 impl Sub for Polynomial {
-	type Output = Polynomial;
+	type Output = Self;
 
 	fn sub(mut self, rhs: Self) -> Self::Output {
 		self -= rhs;
