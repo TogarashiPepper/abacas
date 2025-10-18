@@ -3,36 +3,40 @@ use std::{fmt, str};
 
 use itertools::Itertools;
 use rug::ops::NegAssign;
+use rug::{Integer, Rational};
 
 use crate::error::ParseError;
 use crate::structs::Polynomial;
 
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Monomial {
 	/// The coefficient of the monomial
-	pub coeff: f64,
+	pub coeff: Rational,
 	/// The degree of the monomial
-	pub degree: i64,
+	pub degree: Integer,
 }
 
 impl Monomial {
 	/// Creates a new monomial. Panics if `coeff` is zero.
-	pub const fn new(coeff: f64, degree: i64) -> Self {
+	pub fn new(coeff: f64, degree: i64) -> Self {
 		if coeff == 0.0 {
 			panic!("abacas: monomial coefficient must not be zero");
 		}
 
-		Self { coeff, degree }
+		Self {
+			coeff: Rational::from_f64(coeff).unwrap(),
+			degree: Integer::from(degree),
+		}
 	}
 
 	/// Creates a constant monomial. Panics if `coeff` is zero.
-	pub const fn constant(coeff: f64) -> Self {
+	pub fn constant(coeff: f64) -> Self {
 		Self::new(coeff, 0)
 	}
 
 	/// Creates a linear monomial. Panics if `coeff` is zero.
-	pub const fn linear(coeff: f64) -> Self {
+	pub fn linear(coeff: f64) -> Self {
 		Self::new(coeff, 1)
 	}
 }
@@ -102,11 +106,11 @@ impl Sub for Monomial {
 
 impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match (self.coeff, self.degree) {
-			(1.0, 1) => write!(f, "x"),
-			(_, 0) => write!(f, "{}", self.coeff),
-			(1.0, deg) => write!(f, "x^{deg}"),
-			(_, 1) => write!(f, "{}x", self.coeff),
+		match (&self.coeff, &self.degree) {
+			(Rational::ONE, Integer::ONE) => write!(f, "x"),
+			(_, &Integer::ZERO) => write!(f, "{}", self.coeff),
+			(Rational::ONE, deg) => write!(f, "x^{deg}"),
+			(_, Integer::ONE) => write!(f, "{}x", self.coeff),
 			(_, _) => write!(f, "{}x^{}", self.coeff, self.degree),
 		}
 	}
@@ -138,8 +142,11 @@ impl str::FromStr for Monomial {
 		}
 
 		let tail: String = chars.collect();
-		let degree = tail.parse()?;
+		let degree: i64 = tail.parse()?;
 
-		Ok(Self { coeff, degree })
+		Ok(Self {
+			coeff: Rational::from_f64(coeff).unwrap(),
+			degree: Integer::from(degree),
+		})
 	}
 }
