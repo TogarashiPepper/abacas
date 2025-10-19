@@ -28,11 +28,6 @@ jobs:
       - name: Run Tests
         run: cargo test --verbose
 
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: target/debug
-
       - name: Install Formatter
         uses: dtolnay/rust-toolchain@nightly
         with:
