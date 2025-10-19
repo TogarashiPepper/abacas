@@ -14,13 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@v5
         
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
       - name: Configure Cache
-        uses: Swatinem/rust-cache@master
+        uses: Swatinem/rust-cache@v2
 
       - name: Run Linter
         run: cargo clippy --verbose
