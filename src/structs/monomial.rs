@@ -40,7 +40,6 @@ use std::str::FromStr;
 ///
 /// mono *= Monomial::linear(2.0);
 /// assert_eq!(mono.to_string(), "8x^11");
-///
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Monomial {
