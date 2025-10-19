@@ -19,4 +19,4 @@ jobs:
         run: cargo test --verbose
 
 	  - name: Check Formatting
-	  - run: cargo +nightly fmt
+	  - run: cargo +nightly fmt --check
