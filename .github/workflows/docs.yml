@@ -5,23 +5,60 @@ on:
     branches:
       - main
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
 jobs:
   docs:
     name: Documentation
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@main
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Generate
-        run: cargo doc
+      - name: Setup Rust
+        uses: dtolnay/rust-toolchain@stable
 
-      - name: Deploy
-        uses: s0/git-publish-subdir-action@develop
-        env:
-          BRANCH: docs
-          FOLDER: target/doc
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MESSAGE: Build files for {sha}
-          REPO: self
-          SQUASH_HISTORY: true
+      - name: Configure cache
+        uses: Swatinem/rust-cache@v2
+
+      - name: Setup pages
+        id: pages
+        uses: actions/configure-pages@v5
+
+      - name: Clean docs folder
+        run: cargo clean --doc
+
+      - name: Build docs
+        run: cargo doc --no-deps
+
+      - name: Add redirect
+        run: echo '<meta http-equiv="refresh" content="0;url=abacas/index.html">' > target/doc/index.html
+
+      - name: Remove lock file
+        run: rm target/doc/.lock
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: target/doc
+
+  deploy:
+    name: Deploy
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+      
+    runs-on: ubuntu-latest
+    needs: docs
+    
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
