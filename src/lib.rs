@@ -81,6 +81,6 @@ mod tests {
 		assert_eq!(both_zero, None);
 
 		let dividend_smaller = divisor.clone().div_rem(&dividend);
-		assert_eq!(dividend_smaller, Some((Polynomial::ZERO, divisor.clone())));
+		assert_eq!(dividend_smaller, Some((Polynomial::ZERO, divisor)));
 	}
 }
