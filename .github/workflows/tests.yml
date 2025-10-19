@@ -9,17 +9,17 @@ jobs:
     - name: Setup Rust
       uses: dtolnay/rust-toolchain@nightly
 
-    name: Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@main
+    - name: Tests
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout
+          uses: actions/checkout@main
 
-      - name: Run Linter
-        run: cargo +nightly clippy --verbose
+        - name: Run Linter
+          run: cargo +nightly clippy --verbose
 
-      - name: Run Tests
-        run: cargo +nightly test --verbose
+        - name: Run Tests
+          run: cargo +nightly test --verbose
 
-      - name: Check Formatting
-        run: cargo +nightly fmt --check
+        - name: Check Formatting
+          run: cargo +nightly fmt --check
