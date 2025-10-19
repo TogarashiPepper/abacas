@@ -7,13 +7,13 @@ use std::num::{ParseFloatError, ParseIntError};
 /// An error that can occur while parsing.
 #[derive(Clone, Debug)]
 pub enum ParseError {
-	/// Invalid Syntax
+	/// The parser encountered invalid syntax.
 	InvalidSyntax,
-	/// Invalid Value
+	/// The parser encountered an invalid value.
 	InvalidValue,
-	/// A wrapper around a [`ParseFloatError`]
+	/// A wrapper around a [`ParseFloatError`].
 	ParseFloat(ParseFloatError),
-	/// A wrapper around a [`ParseIntError`]
+	/// A wrapper around a [`ParseIntError`].
 	ParseInt(ParseIntError),
 }
 

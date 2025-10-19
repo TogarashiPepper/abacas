@@ -6,50 +6,43 @@ mod neg;
 mod sub;
 
 use std::ops::Add;
-// Required to let docstr link to Polynomial::from_str
-#[cfg(doc)]
-use std::str::FromStr;
 use std::{fmt, str};
 
 use crate::error::ParseError;
 use crate::structs::Monomial;
 
 /// A polynomial with its monomials sorted by `degree` in descending order.
+///
 /// # Examples
-/// ## Creating a [`Polynomial`]
-/// ### Using An Iterable of [`Monomial`]s
+///
+/// Creating a [`Polynomial`]:
+///
 /// ```rust
-/// use abacas::structs::{Polynomial, Monomial};
+/// # use abacas::structs::{Monomial, Polynomial};
+///
 /// let poly = Polynomial::new([Monomial::new(4.0, 2), Monomial::new(5.0, 3)]);
+/// assert_eq!(poly.to_string(), "5x^3 + 4x^2");
 ///
+/// let poly: Polynomial = "4x^2 + 5x^3".parse().unwrap();
 /// assert_eq!(poly.to_string(), "5x^3 + 4x^2");
 /// ```
 ///
-/// # Using the [`Polynomial::from_str`] impl
+/// Using arithmetic operations:
+///
 /// ```rust
-/// use abacas::structs::{Polynomial, Monomial};
-/// let poly = "4x^2 + 5x^3".parse::<Polynomial>().unwrap();
+/// # use abacas::structs::{Monomial, Polynomial};
 ///
-/// assert_eq!(poly.to_string(), "5x^3 + 4x^2");
-/// ```
+/// let a: Polynomial = "4x^4 + 3x^3 + 1".parse().unwrap();
+/// let b: Polynomial = "2x^2 - 5".parse().unwrap();
 ///
-/// ## Arithmetic Operations
-/// ```rust
-/// use abacas::structs::{Polynomial, Monomial};
+/// let add = a.clone() + b.clone();
+/// assert_eq!(add.to_string(), "4x^4 + 3x^3 + 2x^2 - 4");
 ///
-/// let mut a = "5x^5 + 4x^4 + 3x^3 + 1".parse::<Polynomial>().unwrap();
-/// let b = "2x^2".parse::<Polynomial>().unwrap();
+/// let sub = a.clone() - b.clone() * Monomial::constant(2.0);
+/// assert_eq!(sub.to_string(), "4x^4 + 3x^3 - 4x^2 + 11");
 ///
-/// a += b.clone();
-///
-/// assert_eq!(a.to_string(), "5x^5 + 4x^4 + 3x^3 + 2x^2 + 1");
-///
-/// a -= b * Monomial::constant(2.0);
-///
-/// assert_eq!(a.to_string(), "5x^5 + 4x^4 + 3x^3 - 2x^2 + 1");
-///
-/// let fac: Polynomial = "x^2 + 2".parse().unwrap();
-/// assert_eq!((a * fac).to_string(), "5x^7 + 4x^6 + 13x^5 + 6x^4 + 6x^3 - 3x^2 + 2");
+/// let mul = a.clone() * b.clone();
+/// assert_eq!(mul.to_string(), "8x^6 + 6x^5 - 20x^4 - 15x^3 + 2x^2 - 5");
 /// ```
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Polynomial(Vec<Monomial>);
@@ -63,10 +56,13 @@ impl Polynomial {
 		self.0.retain(|mono| mono.coeff != 0.0);
 	}
 
-	/// The degree of the polynomial. Returns [`None`] for the zero polynomial.
-	/// # Example
+	/// Returns the degree of the polynomial, or [`None`] for the zero polynomial.
+	///
+	/// # Examples
+	///
 	/// ```rust
 	/// # use abacas::structs::Polynomial;
+	///
 	/// let poly: Polynomial = "4x^999 + 2x^3 + 1".parse().unwrap();
 	/// assert_eq!(poly.degree(), Some(999));
 	/// ```
@@ -74,12 +70,15 @@ impl Polynomial {
 		self.0.first().map(|mono| mono.degree)
 	}
 
-	/// Gets the monomial with the given degree.
-	/// # Example
+	/// Returns the monomial with the given degree, or [`None`] if the degree is not present.
+	///
+	/// # Examples
+	///
 	/// ```rust
-	/// # use abacas::structs::{Polynomial, Monomial};
+	/// # use abacas::structs::{Monomial, Polynomial};
+	///
 	/// let poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
-	/// assert_eq!(poly.get(9).unwrap(), &Monomial::new(4.0, 9));
+	/// assert_eq!(poly.get(9), Some(&Monomial::new(4.0, 9)));
 	/// ```
 	pub fn get(&self, degree: i64) -> Option<&Monomial> {
 		self.0
@@ -88,12 +87,15 @@ impl Polynomial {
 			.and_then(|index| self.0.get(index))
 	}
 
-	/// Gets the monomial with the given degree.
-	/// # Example
+	/// Returns the monomial with the given degree, or [`None`] if the degree is not present.
+	///
+	/// # Examples
+	///
 	/// ```rust
-	/// # use abacas::structs::{Polynomial, Monomial};
+	/// # use abacas::structs::{Monomial, Polynomial};
+	///
 	/// let mut poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
-	/// assert_eq!(poly.get_mut(9).unwrap(), &mut Monomial::new(4.0, 9));
+	/// assert_eq!(poly.get_mut(9), Some(&mut Monomial::new(4.0, 9)));
 	/// ```
 	pub fn get_mut(&mut self, degree: i64) -> Option<&mut Monomial> {
 		self.0
@@ -114,9 +116,12 @@ impl Polynomial {
 	}
 
 	/// Creates a new polynomial from the given monomials.
-	/// # Example
+	///
+	/// # Examples
+	///
 	/// ```rust
-	/// # use abacas::structs::{Polynomial, Monomial};
+	/// # use abacas::structs::{Monomial, Polynomial};
+	///
 	/// let poly = Polynomial::new([Monomial::new(4.0, 2), Monomial::new(9.0, 9)]);
 	/// assert_eq!(poly.to_string(), "9x^9 + 4x^2");
 	/// ```

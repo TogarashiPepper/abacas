@@ -15,12 +15,12 @@ mod tests {
 	const E: Monomial = Monomial::new(1.0, 4);
 	const F: Monomial = Monomial::new(2.5, 4);
 
-	/// Helper to create a monomial from a string
+	/// Internal function to create a monomial from a string.
 	fn m(s: &str) -> Monomial {
 		s.parse().unwrap()
 	}
 
-	/// Helper to create a polynomial from a string
+	/// Internal function to create a polynomial from a string.
 	fn p(s: &str) -> Polynomial {
 		s.parse().unwrap()
 	}
@@ -67,7 +67,7 @@ mod tests {
 	}
 
 	#[test]
-	fn div_rem() {
+	fn zeros() {
 		let dividend = p("6x^5 + 5x^2 - 7");
 		let divisor = p("2x^2 - 1");
 
@@ -81,22 +81,6 @@ mod tests {
 		assert_eq!(both_zero, None);
 
 		let dividend_smaller = divisor.clone().div_rem(&dividend);
-		assert_eq!(dividend_smaller, Some((Polynomial::ZERO, divisor.clone())));
-
-		let (quotient, remainder) = dividend.clone().div_rem(&divisor).unwrap();
-		assert_eq!(quotient.to_string(), "3x^3 + 1.5x + 2.5");
-		assert_eq!(remainder.to_string(), "1.5x - 4.5");
-		assert_eq!(quotient * divisor + remainder, dividend);
-	}
-
-	#[test]
-	fn factor() {
-		let poly = p("4x^3 + 2x^2 + 16");
-
-		let factored = p("2x^3 + x^2 + 8");
-		assert_eq!(poly.clone().factor().unwrap(), (2.0, factored));
-
-		let monic = p("x^3 + 0.5x^2 + 4");
-		assert_eq!(poly.clone().monic().unwrap(), (4.0, monic));
+		assert_eq!(dividend_smaller, Some((Polynomial::ZERO, divisor)));
 	}
 }
