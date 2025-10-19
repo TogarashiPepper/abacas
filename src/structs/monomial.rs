@@ -8,6 +8,31 @@ use crate::error::ParseError;
 use crate::structs::Polynomial;
 
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
+/// # Example
+/// ## Creating a [`Monomial`]
+/// ```rust
+/// # use abacas::structs::Monomial;
+/// // Option A: use the `new` method (there's also `constant` and `linear`) 
+/// let l_mono = Monomial::new(4.0, 10);
+///
+/// // Option B: Parsing from a String
+/// let r_mono = "4x^10".parse().unwrap();
+///
+/// assert_eq!(l_mono, r_mono);
+/// ```
+///
+/// ## Arithmetic Operations
+/// ```rust
+/// # use abacas::structs::Monomial;
+/// let mut mono = Monomial::new(4.0, 10);
+///
+/// let poly = mono + Monomial::new(2.0, 10);
+/// assert_eq!(poly.to_string(), "6x^10");
+///
+/// mono *= Monomial::linear(2.0);
+/// assert_eq!(mono.to_string(), "8x^11");
+///
+/// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Monomial {
 	/// The coefficient of the monomial
