@@ -20,7 +20,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Configure Cache
-        uses: Swatinem/rust-cache@master
+        uses: Swatinem/rust-cache@v2
 
       - name: Run Linter
         run: cargo clippy --verbose
