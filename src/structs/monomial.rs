@@ -7,18 +7,27 @@ use rug::ops::NegAssign;
 use crate::error::ParseError;
 use crate::structs::Polynomial;
 
+// Required to let docstr link to Monomial::from_str
+#[cfg(doc)]
+use std::str::FromStr;
+
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
 /// # Example
 /// ## Creating a [`Monomial`]
+/// ### Using the [`Monomial::new`] method
 /// ```rust
 /// # use abacas::structs::Monomial;
-/// // Option A: use the `new` method (there's also `constant` and `linear`) 
-/// let l_mono = Monomial::new(4.0, 10);
+/// let mono = Monomial::new(4.0, 10);
 ///
-/// // Option B: Parsing from a String
-/// let r_mono = "4x^10".parse().unwrap();
+/// assert_eq!(mono.to_string(), "4x^10");
+/// ```
 ///
-/// assert_eq!(l_mono, r_mono);
+/// ### Using the [`Monomial::from_str`] impl
+/// ```rust
+/// # use abacas::structs::Monomial;
+/// let mono: Monomial = "4x^10".parse().unwrap();
+///
+/// assert_eq!(mono.to_string(), "4x^10");
 /// ```
 ///
 /// ## Arithmetic Operations

@@ -11,18 +11,29 @@ use std::{fmt, str};
 use crate::error::ParseError;
 use crate::structs::Monomial;
 
+// Required to let docstr link to Polynomial::from_str
+#[cfg(doc)]
+use std::str::FromStr;
+
 /// A polynomial with its monomials sorted by `degree` in descending order.
 /// # Examples
 /// ## Creating a [`Polynomial`]
+/// ### Using An Iterable of [`Monomial`]s
 /// ```rust
 /// use abacas::structs::{Polynomial, Monomial};
-/// // Option A: Collection of Monomials
-/// let a = Polynomial::new([Monomial::new(4.0, 2), Monomial::new(5.0, 3)]);
-/// // Option B: Parsing from a String
-/// let b = "4x^2 + 5x^3".parse::<Polynomial>().unwrap();
+/// let poly = Polynomial::new([Monomial::new(4.0, 2), Monomial::new(5.0, 3)]);
 ///
-/// assert_eq!(a - b, Polynomial::ZERO);
+/// assert_eq!(poly.to_string(), "5x^3 + 4x^2");
 /// ```
+///
+/// # Using the [`Polynomial::from_str`] impl 
+/// ```rust
+/// use abacas::structs::{Polynomial, Monomial};
+/// let poly = "4x^2 + 5x^3".parse::<Polynomial>().unwrap();
+///
+/// assert_eq!(poly.to_string(), "5x^3 + 4x^2");
+/// ```
+///
 ///
 /// ## Arithmetic Operations
 /// ```rust
