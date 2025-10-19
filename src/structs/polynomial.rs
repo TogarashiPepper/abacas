@@ -34,7 +34,6 @@ use std::str::FromStr;
 /// assert_eq!(poly.to_string(), "5x^3 + 4x^2");
 /// ```
 ///
-///
 /// ## Arithmetic Operations
 /// ```rust
 /// use abacas::structs::{Polynomial, Monomial};
