@@ -6,6 +6,9 @@ on:
 
 jobs:
   tests:
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@nightly
+
     name: Tests
     runs-on: ubuntu-latest
     steps:
