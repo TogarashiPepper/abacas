@@ -1,7 +1,4 @@
 use std::ops::{Add, Div, DivAssign, Mul, MulAssign, Neg, Sub};
-// Required to let docstr link to Monomial::from_str
-#[cfg(doc)]
-use std::str::FromStr;
 use std::{fmt, str};
 
 use itertools::Itertools;
@@ -11,48 +8,48 @@ use crate::error::ParseError;
 use crate::structs::Polynomial;
 
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
-/// # Example
-/// ## Creating a [`Monomial`]
-/// ### Using the [`Monomial::new`] method
+///
+/// # Examples
+///
+/// Creating a [`Monomial`]:
+///
 /// ```rust
 /// # use abacas::structs::Monomial;
+///
 /// let mono = Monomial::new(4.0, 10);
-///
 /// assert_eq!(mono.to_string(), "4x^10");
-/// ```
 ///
-/// ### Using the [`Monomial::from_str`] impl
-/// ```rust
-/// # use abacas::structs::Monomial;
 /// let mono: Monomial = "4x^10".parse().unwrap();
-///
 /// assert_eq!(mono.to_string(), "4x^10");
 /// ```
 ///
-/// ## Arithmetic Operations
+/// Using arithmetic operations:
+///
 /// ```rust
 /// # use abacas::structs::Monomial;
-/// let mut mono = Monomial::new(4.0, 10);
 ///
-/// let poly = mono + Monomial::new(2.0, 10);
-/// assert_eq!(poly.to_string(), "6x^10");
+/// let add = Monomial::new(4.0, 10) + Monomial::new(1.0, 20);
+/// assert_eq!(add.to_string(), "x^20 + 4x^10");
 ///
-/// mono *= Monomial::linear(2.0);
-/// assert_eq!(mono.to_string(), "8x^11");
+/// let mul = Monomial::new(4.0, 10) * Monomial::linear(2.0);
+/// assert_eq!(mul.to_string(), "8x^11");
 /// ```
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub struct Monomial {
-	/// The coefficient of the monomial
+	/// The coefficient of the monomial.
 	pub coeff: f64,
-	/// The degree of the monomial
+	/// The degree of the monomial.
 	pub degree: i64,
 }
 
 impl Monomial {
 	/// Creates a new monomial. Panics if `coeff` is zero.
-	/// # Example
+	///
+	/// # Examples
+	///
 	/// ```rust
 	/// # use abacas::structs::Monomial;
+	///
 	/// let mono = Monomial::new(4.0, 22);
 	/// assert_eq!(mono.to_string(), "4x^22");
 	/// ```
@@ -65,9 +62,12 @@ impl Monomial {
 	}
 
 	/// Creates a constant monomial. Panics if `coeff` is zero.
-	/// # Example
+	///
+	/// # Examples
+	///
 	/// ```rust
 	/// # use abacas::structs::Monomial;
+	///
 	/// let mono = Monomial::constant(4.0);
 	/// assert_eq!(mono.to_string(), "4");
 	/// ```
@@ -76,9 +76,12 @@ impl Monomial {
 	}
 
 	/// Creates a linear monomial. Panics if `coeff` is zero.
-	/// # Example
+	///
+	/// # Examples
+	///
 	/// ```rust
 	/// # use abacas::structs::Monomial;
+	///
 	/// let mono = Monomial::linear(2.0);
 	/// assert_eq!(mono.to_string(), "2x");
 	/// ```

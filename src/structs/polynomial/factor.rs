@@ -10,10 +10,14 @@ fn gcd(mut a: f64, mut b: f64) -> f64 {
 }
 
 impl Polynomial {
-	/// Extracts the common factor of all monomials if there is one.
-	/// # Example
+	/// Extracts the common factor of all monomials.
+	/// Returns [`None`] if the polynomial is zero or has coprime coefficients.
+	///
+	/// # Examples
+	///
 	/// ```rust
 	/// # use abacas::structs::Polynomial;
+	///
 	/// let poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
 	/// let (factor, rest) = poly.factor().unwrap();
 	///
@@ -24,10 +28,14 @@ impl Polynomial {
 		self.factor_mut().map(|factor| (factor, self))
 	}
 
-	/// Extracts the common factor of all monomials in-place if there is one.
-	/// # Example
+	/// Extracts the common factor of all monomials in-place.
+	/// Returns [`None`] if the polynomial is zero or has coprime coefficients.
+	///
+	/// # Examples
+	///
 	/// ```rust
 	/// # use abacas::structs::Polynomial;
+	///
 	/// let mut poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
 	/// let factor = poly.factor_mut().unwrap();
 	///
@@ -46,30 +54,36 @@ impl Polynomial {
 		Some(factor)
 	}
 
-	/// Creates a monic polynomial by dividing all monomials by the lead coefficient.
-	/// Returns [`None`] if the leading coefficient is already `1`.
-	/// # Example
+	/// Creates a monic polynomial by dividing all monomials by the leading coefficient.
+	/// Returns [`None`] if the polynomial is zero or already monic.
+	///
+	/// # Examples
+	///
 	/// ```rust
 	/// # use abacas::structs::Polynomial;
-	/// let poly: Polynomial = "16x^9 + 4x^3 + 32".parse().unwrap();
-	/// let (lc, normalized) = poly.monic().unwrap();
 	///
-	/// assert_eq!(lc, 16.0);
-	/// assert_eq!(normalized.to_string(), "x^9 + 0.25x^3 + 2");
+	/// let poly: Polynomial = "16x^9 + 4x^3 + 32".parse().unwrap();
+	/// let (factor, monic) = poly.monic().unwrap();
+	///
+	/// assert_eq!(factor, 16.0);
+	/// assert_eq!(monic.to_string(), "x^9 + 0.25x^3 + 2");
 	/// ```
 	pub fn monic(mut self) -> Option<(f64, Self)> {
 		self.monic_mut().map(|factor| (factor, self))
 	}
 
-	/// Creates a monic polynomial in-place by dividing all monomials by the lead coefficient.
-	/// Returns [`None`] if the leading coefficient is already `1`.
-	/// # Example
+	/// Creates a monic polynomial in-place by dividing all monomials by the leading coefficient.
+	/// Returns [`None`] if the polynomial is zero or already monic.
+	///
+	/// # Examples
+	///
 	/// ```rust
 	/// # use abacas::structs::Polynomial;
-	/// let mut poly: Polynomial = "16x^9 + 4x^3 + 32".parse().unwrap();
-	/// let lc = poly.monic_mut().unwrap();
 	///
-	/// assert_eq!(lc, 16.0);
+	/// let mut poly: Polynomial = "16x^9 + 4x^3 + 32".parse().unwrap();
+	/// let factor = poly.monic_mut().unwrap();
+	///
+	/// assert_eq!(factor, 16.0);
 	/// assert_eq!(poly.to_string(), "x^9 + 0.25x^3 + 2");
 	/// ```
 	pub fn monic_mut(&mut self) -> Option<f64> {

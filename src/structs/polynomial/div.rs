@@ -21,13 +21,42 @@ impl DivAssign<Monomial> for Polynomial {
 
 impl Polynomial {
 	/// Calculates division and remainder at the same time, returning [`None`] if the divisor is zero.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// # use abacas::structs::Polynomial;
+	///
+	/// let dividend: Polynomial = "6x^5 + 5x^2 - 7".parse().unwrap();
+	/// let divisor: Polynomial = "2x^2 - 1".parse().unwrap();
+	///
+	/// let (quotient, remainder) = dividend.clone().div_rem(&divisor).unwrap();
+	///
+	/// assert_eq!(quotient.to_string(), "3x^3 + 1.5x + 2.5");
+	/// assert_eq!(remainder.to_string(), "1.5x - 4.5");
+	/// assert_eq!(quotient * divisor + remainder, dividend);
+	/// ```
 	pub fn div_rem(mut self, divisor: &Self) -> Option<(Self, Self)> {
 		self.div_rem_mut(divisor).map(|remainder| (self, remainder))
 	}
 
 	/// Calculates division in-place and returns the remainder, or [`None`] if the divisor is zero.
+	///
+	/// # Examples
+	///
+	/// ```rust
+	/// # use abacas::structs::Polynomial;
+	///
+	/// let mut dividend: Polynomial = "6x^5 + 5x^2 - 7".parse().unwrap();
+	/// let divisor: Polynomial = "2x^2 - 1".parse().unwrap();
+	///
+	/// let remainder = dividend.div_rem_mut(&divisor).unwrap();
+	///
+	/// assert_eq!(dividend.to_string(), "3x^3 + 1.5x + 2.5");
+	/// assert_eq!(remainder.to_string(), "1.5x - 4.5");
+	/// ```
 	pub fn div_rem_mut(&mut self, divisor: &Self) -> Option<Self> {
-		let (normalizer, remaining) = divisor.0.split_first()?;
+		let (normalizer, terms) = divisor.0.split_first()?;
 
 		let Some(degree) = self.degree() else {
 			return Some(Self::ZERO);
@@ -39,8 +68,8 @@ impl Polynomial {
 
 			monomial.coeff = coeff;
 
-			for monomial in remaining {
-				self.get_or_insert(degree + monomial.degree - normalizer.degree).coeff -= monomial.coeff * coeff;
+			for term in terms {
+				self.get_or_insert(degree + term.degree - normalizer.degree).coeff -= coeff * term.coeff;
 			}
 		}
 
