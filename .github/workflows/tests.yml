@@ -13,10 +13,10 @@ jobs:
         uses: actions/checkout@main
 
       - name: Run Linter
-        run: cargo clippy --verbose
+        run: cargo +nightly clippy --verbose
 
       - name: Run Tests
-        run: cargo test --verbose
+        run: cargo +nightly test --verbose
 
 	  - name: Check Formatting
 	  - run: cargo +nightly fmt --check
