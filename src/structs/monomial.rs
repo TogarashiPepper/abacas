@@ -18,6 +18,12 @@ pub struct Monomial {
 
 impl Monomial {
 	/// Creates a new monomial. Panics if `coeff` is zero.
+    /// # Example
+    /// ```rust
+    /// # use abacas::structs::Monomial;
+    /// let mono = Monomial::new(4.0, 22);
+    /// assert_eq!(mono.to_string(), "4x^22");
+    /// ```
 	pub const fn new(coeff: f64, degree: i64) -> Self {
 		if coeff == 0.0 {
 			panic!("abacas: monomial coefficient must not be zero");
@@ -27,11 +33,23 @@ impl Monomial {
 	}
 
 	/// Creates a constant monomial. Panics if `coeff` is zero.
+    /// # Example
+    /// ```rust
+    /// # use abacas::structs::Monomial;
+    /// let mono = Monomial::constant(4.0);
+    /// assert_eq!(mono.to_string(), "4");
+    /// ```
 	pub const fn constant(coeff: f64) -> Self {
 		Self::new(coeff, 0)
 	}
 
 	/// Creates a linear monomial. Panics if `coeff` is zero.
+    /// # Example
+    /// ```rust
+    /// # use abacas::structs::Monomial;
+    /// let mono = Monomial::linear(2.0);
+    /// assert_eq!(mono.to_string(), "2x");
+    /// ```
 	pub const fn linear(coeff: f64) -> Self {
 		Self::new(coeff, 1)
 	}
