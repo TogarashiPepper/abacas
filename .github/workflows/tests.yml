@@ -17,3 +17,6 @@ jobs:
 
       - name: Run Tests
         run: cargo test --verbose
+
+	  - name: Check Formatting
+	  - run: cargo +nightly fmt
