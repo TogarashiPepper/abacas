@@ -19,8 +19,8 @@ jobs:
       - name: Setup Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Configure cache
-        uses: Swatinem/rust-cache@v2
+      - name: Configure Cache
+        uses: Swatinem/rust-cache@master
 
       - name: Run Linter
         run: cargo clippy --verbose
