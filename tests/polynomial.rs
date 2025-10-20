@@ -11,7 +11,7 @@ fn m(s: &str) -> Monomial {
 	s.parse().unwrap()
 }
 
-pub fn p(s: &str) -> Polynomial {
+fn p(s: &str) -> Polynomial {
 	s.parse().unwrap()
 }
 
