@@ -2,17 +2,19 @@ use std::ops::{Div, DivAssign, Rem, RemAssign};
 
 use crate::structs::{Monomial, Polynomial};
 
-impl Div<Monomial> for Polynomial {
+impl<T: Into<Monomial>> Div<T> for Polynomial {
 	type Output = Self;
 
-	fn div(mut self, rhs: Monomial) -> Self::Output {
+	fn div(mut self, rhs: T) -> Self::Output {
 		self /= rhs;
 		self
 	}
 }
 
-impl DivAssign<Monomial> for Polynomial {
-	fn div_assign(&mut self, rhs: Monomial) {
+impl<T: Into<Monomial>> DivAssign<T> for Polynomial {
+	fn div_assign(&mut self, rhs: T) {
+		let rhs = rhs.into();
+
 		for monomial in self.0.iter_mut() {
 			*monomial /= rhs;
 		}

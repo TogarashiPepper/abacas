@@ -2,17 +2,19 @@ use std::ops::{Mul, MulAssign};
 
 use crate::structs::Monomial;
 
-impl Mul for Monomial {
+impl<T: Into<Monomial>> Mul<T> for Monomial {
 	type Output = Self;
 
-	fn mul(mut self, rhs: Self) -> Self::Output {
+	fn mul(mut self, rhs: T) -> Self::Output {
 		self *= rhs;
 		self
 	}
 }
 
-impl MulAssign for Monomial {
-	fn mul_assign(&mut self, rhs: Self) {
+impl<T: Into<Monomial>> MulAssign<T> for Monomial {
+	fn mul_assign(&mut self, rhs: T) {
+		let rhs = rhs.into();
+
 		self.coeff *= rhs.coeff;
 		self.degree += rhs.degree;
 	}

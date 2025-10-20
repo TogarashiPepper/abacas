@@ -2,10 +2,10 @@ use std::ops::Add;
 
 use crate::structs::{Monomial, Polynomial};
 
-impl Add for Monomial {
+impl<T: Into<Monomial>> Add<T> for Monomial {
 	type Output = Polynomial;
 
-	fn add(self, rhs: Self) -> Self::Output {
-		Polynomial::new([self, rhs])
+	fn add(self, rhs: T) -> Self::Output {
+		Polynomial::new([self, rhs.into()])
 	}
 }

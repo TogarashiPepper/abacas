@@ -3,17 +3,19 @@ use std::ops::{Mul, MulAssign};
 
 use crate::structs::{Monomial, Polynomial};
 
-impl Mul<Monomial> for Polynomial {
+impl<T: Into<Monomial>> Mul<T> for Polynomial {
 	type Output = Self;
 
-	fn mul(mut self, rhs: Monomial) -> Self::Output {
+	fn mul(mut self, rhs: T) -> Self::Output {
 		self *= rhs;
 		self
 	}
 }
 
-impl MulAssign<Monomial> for Polynomial {
-	fn mul_assign(&mut self, rhs: Monomial) {
+impl<T: Into<Monomial>> MulAssign<T> for Polynomial {
+	fn mul_assign(&mut self, rhs: T) {
+		let rhs = rhs.into();
+
 		for monomial in self.0.iter_mut() {
 			*monomial *= rhs;
 		}

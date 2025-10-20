@@ -2,10 +2,10 @@ use std::ops::Sub;
 
 use crate::structs::{Monomial, Polynomial};
 
-impl Sub for Monomial {
+impl<T: Into<Monomial>> Sub<T> for Monomial {
 	type Output = Polynomial;
 
-	fn sub(self, rhs: Self) -> Self::Output {
-		Polynomial::new([self, -rhs])
+	fn sub(self, rhs: T) -> Self::Output {
+		Polynomial::new([self, -rhs.into()])
 	}
 }

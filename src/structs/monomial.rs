@@ -2,6 +2,7 @@ mod add;
 mod div;
 mod mul;
 mod neg;
+mod pow;
 mod sub;
 
 use std::{fmt, str};
@@ -90,6 +91,12 @@ impl Monomial {
 	/// ```
 	pub const fn linear(coeff: f64) -> Self {
 		Self::new(coeff, 1)
+	}
+}
+
+impl<T: Into<f64>> From<T> for Monomial {
+	fn from(value: T) -> Self {
+		Self::constant(value.into())
 	}
 }
 

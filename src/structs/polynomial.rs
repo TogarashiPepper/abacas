@@ -130,6 +130,12 @@ impl Polynomial {
 	}
 }
 
+impl<T: Into<Monomial>> From<T> for Polynomial {
+	fn from(value: T) -> Self {
+		Self::new([value.into()])
+	}
+}
+
 impl FromIterator<Monomial> for Polynomial {
 	fn from_iter<T: IntoIterator<Item = Monomial>>(iter: T) -> Self {
 		iter.into_iter().fold(Self::ZERO, Self::add)
