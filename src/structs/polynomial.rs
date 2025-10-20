@@ -17,8 +17,8 @@ use crate::structs::Monomial;
 ///
 /// Creating a [`Polynomial`]:
 ///
-/// ```rust
-/// # use abacas::structs::{Monomial, Polynomial};
+/// ```
+/// use abacas::structs::{Monomial, Polynomial};
 ///
 /// let poly = Polynomial::new([Monomial::new(4.0, 2), Monomial::new(5.0, 3)]);
 /// assert_eq!(poly.to_string(), "5x^3 + 4x^2");
@@ -29,8 +29,8 @@ use crate::structs::Monomial;
 ///
 /// Using arithmetic operations:
 ///
-/// ```rust
-/// # use abacas::structs::{Monomial, Polynomial};
+/// ```
+/// use abacas::structs::Polynomial;
 ///
 /// let a: Polynomial = "4x^4 + 3x^3 + 1".parse().unwrap();
 /// let b: Polynomial = "2x^2 - 5".parse().unwrap();
@@ -38,7 +38,7 @@ use crate::structs::Monomial;
 /// let add = a.clone() + b.clone();
 /// assert_eq!(add.to_string(), "4x^4 + 3x^3 + 2x^2 - 4");
 ///
-/// let sub = a.clone() - b.clone() * Monomial::constant(2.0);
+/// let sub = a.clone() - b.clone() * 2;
 /// assert_eq!(sub.to_string(), "4x^4 + 3x^3 - 4x^2 + 11");
 ///
 /// let mul = a.clone() * b.clone();
@@ -60,8 +60,8 @@ impl Polynomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::Polynomial;
+	/// ```
+	/// use abacas::structs::Polynomial;
 	///
 	/// let poly: Polynomial = "4x^999 + 2x^3 + 1".parse().unwrap();
 	/// assert_eq!(poly.degree(), Some(999));
@@ -74,8 +74,8 @@ impl Polynomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::{Monomial, Polynomial};
+	/// ```
+	/// use abacas::structs::{Monomial, Polynomial};
 	///
 	/// let poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
 	/// assert_eq!(poly.get(9), Some(&Monomial::new(4.0, 9)));
@@ -91,8 +91,8 @@ impl Polynomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::{Monomial, Polynomial};
+	/// ```
+	/// use abacas::structs::{Monomial, Polynomial};
 	///
 	/// let mut poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
 	/// assert_eq!(poly.get_mut(9), Some(&mut Monomial::new(4.0, 9)));
@@ -119,8 +119,8 @@ impl Polynomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::{Monomial, Polynomial};
+	/// ```
+	/// use abacas::structs::{Monomial, Polynomial};
 	///
 	/// let poly = Polynomial::new([Monomial::new(4.0, 2), Monomial::new(9.0, 9)]);
 	/// assert_eq!(poly.to_string(), "9x^9 + 4x^2");

@@ -15,8 +15,8 @@ impl Polynomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::Polynomial;
+	/// ```
+	/// use abacas::structs::Polynomial;
 	///
 	/// let poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
 	/// let (factor, rest) = poly.factor().unwrap();
@@ -33,8 +33,8 @@ impl Polynomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::Polynomial;
+	/// ```
+	/// use abacas::structs::Polynomial;
 	///
 	/// let mut poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
 	/// let factor = poly.factor_mut().unwrap();
@@ -59,8 +59,8 @@ impl Polynomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::Polynomial;
+	/// ```
+	/// use abacas::structs::Polynomial;
 	///
 	/// let poly: Polynomial = "16x^9 + 4x^3 + 32".parse().unwrap();
 	/// let (factor, monic) = poly.monic().unwrap();
@@ -77,8 +77,8 @@ impl Polynomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::Polynomial;
+	/// ```
+	/// use abacas::structs::Polynomial;
 	///
 	/// let mut poly: Polynomial = "16x^9 + 4x^3 + 32".parse().unwrap();
 	/// let factor = poly.monic_mut().unwrap();

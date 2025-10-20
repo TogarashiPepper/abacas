@@ -26,8 +26,8 @@ impl Polynomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::Polynomial;
+	/// ```
+	/// use abacas::structs::Polynomial;
 	///
 	/// let dividend: Polynomial = "6x^5 + 5x^2 - 7".parse().unwrap();
 	/// let divisor: Polynomial = "2x^2 - 1".parse().unwrap();
@@ -46,8 +46,8 @@ impl Polynomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::Polynomial;
+	/// ```
+	/// use abacas::structs::Polynomial;
 	///
 	/// let mut dividend: Polynomial = "6x^5 + 5x^2 - 7".parse().unwrap();
 	/// let divisor: Polynomial = "2x^2 - 1".parse().unwrap();
