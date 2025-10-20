@@ -1,11 +1,24 @@
 use abacas::structs::{Monomial, Polynomial};
+use rug::{Integer, Rational};
 
-const A: Monomial = Monomial::new(1.0, 0);
-const B: Monomial = Monomial::new(2.5, 0);
-const C: Monomial = Monomial::new(1.0, 1);
-const D: Monomial = Monomial::new(2.5, 1);
-const E: Monomial = Monomial::new(1.0, 4);
-const F: Monomial = Monomial::new(2.5, 4);
+fn a() -> Monomial {
+	Monomial::new(Rational::from_f64(1.0).unwrap(), Integer::from(0))
+}
+fn b() -> Monomial {
+	Monomial::new(Rational::from_f64(2.5).unwrap(), Integer::from(0))
+}
+fn c() -> Monomial {
+	Monomial::new(Rational::from_f64(1.0).unwrap(), Integer::from(1))
+}
+fn d() -> Monomial {
+	Monomial::new(Rational::from_f64(2.5).unwrap(), Integer::from(1))
+}
+fn e() -> Monomial {
+	Monomial::new(Rational::from_f64(1.0).unwrap(), Integer::from(4))
+}
+fn f() -> Monomial {
+	Monomial::new(Rational::from_f64(2.5).unwrap(), Integer::from(4))
+}
 
 fn m(s: &str) -> Monomial {
 	s.parse().unwrap()
@@ -17,7 +30,7 @@ fn p(s: &str) -> Polynomial {
 
 #[test]
 fn construction() {
-	let polynomial = Polynomial::new([A, D, F, D, A]);
+	let polynomial = Polynomial::new([a(), d(), f(), d(), a()]);
 	assert_eq!(polynomial.to_string(), "2.5x^4 + 5x + 2");
 
 	let zero = Polynomial::new([]);
@@ -37,25 +50,25 @@ fn impls() {
 
 #[test]
 fn operators() {
-	let addition = A + B;
+	let addition = a() + b();
 	assert_eq!(addition.to_string(), "3.5");
 
-	let subtraction = A - C + D + (-F);
+	let subtraction = a() - c() + d() + (-f());
 	assert_eq!(subtraction.to_string(), "-2.5x^4 + 1.5x + 1");
 
-	let multiplication = B * D + E * F;
+	let multiplication = b() * d() + e() * f();
 	assert_eq!(multiplication.to_string(), "2.5x^8 + 6.25x");
 
-	let division = (F + E + D + C) / F;
+	let division = (f() + e() + d() + c()) / f();
 	assert_eq!(division.to_string(), "1.4 + 1.4x^-3");
 
-	let zero = B * D - D * B;
+	let zero = b() * d() - d() * b();
 	assert_eq!(zero.to_string(), "0");
 }
 
 #[test]
 fn parse() {
-	let expected = A - D - E - E;
+	let expected = a() - d() - e() - e();
 
 	let mono = m("1") + m("-2.5x") + m("-2x^4");
 	assert_eq!(mono, expected);

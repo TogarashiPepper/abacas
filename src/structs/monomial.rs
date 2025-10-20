@@ -63,10 +63,7 @@ impl Monomial {
 			panic!("abacas: monomial coefficient must not be zero");
 		}
 
-		Self {
-			coeff,
-			degree: Integer::from(degree),
-		}
+		Self { coeff, degree }
 	}
 
 	/// Creates a constant monomial. Panics if `coeff` is zero.
