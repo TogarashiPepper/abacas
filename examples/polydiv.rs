@@ -40,11 +40,11 @@ fn main() -> Result<()> {
 		return Ok(());
 	};
 
-	let a = format_args!("{GREEN}{dividend}{RESET}");
-	let b = format_args!("{RED}{divisor}{RESET}");
+	let fa = format_args!("{GREEN}{dividend}{RESET}");
+	let fb = format_args!("{RED}{divisor}{RESET}");
 
-	println!("\n({a}) / ({b}) = {quotient}");
-	println!("({a}) % ({b}) = {remainder}");
+	println!("\n({fa}) / ({fb}) = {quotient}");
+	println!("({fa}) % ({fb}) = {remainder}");
 
 	Ok(())
 }
