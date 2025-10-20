@@ -69,7 +69,7 @@ impl Polynomial {
 		let end = &normalizer.degree;
 
 		loop {
-			if &degree > end {
+			if &degree < end {
 				break;
 			}
 
@@ -83,7 +83,7 @@ impl Polynomial {
 					.coeff -= (&coeff * &term.coeff).complete();
 			}
 
-			degree += Integer::ONE;
+			degree -= Integer::ONE;
 		}
 
 		self.clean();

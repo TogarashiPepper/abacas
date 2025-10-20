@@ -21,8 +21,9 @@ use crate::structs::Monomial;
 ///
 /// ```
 /// use abacas::structs::{Monomial, Polynomial};
+/// use rug::{Integer, Rational};
 ///
-/// let poly = Polynomial::new([Monomial::new(4.0, 2), Monomial::new(5.0, 3)]);
+/// let poly = Polynomial::new([Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(2)), Monomial::new(Rational::from_f64(5.0).unwrap(), Integer::from(3))]);
 /// assert_eq!(poly.to_string(), "5x^3 + 4x^2");
 ///
 /// let poly: Polynomial = "4x^2 + 5x^3".parse().unwrap();
@@ -33,6 +34,7 @@ use crate::structs::Monomial;
 ///
 /// ```
 /// use abacas::structs::Polynomial;
+/// use rug::Rational;
 ///
 /// let a: Polynomial = "4x^4 + 3x^3 + 1".parse().unwrap();
 /// let b: Polynomial = "2x^2 - 5".parse().unwrap();
@@ -40,7 +42,7 @@ use crate::structs::Monomial;
 /// let add = a.clone() + b.clone();
 /// assert_eq!(add.to_string(), "4x^4 + 3x^3 + 2x^2 - 4");
 ///
-/// let sub = a.clone() - b.clone() * 2;
+/// let sub = a.clone() - b.clone() * Rational::from_f64(2.0).unwrap();
 /// assert_eq!(sub.to_string(), "4x^4 + 3x^3 - 4x^2 + 11");
 ///
 /// let mul = a.clone() * b.clone();
@@ -64,9 +66,10 @@ impl Polynomial {
 	///
 	/// ```
 	/// use abacas::structs::Polynomial;
+	/// use rug::Integer;
 	///
 	/// let poly: Polynomial = "4x^999 + 2x^3 + 1".parse().unwrap();
-	/// assert_eq!(poly.degree(), Some(999));
+	/// assert_eq!(poly.degree(), Some(Integer::from(999)));
 	/// ```
 	pub fn degree(&self) -> Option<Integer> {
 		self.0.first().map(|mono| mono.degree.clone())
@@ -78,9 +81,10 @@ impl Polynomial {
 	///
 	/// ```
 	/// use abacas::structs::{Monomial, Polynomial};
+	/// use rug::{Integer, Rational};
 	///
 	/// let poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
-	/// assert_eq!(poly.get(9), Some(&Monomial::new(4.0, 9)));
+	/// assert_eq!(poly.get(&Integer::from(9)), Some(&Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(9))));
 	/// ```
 	pub fn get(&self, degree: &Integer) -> Option<&Monomial> {
 		self.0
@@ -95,9 +99,10 @@ impl Polynomial {
 	///
 	/// ```
 	/// use abacas::structs::{Monomial, Polynomial};
+	/// use rug::{Integer, Rational};
 	///
 	/// let mut poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
-	/// assert_eq!(poly.get_mut(9), Some(&mut Monomial::new(4.0, 9)));
+	/// assert_eq!(poly.get(&Integer::from(9)), Some(&Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(9))));
 	/// ```
 	pub fn get_mut(&mut self, degree: &Integer) -> Option<&mut Monomial> {
 		self.0
@@ -131,8 +136,9 @@ impl Polynomial {
 	///
 	/// ```
 	/// use abacas::structs::{Monomial, Polynomial};
+	/// use rug::{Integer, Rational};
 	///
-	/// let poly = Polynomial::new([Monomial::new(4.0, 2), Monomial::new(9.0, 9)]);
+	/// let poly = Polynomial::new([Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(2)), Monomial::new(Rational::from_f64(9.0).unwrap(), Integer::from(9))]);
 	/// assert_eq!(poly.to_string(), "9x^9 + 4x^2");
 	/// ```
 	pub fn new(monomials: impl IntoIterator<Item = Monomial>) -> Self {

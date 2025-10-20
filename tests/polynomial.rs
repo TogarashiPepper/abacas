@@ -44,7 +44,7 @@ fn impls() {
 	let mono = m("5x^4").pow(3);
 	assert_eq!(mono.to_string(), "125x^12");
 
-	let poly = p("2x^2 + 5x + 3") * 4 - 5.5;
+	let poly = p("2x^2 + 5x + 3") * Integer::from(4) - Rational::from_f64(5.5).unwrap();
 	assert_eq!(poly.to_string(), "8x^2 + 20x + 6.5");
 }
 
