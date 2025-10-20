@@ -11,7 +11,18 @@ fn gcd(a: Rational, b: &Rational) -> Rational {
 }
 
 impl Polynomial {
-	/// Gets the gcd of two polynomials, 
+	/// Gets the gcd of two polynomials.
+	///
+	/// # Examples
+	/// ```
+	/// use abacas::structs::Polynomial;
+	///
+	/// let coeff: Polynomial = "x - 1".parse().unwrap();
+	/// let a = coeff.clone() * "x - 21".parse::<Polynomial>().unwrap();
+	/// let b = coeff.clone() * "4x - 9".parse::<Polynomial>().unwrap();
+	///
+	/// assert_eq!(a.gcd(b), coeff);
+	/// ```
 	pub fn gcd(mut self, mut b: Polynomial) -> Polynomial {
 		while b != Polynomial::ZERO {
 			(self, b) = (b.clone(), self % b);
