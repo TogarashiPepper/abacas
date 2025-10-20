@@ -1,4 +1,4 @@
-use crate::structs::{Monomial, Polynomial};
+use crate::structs::Polynomial;
 
 /// Internal function that performs the euclidean algorithm.
 fn gcd(mut a: f64, mut b: f64) -> f64 {
@@ -49,7 +49,7 @@ impl Polynomial {
 			return None;
 		}
 
-		*self /= Monomial::constant(factor);
+		*self /= factor;
 
 		Some(factor)
 	}
@@ -93,7 +93,7 @@ impl Polynomial {
 			return None;
 		}
 
-		*self /= Monomial::constant(factor);
+		*self /= factor;
 
 		Some(factor)
 	}

@@ -25,6 +25,12 @@ fn construction() {
 }
 
 #[test]
+fn impls() {
+	let poly = p("2x^2 + 5x + 3") * 4 - 5.5;
+	assert_eq!(poly.to_string(), "8x^2 + 20x + 6.5");
+}
+
+#[test]
 fn operators() {
 	let addition = A + B;
 	assert_eq!(addition.to_string(), "3.5");

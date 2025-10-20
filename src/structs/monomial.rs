@@ -93,6 +93,12 @@ impl Monomial {
 	}
 }
 
+impl<T: Into<f64>> From<T> for Monomial {
+	fn from(value: T) -> Self {
+		Self::constant(value.into())
+	}
+}
+
 impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match (self.coeff, self.degree) {
