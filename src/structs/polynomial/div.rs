@@ -1,7 +1,5 @@
 use std::ops::{Div, DivAssign, Rem, RemAssign};
 
-use rug::{Complete, Integer, Rational};
-
 use crate::structs::{Monomial, Polynomial};
 
 impl<T: Into<Monomial>> Div<T> for Polynomial {
@@ -62,28 +60,24 @@ impl Polynomial {
 	pub fn div_rem_mut(&mut self, divisor: &Self) -> Option<Self> {
 		let (normalizer, terms) = divisor.0.split_first()?;
 
-		let Some(mut degree) = self.degree() else {
+		let Some(mut degree) = self.degree().cloned() else {
 			return Some(Self::ZERO);
 		};
 
-		let end = &normalizer.degree;
-
-		loop {
-			if &degree < end {
-				break;
-			}
-
+		while degree >= normalizer.degree {
 			let monomial = self.get_or_insert(&degree);
-			let coeff = (&monomial.coeff / &normalizer.coeff).complete();
+			let coeff = monomial.coeff.clone() / &normalizer.coeff;
 
 			monomial.coeff = coeff.clone();
 
 			for term in terms {
-				self.get_or_insert(&((&degree + &term.degree).complete() - &normalizer.degree))
-					.coeff -= (&coeff * &term.coeff).complete();
+				let degree = degree.clone() + &term.degree - &normalizer.degree;
+				let monomial = self.get_or_insert(&degree);
+
+				monomial.coeff -= coeff.clone() * &term.coeff;
 			}
 
-			degree -= Integer::ONE;
+			degree -= 1;
 		}
 
 		self.clean();
@@ -95,7 +89,9 @@ impl Polynomial {
 
 		let remainder = Self::new(self.0.split_off(index));
 
-		*self /= Monomial::new(Rational::ONE.clone(), normalizer.degree.clone());
+		for monomial in self.0.iter_mut() {
+			monomial.degree -= &normalizer.degree;
+		}
 
 		Some(remainder)
 	}

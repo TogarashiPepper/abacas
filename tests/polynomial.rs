@@ -1,23 +1,27 @@
 use abacas::structs::{Monomial, Polynomial};
-use rug::{Integer, Rational};
 
 fn a() -> Monomial {
-	Monomial::new(Rational::from_f64(1.0).unwrap(), Integer::from(0))
+	Monomial::new(1.into(), 0.into())
 }
+
 fn b() -> Monomial {
-	Monomial::new(Rational::from_f64(2.5).unwrap(), Integer::from(0))
+	Monomial::new((5, 2).into(), 0.into())
 }
+
 fn c() -> Monomial {
-	Monomial::new(Rational::from_f64(1.0).unwrap(), Integer::from(1))
+	Monomial::new(1.into(), 1.into())
 }
+
 fn d() -> Monomial {
-	Monomial::new(Rational::from_f64(2.5).unwrap(), Integer::from(1))
+	Monomial::new((5, 2).into(), 1.into())
 }
+
 fn e() -> Monomial {
-	Monomial::new(Rational::from_f64(1.0).unwrap(), Integer::from(4))
+	Monomial::new(1.into(), 4.into())
 }
+
 fn f() -> Monomial {
-	Monomial::new(Rational::from_f64(2.5).unwrap(), Integer::from(4))
+	Monomial::new((5, 2).into(), 4.into())
 }
 
 fn m(s: &str) -> Monomial {
@@ -44,7 +48,7 @@ fn impls() {
 	let mono = m("5x^4").pow(3);
 	assert_eq!(mono.to_string(), "125x^12");
 
-	let poly = p("2x^2 + 5x + 3") * Integer::from(4) - Rational::from_f64(5.5).unwrap();
+	let poly = p("2x^2 + 5x + 3") * 4 - (11, 2);
 	assert_eq!(poly.to_string(), "8x^2 + 20x + 6.5");
 }
 

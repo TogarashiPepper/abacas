@@ -2,7 +2,7 @@ use std::ops::Sub;
 
 use crate::structs::{Monomial, Polynomial};
 
-impl<T: Into<Monomial>> Sub<T> for Monomial {
+impl<T: Into<Self>> Sub<T> for Monomial {
 	type Output = Polynomial;
 
 	fn sub(self, rhs: T) -> Self::Output {

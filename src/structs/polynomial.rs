@@ -21,9 +21,8 @@ use crate::structs::Monomial;
 ///
 /// ```
 /// use abacas::structs::{Monomial, Polynomial};
-/// use rug::{Integer, Rational};
 ///
-/// let poly = Polynomial::new([Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(2)), Monomial::new(Rational::from_f64(5.0).unwrap(), Integer::from(3))]);
+/// let poly = Polynomial::new([Monomial::new(4.into(), 2.into()), Monomial::new(5.into(), 3.into())]);
 /// assert_eq!(poly.to_string(), "5x^3 + 4x^2");
 ///
 /// let poly: Polynomial = "4x^2 + 5x^3".parse().unwrap();
@@ -34,7 +33,6 @@ use crate::structs::Monomial;
 ///
 /// ```
 /// use abacas::structs::Polynomial;
-/// use rug::Rational;
 ///
 /// let a: Polynomial = "4x^4 + 3x^3 + 1".parse().unwrap();
 /// let b: Polynomial = "2x^2 - 5".parse().unwrap();
@@ -42,13 +40,13 @@ use crate::structs::Monomial;
 /// let add = a.clone() + b.clone();
 /// assert_eq!(add.to_string(), "4x^4 + 3x^3 + 2x^2 - 4");
 ///
-/// let sub = a.clone() - b.clone() * Rational::from_f64(2.0).unwrap();
+/// let sub = a.clone() - b.clone() * 2;
 /// assert_eq!(sub.to_string(), "4x^4 + 3x^3 - 4x^2 + 11");
 ///
 /// let mul = a.clone() * b.clone();
 /// assert_eq!(mul.to_string(), "8x^6 + 6x^5 - 20x^4 - 15x^3 + 2x^2 - 5");
 /// ```
-#[derive(Clone, Debug, Default, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq)]
 pub struct Polynomial(Vec<Monomial>);
 
 impl Polynomial {
@@ -57,7 +55,7 @@ impl Polynomial {
 
 	/// Internal method to clean up a polynomial after operating on it.
 	fn clean(&mut self) {
-		self.0.retain(|mono| mono.coeff != 0.0);
+		self.0.retain(|mono| !mono.coeff.is_zero());
 	}
 
 	/// Returns the degree of the polynomial, or [`None`] for the zero polynomial.
@@ -66,13 +64,12 @@ impl Polynomial {
 	///
 	/// ```
 	/// use abacas::structs::Polynomial;
-	/// use rug::Integer;
 	///
 	/// let poly: Polynomial = "4x^999 + 2x^3 + 1".parse().unwrap();
-	/// assert_eq!(poly.degree(), Some(Integer::from(999)));
+	/// assert_eq!(poly.degree(), Some(&999.into()));
 	/// ```
-	pub fn degree(&self) -> Option<Integer> {
-		self.0.first().map(|mono| mono.degree.clone())
+	pub fn degree(&self) -> Option<&Integer> {
+		self.0.first().map(|mono| &mono.degree)
 	}
 
 	/// Returns the monomial with the given degree, or [`None`] if the degree is not present.
@@ -81,10 +78,9 @@ impl Polynomial {
 	///
 	/// ```
 	/// use abacas::structs::{Monomial, Polynomial};
-	/// use rug::{Integer, Rational};
 	///
 	/// let poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
-	/// assert_eq!(poly.get(&Integer::from(9)), Some(&Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(9))));
+	/// assert_eq!(poly.get(&9.into()), Some(&Monomial::new(4.into(), 9.into())));
 	/// ```
 	pub fn get(&self, degree: &Integer) -> Option<&Monomial> {
 		self.0
@@ -99,10 +95,9 @@ impl Polynomial {
 	///
 	/// ```
 	/// use abacas::structs::{Monomial, Polynomial};
-	/// use rug::{Integer, Rational};
 	///
 	/// let mut poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
-	/// assert_eq!(poly.get(&Integer::from(9)), Some(&Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(9))));
+	/// assert_eq!(poly.get(&9.into()), Some(&Monomial::new(4.into(), 9.into())));
 	/// ```
 	pub fn get_mut(&mut self, degree: &Integer) -> Option<&mut Monomial> {
 		self.0
@@ -136,9 +131,8 @@ impl Polynomial {
 	///
 	/// ```
 	/// use abacas::structs::{Monomial, Polynomial};
-	/// use rug::{Integer, Rational};
 	///
-	/// let poly = Polynomial::new([Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(2)), Monomial::new(Rational::from_f64(9.0).unwrap(), Integer::from(9))]);
+	/// let poly = Polynomial::new([Monomial::new(4.into(), 2.into()), Monomial::new(9.into(), 9.into())]);
 	/// assert_eq!(poly.to_string(), "9x^9 + 4x^2");
 	/// ```
 	pub fn new(monomials: impl IntoIterator<Item = Monomial>) -> Self {
@@ -160,17 +154,17 @@ impl FromIterator<Monomial> for Polynomial {
 
 impl fmt::Display for Polynomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		if self.0.is_empty() {
-			write!(f, "0")?;
-		} else {
-			write!(f, "{}", self.0.first().unwrap())?;
-			for mono in self.0[1..].iter() {
-				let mut mono = mono.clone();
-				let is_neg = mono.coeff.is_negative();
+		match self.0.first() {
+			Some(first) => write!(f, "{first}")?,
+			None => write!(f, "0")?,
+		}
 
-				mono.coeff = mono.coeff.abs();
-
-				write!(f, " {} {mono}", if is_neg { '-' } else { '+' })?;
+		for monomial in self.0.iter().skip(1) {
+			if monomial.coeff.is_positive() {
+				write!(f, " + {monomial}")?;
+			} else {
+				// TODO: Find an alternative without allocations
+				write!(f, " - {}", -monomial.clone())?;
 			}
 		}
 
