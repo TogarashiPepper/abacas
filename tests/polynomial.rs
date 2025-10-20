@@ -89,7 +89,7 @@ fn zeros() {
 
 #[test]
 fn gcd() {
-    let a = p("x - 1") * p("x + 6");
+	let a = p("x - 1") * p("x + 6");
 	let b = p("x - 1") * p("x - 20");
 
 	assert_eq!(a.clone().gcd(b.clone()), p("x - 1"));
