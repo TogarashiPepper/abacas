@@ -11,6 +11,16 @@ fn gcd(a: Rational, b: &Rational) -> Rational {
 }
 
 impl Polynomial {
+	/// Gets the gcd of two polynomials, 
+	pub fn gcd(mut self, mut b: Polynomial) -> Polynomial {
+		while b != Polynomial::ZERO {
+			(self, b) = (b.clone(), self % b);
+		}
+
+		self.monic_mut();
+		self
+	}
+
 	/// Extracts the common factor of all monomials.
 	/// Returns [`None`] if the polynomial is zero or has coprime coefficients.
 	///

@@ -86,3 +86,12 @@ fn zeros() {
 	let dividend_smaller = divisor.clone().div_rem(&dividend);
 	assert_eq!(dividend_smaller, Some((Polynomial::ZERO, divisor)));
 }
+
+#[test]
+fn gcd() {
+    let a = p("x - 1") * p("x + 6");
+	let b = p("x - 1") * p("x - 20");
+
+	assert_eq!(a.clone().gcd(b.clone()), p("x - 1"));
+	assert_eq!(b.gcd(a), p("x - 1"));
+}
