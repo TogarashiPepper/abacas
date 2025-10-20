@@ -103,11 +103,11 @@ impl<T: Into<Rational>> From<T> for Monomial {
 
 impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match (self.coeff.clone(), self.degree.clone()) {
-			(a, b) if a == Integer::ONE.clone() && b == Rational::ONE.clone() => write!(f, "x"),
-			(_, a) if a == Integer::ZERO.clone() => write!(f, "{}", self.coeff),
-			(a, deg) if a == Rational::ONE.clone() => write!(f, "x^{deg}"),
-			(_, a) if a == Integer::ONE.clone() => write!(f, "{}x", self.coeff),
+		match (&self.coeff, &self.degree) {
+			(a, b) if a == Integer::ONE && b == Rational::ONE => write!(f, "x"),
+			(_, a) if a == &Integer::ZERO => write!(f, "{}", self.coeff),
+			(a, deg) if a == Rational::ONE => write!(f, "x^{deg}"),
+			(_, a) if a == Integer::ONE => write!(f, "{}x", self.coeff),
 			(_, _) => write!(f, "{}x^{}", self.coeff, self.degree),
 		}
 	}
