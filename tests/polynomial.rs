@@ -7,7 +7,7 @@ const D: Monomial = Monomial::new(2.5, 1);
 const E: Monomial = Monomial::new(1.0, 4);
 const F: Monomial = Monomial::new(2.5, 4);
 
-pub fn m(s: &str) -> Monomial {
+fn m(s: &str) -> Monomial {
 	s.parse().unwrap()
 }
 
