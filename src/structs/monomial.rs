@@ -2,6 +2,7 @@ mod add;
 mod div;
 mod mul;
 mod neg;
+mod pow;
 mod sub;
 
 use std::{fmt, str};
