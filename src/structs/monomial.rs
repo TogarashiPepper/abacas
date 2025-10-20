@@ -8,6 +8,7 @@ mod sub;
 use std::{fmt, str};
 
 use itertools::Itertools;
+use rug::{Integer, Rational};
 
 use crate::error::ParseError;
 
@@ -19,8 +20,9 @@ use crate::error::ParseError;
 ///
 /// ```
 /// use abacas::structs::Monomial;
+/// use rug::{Integer, Rational};
 ///
-/// let mono = Monomial::new(4.0, 10);
+/// let mono = Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(10));
 /// assert_eq!(mono.to_string(), "4x^10");
 ///
 /// let mono: Monomial = "4x^10".parse().unwrap();
@@ -31,19 +33,21 @@ use crate::error::ParseError;
 ///
 /// ```
 /// use abacas::structs::Monomial;
+/// use rug::{Integer, Rational};
 ///
-/// let add = Monomial::new(4.0, 10) + Monomial::new(1.0, 20);
+/// let add = Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(10)) + Monomial::new(Rational::ONE.clone(), Integer::from(20));
 /// assert_eq!(add.to_string(), "x^20 + 4x^10");
 ///
-/// let mul = Monomial::new(4.0, 10) * Monomial::linear(2.0);
+/// let mul = Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(10)) * Monomial::linear(Rational::from_f64(2.0).unwrap());
+///
 /// assert_eq!(mul.to_string(), "8x^11");
 /// ```
-#[derive(Clone, Copy, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct Monomial {
-	/// The coefficient of the monomial.
-	pub coeff: f64,
-	/// The degree of the monomial.
-	pub degree: i64,
+	/// The coefficient of the monomial
+	pub coeff: Rational,
+	/// The degree of the monomial
+	pub degree: Integer,
 }
 
 impl Monomial {
@@ -53,12 +57,13 @@ impl Monomial {
 	///
 	/// ```
 	/// use abacas::structs::Monomial;
+	/// use rug::{Integer, Rational};
 	///
-	/// let mono = Monomial::new(4.0, 22);
+	/// let mono = Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(22));
 	/// assert_eq!(mono.to_string(), "4x^22");
 	/// ```
-	pub const fn new(coeff: f64, degree: i64) -> Self {
-		if coeff == 0.0 {
+	pub fn new(coeff: Rational, degree: Integer) -> Self {
+		if &coeff == Rational::ZERO {
 			panic!("abacas: monomial coefficient must not be zero");
 		}
 
@@ -71,12 +76,13 @@ impl Monomial {
 	///
 	/// ```
 	/// use abacas::structs::Monomial;
+	/// use rug::Rational;
 	///
-	/// let mono = Monomial::constant(4.0);
+	/// let mono = Monomial::constant(Rational::from_f64(4.0).unwrap());
 	/// assert_eq!(mono.to_string(), "4");
 	/// ```
-	pub const fn constant(coeff: f64) -> Self {
-		Self::new(coeff, 0)
+	pub fn constant(coeff: Rational) -> Self {
+		Self::new(coeff, Integer::ZERO)
 	}
 
 	/// Creates a linear monomial. Panics if `coeff` is zero.
@@ -85,16 +91,17 @@ impl Monomial {
 	///
 	/// ```
 	/// use abacas::structs::Monomial;
+	/// use rug::Rational;
 	///
-	/// let mono = Monomial::linear(2.0);
+	/// let mono = Monomial::linear(Rational::from_f64(2.0).unwrap());
 	/// assert_eq!(mono.to_string(), "2x");
 	/// ```
-	pub const fn linear(coeff: f64) -> Self {
-		Self::new(coeff, 1)
+	pub fn linear(coeff: Rational) -> Self {
+		Self::new(coeff, Integer::ONE.clone())
 	}
 }
 
-impl<T: Into<f64>> From<T> for Monomial {
+impl<T: Into<Rational>> From<T> for Monomial {
 	fn from(value: T) -> Self {
 		Self::constant(value.into())
 	}
@@ -102,12 +109,12 @@ impl<T: Into<f64>> From<T> for Monomial {
 
 impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match (self.coeff, self.degree) {
-			(1.0, 1) => write!(f, "x"),
-			(_, 0) => write!(f, "{}", self.coeff),
-			(1.0, deg) => write!(f, "x^{deg}"),
-			(_, 1) => write!(f, "{}x", self.coeff),
-			(_, _) => write!(f, "{}x^{}", self.coeff, self.degree),
+		match (&self.coeff, &self.degree) {
+			(a, b) if a == Integer::ONE && b == Rational::ONE => write!(f, "x"),
+			(_, a) if a == &Integer::ZERO => write!(f, "{}", self.coeff.to_f64()),
+			(a, deg) if a == Rational::ONE => write!(f, "x^{deg}"),
+			(_, a) if a == Integer::ONE => write!(f, "{}x", self.coeff.to_f64()),
+			(_, _) => write!(f, "{}x^{}", self.coeff.to_f64(), self.degree),
 		}
 	}
 }
@@ -126,20 +133,23 @@ impl str::FromStr for Monomial {
 		}
 
 		match chars.next() {
-			None => return Ok(Self::constant(coeff)),
+			None => return Ok(Self::constant(Rational::from_f64(coeff).unwrap())),
 			Some('x') => (),
 			Some(_) => return Err(ParseError::InvalidSyntax),
 		}
 
 		match chars.next() {
-			None => return Ok(Self::linear(coeff)),
+			None => return Ok(Self::linear(Rational::from_f64(coeff).unwrap())),
 			Some('^') => (),
 			Some(_) => return Err(ParseError::InvalidSyntax),
 		}
 
 		let tail: String = chars.collect();
-		let degree = tail.parse()?;
+		let degree: i64 = tail.parse()?;
 
-		Ok(Self { coeff, degree })
+		Ok(Self {
+			coeff: Rational::from_f64(coeff).unwrap(),
+			degree: Integer::from(degree),
+		})
 	}
 }

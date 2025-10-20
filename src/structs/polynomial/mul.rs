@@ -17,7 +17,7 @@ impl<T: Into<Monomial>> MulAssign<T> for Polynomial {
 		let rhs = rhs.into();
 
 		for monomial in self.0.iter_mut() {
-			*monomial *= rhs;
+			*monomial *= rhs.clone();
 		}
 
 		self.clean();
