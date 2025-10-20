@@ -17,8 +17,8 @@ use crate::error::ParseError;
 ///
 /// Creating a [`Monomial`]:
 ///
-/// ```rust
-/// # use abacas::structs::Monomial;
+/// ```
+/// use abacas::structs::Monomial;
 ///
 /// let mono = Monomial::new(4.0, 10);
 /// assert_eq!(mono.to_string(), "4x^10");
@@ -29,8 +29,8 @@ use crate::error::ParseError;
 ///
 /// Using arithmetic operations:
 ///
-/// ```rust
-/// # use abacas::structs::Monomial;
+/// ```
+/// use abacas::structs::Monomial;
 ///
 /// let add = Monomial::new(4.0, 10) + Monomial::new(1.0, 20);
 /// assert_eq!(add.to_string(), "x^20 + 4x^10");
@@ -51,8 +51,8 @@ impl Monomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::Monomial;
+	/// ```
+	/// use abacas::structs::Monomial;
 	///
 	/// let mono = Monomial::new(4.0, 22);
 	/// assert_eq!(mono.to_string(), "4x^22");
@@ -69,8 +69,8 @@ impl Monomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::Monomial;
+	/// ```
+	/// use abacas::structs::Monomial;
 	///
 	/// let mono = Monomial::constant(4.0);
 	/// assert_eq!(mono.to_string(), "4");
@@ -83,8 +83,8 @@ impl Monomial {
 	///
 	/// # Examples
 	///
-	/// ```rust
-	/// # use abacas::structs::Monomial;
+	/// ```
+	/// use abacas::structs::Monomial;
 	///
 	/// let mono = Monomial::linear(2.0);
 	/// assert_eq!(mono.to_string(), "2x");
