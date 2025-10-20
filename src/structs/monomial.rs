@@ -58,13 +58,13 @@ impl Monomial {
 	/// let mono = Monomial::new(4.0, 22);
 	/// assert_eq!(mono.to_string(), "4x^22");
 	/// ```
-	pub fn new(coeff: f64, degree: i64) -> Self {
-		if coeff == 0.0 {
+	pub fn new(coeff: Rational, degree: Integer) -> Self {
+		if &coeff == Rational::ZERO {
 			panic!("abacas: monomial coefficient must not be zero");
 		}
 
 		Self {
-			coeff: Rational::from_f64(coeff).unwrap(),
+			coeff,
 			degree: Integer::from(degree),
 		}
 	}
@@ -79,8 +79,8 @@ impl Monomial {
 	/// let mono = Monomial::constant(4.0);
 	/// assert_eq!(mono.to_string(), "4");
 	/// ```
-	pub fn constant(coeff: f64) -> Self {
-		Self::new(coeff, 0)
+	pub fn constant(coeff: Rational) -> Self {
+		Self::new(coeff, Integer::ZERO)
 	}
 
 	/// Creates a linear monomial. Panics if `coeff` is zero.
@@ -93,12 +93,12 @@ impl Monomial {
 	/// let mono = Monomial::linear(2.0);
 	/// assert_eq!(mono.to_string(), "2x");
 	/// ```
-	pub fn linear(coeff: f64) -> Self {
-		Self::new(coeff, 1)
+	pub fn linear(coeff: Rational) -> Self {
+		Self::new(coeff, Integer::ONE.clone())
 	}
 }
 
-impl<T: Into<f64>> From<T> for Monomial {
+impl<T: Into<Rational>> From<T> for Monomial {
 	fn from(value: T) -> Self {
 		Self::constant(value.into())
 	}
@@ -106,11 +106,11 @@ impl<T: Into<f64>> From<T> for Monomial {
 
 impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match (&self.coeff, &self.degree) {
-			(Rational::ONE, Integer::ONE) => write!(f, "x"),
-			(_, &Integer::ZERO) => write!(f, "{}", self.coeff),
-			(Rational::ONE, deg) => write!(f, "x^{deg}"),
-			(_, Integer::ONE) => write!(f, "{}x", self.coeff),
+		match (self.coeff.clone(), self.degree.clone()) {
+			(a, b) if a == Integer::ONE.clone() && b == Rational::ONE.clone() => write!(f, "x"),
+			(_, a) if a == Integer::ZERO.clone() => write!(f, "{}", self.coeff),
+			(a, deg) if a == Rational::ONE.clone() => write!(f, "x^{deg}"),
+			(_, a) if a == Integer::ONE.clone() => write!(f, "{}x", self.coeff),
 			(_, _) => write!(f, "{}x^{}", self.coeff, self.degree),
 		}
 	}
@@ -130,13 +130,13 @@ impl str::FromStr for Monomial {
 		}
 
 		match chars.next() {
-			None => return Ok(Self::constant(coeff)),
+			None => return Ok(Self::constant(Rational::from_f64(coeff).unwrap())),
 			Some('x') => (),
 			Some(_) => return Err(ParseError::InvalidSyntax),
 		}
 
 		match chars.next() {
-			None => return Ok(Self::linear(coeff)),
+			None => return Ok(Self::linear(Rational::from_f64(coeff).unwrap())),
 			Some('^') => (),
 			Some(_) => return Err(ParseError::InvalidSyntax),
 		}

@@ -8,6 +8,8 @@ mod sub;
 use std::ops::Add;
 use std::{fmt, str};
 
+use rug::{Integer, Rational};
+
 use crate::error::ParseError;
 use crate::structs::Monomial;
 
@@ -66,8 +68,8 @@ impl Polynomial {
 	/// let poly: Polynomial = "4x^999 + 2x^3 + 1".parse().unwrap();
 	/// assert_eq!(poly.degree(), Some(999));
 	/// ```
-	pub fn degree(&self) -> Option<i64> {
-		self.0.first().map(|mono| mono.degree)
+	pub fn degree(&self) -> Option<Integer> {
+		self.0.first().map(|mono| mono.degree.clone())
 	}
 
 	/// Returns the monomial with the given degree, or [`None`] if the degree is not present.
@@ -80,7 +82,7 @@ impl Polynomial {
 	/// let poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
 	/// assert_eq!(poly.get(9), Some(&Monomial::new(4.0, 9)));
 	/// ```
-	pub fn get(&self, degree: i64) -> Option<&Monomial> {
+	pub fn get(&self, degree: &Integer) -> Option<&Monomial> {
 		self.0
 			.binary_search_by(|mono| degree.cmp(&mono.degree))
 			.ok()
@@ -97,7 +99,7 @@ impl Polynomial {
 	/// let mut poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
 	/// assert_eq!(poly.get_mut(9), Some(&mut Monomial::new(4.0, 9)));
 	/// ```
-	pub fn get_mut(&mut self, degree: i64) -> Option<&mut Monomial> {
+	pub fn get_mut(&mut self, degree: &Integer) -> Option<&mut Monomial> {
 		self.0
 			.binary_search_by(|mono| degree.cmp(&mono.degree))
 			.ok()
@@ -105,11 +107,19 @@ impl Polynomial {
 	}
 
 	/// Internal method to get a monomial or insert it if it does not exist.
-	fn get_or_insert(&mut self, degree: i64) -> &mut Monomial {
+	fn get_or_insert(&mut self, degree: &Integer) -> &mut Monomial {
 		let index = self
 			.0
 			.binary_search_by(|mono| degree.cmp(&mono.degree))
-			.inspect_err(|&index| self.0.insert(index, Monomial { coeff: 0.0, degree }))
+			.inspect_err(|&index| {
+				self.0.insert(
+					index,
+					Monomial {
+						coeff: Rational::ZERO.clone(),
+						degree: degree.clone(),
+					},
+				)
+			})
 			.unwrap_or_else(|index| index);
 
 		&mut self.0[index]
@@ -149,8 +159,8 @@ impl fmt::Display for Polynomial {
 		} else {
 			write!(f, "{}", self.0.first().unwrap())?;
 			for mono in self.0[1..].iter() {
-				let mut mono = *mono;
-				let is_neg = mono.coeff.is_sign_negative();
+				let mut mono = mono.clone();
+				let is_neg = mono.coeff.is_negative();
 
 				mono.coeff = mono.coeff.abs();
 
