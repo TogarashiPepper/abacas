@@ -1,11 +1,14 @@
-use std::ops::{Add, Div, DivAssign, Mul, MulAssign, Neg, Sub};
+mod add;
+mod div;
+mod mul;
+mod neg;
+mod sub;
+
 use std::{fmt, str};
 
 use itertools::Itertools;
-use rug::ops::NegAssign;
 
 use crate::error::ParseError;
-use crate::structs::Polynomial;
 
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
 ///
@@ -87,69 +90,6 @@ impl Monomial {
 	/// ```
 	pub const fn linear(coeff: f64) -> Self {
 		Self::new(coeff, 1)
-	}
-}
-
-impl Add for Monomial {
-	type Output = Polynomial;
-
-	fn add(self, rhs: Self) -> Self::Output {
-		Polynomial::new([self, rhs])
-	}
-}
-
-impl Div for Monomial {
-	type Output = Self;
-
-	fn div(mut self, rhs: Self) -> Self::Output {
-		self /= rhs;
-		self
-	}
-}
-
-impl DivAssign for Monomial {
-	fn div_assign(&mut self, rhs: Self) {
-		self.coeff /= rhs.coeff;
-		self.degree -= rhs.degree;
-	}
-}
-
-impl Mul for Monomial {
-	type Output = Self;
-
-	fn mul(mut self, rhs: Self) -> Self::Output {
-		self *= rhs;
-		self
-	}
-}
-
-impl MulAssign for Monomial {
-	fn mul_assign(&mut self, rhs: Self) {
-		self.coeff *= rhs.coeff;
-		self.degree += rhs.degree;
-	}
-}
-
-impl Neg for Monomial {
-	type Output = Self;
-
-	fn neg(mut self) -> Self::Output {
-		self.neg_assign();
-		self
-	}
-}
-
-impl NegAssign for Monomial {
-	fn neg_assign(&mut self) {
-		self.coeff.neg_assign();
-	}
-}
-
-impl Sub for Monomial {
-	type Output = Polynomial;
-
-	fn sub(self, rhs: Self) -> Self::Output {
-		Polynomial::new([self, -rhs])
 	}
 }
 
