@@ -94,4 +94,10 @@ fn gcd() {
 
 	assert_eq!(a.clone().gcd(b.clone()), p("x - 1"));
 	assert_eq!(b.gcd(a), p("x - 1"));
+
+	let a = p("2x - 1") * p("x + 6") * p("41x + 2");
+	let b = p("2x - 1") * p("x - 20") * p("99999x^2 + 7");
+
+	assert_eq!(a.clone().gcd(b.clone()), p("x - 0.5"));
+	assert_eq!(b.clone().gcd(a.clone()), p("x - 0.5"));
 }
