@@ -11,13 +11,14 @@ fn gcd(a: Rational, b: &Rational) -> Rational {
 }
 
 impl Polynomial {
-	/// Gets the gcd of two polynomials.
+	/// Returns the GCD of two polynomials in monic form.
 	///
 	/// # Examples
+	///
 	/// ```
 	/// use abacas::structs::Polynomial;
 	///
-	/// let coeff: Polynomial = "x - 1".parse().unwrap();
+	/// let coeff = "x - 1".parse::<Polynomial>().unwrap();
 	/// let a = coeff.clone() * "x - 21".parse::<Polynomial>().unwrap();
 	/// let b = coeff.clone() * "4x - 9".parse::<Polynomial>().unwrap();
 	///
