@@ -8,7 +8,7 @@ mod sub;
 use std::ops::Add;
 use std::{fmt, str};
 
-use rug::{Integer, Rational};
+use rug::Integer;
 
 use crate::error::ParseError;
 use crate::structs::Monomial;
@@ -112,13 +112,10 @@ impl Polynomial {
 			.0
 			.binary_search_by(|mono| degree.cmp(&mono.degree))
 			.inspect_err(|&index| {
-				self.0.insert(
-					index,
-					Monomial {
-						coeff: Rational::ZERO.clone(),
-						degree: degree.clone(),
-					},
-				)
+				let coeff = 0.into();
+				let degree = degree.clone();
+
+				self.0.insert(index, Monomial { coeff, degree });
 			})
 			.unwrap_or_else(|index| index);
 
