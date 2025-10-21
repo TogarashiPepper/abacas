@@ -19,8 +19,6 @@ impl<T: Into<Monomial>> MulAssign<T> for Polynomial {
 		for monomial in self.0.iter_mut() {
 			*monomial *= rhs.clone();
 		}
-
-		self.clean();
 	}
 }
 
@@ -40,7 +38,5 @@ impl MulAssign for Polynomial {
 		for monomial in rhs.0 {
 			*self += old.clone() * monomial;
 		}
-
-		self.clean();
 	}
 }

@@ -1,40 +1,25 @@
 use abacas::structs::{Monomial, Polynomial};
 
-fn a() -> Monomial {
-	Monomial::new(1.into(), 0.into())
+const A: fn() -> Monomial = || Monomial::new(1, 0);
+const B: fn() -> Monomial = || Monomial::new((5, 2), 0);
+const C: fn() -> Monomial = || Monomial::new(1, 1);
+const D: fn() -> Monomial = || Monomial::new((5, 2), 1);
+const E: fn() -> Monomial = || Monomial::new(1, 4);
+const F: fn() -> Monomial = || Monomial::new((5, 2), 4);
+
+/// Helper to construct a monomial without type inference required.
+fn m(input: &str) -> Monomial {
+	input.parse().unwrap()
 }
 
-fn b() -> Monomial {
-	Monomial::new((5, 2).into(), 0.into())
-}
-
-fn c() -> Monomial {
-	Monomial::new(1.into(), 1.into())
-}
-
-fn d() -> Monomial {
-	Monomial::new((5, 2).into(), 1.into())
-}
-
-fn e() -> Monomial {
-	Monomial::new(1.into(), 4.into())
-}
-
-fn f() -> Monomial {
-	Monomial::new((5, 2).into(), 4.into())
-}
-
-fn m(s: &str) -> Monomial {
-	s.parse().unwrap()
-}
-
-fn p(s: &str) -> Polynomial {
-	s.parse().unwrap()
+/// Helper to construct a polynomial without type inference required.
+fn p(input: &str) -> Polynomial {
+	input.parse().unwrap()
 }
 
 #[test]
 fn construction() {
-	let polynomial = Polynomial::new([a(), d(), f(), d(), a()]);
+	let polynomial = Polynomial::new([A(), D(), F(), D(), A()]);
 	assert_eq!(polynomial.to_string(), "2.5x^4 + 5x + 2");
 
 	let zero = Polynomial::new([]);
@@ -54,25 +39,25 @@ fn impls() {
 
 #[test]
 fn operators() {
-	let addition = a() + b();
+	let addition = A() + B();
 	assert_eq!(addition.to_string(), "3.5");
 
-	let subtraction = a() - c() + d() + (-f());
+	let subtraction = A() - C() + D() + (-F());
 	assert_eq!(subtraction.to_string(), "-2.5x^4 + 1.5x + 1");
 
-	let multiplication = b() * d() + e() * f();
+	let multiplication = B() * D() + E() * F();
 	assert_eq!(multiplication.to_string(), "2.5x^8 + 6.25x");
 
-	let division = (f() + e() + d() + c()) / f();
+	let division = (F() + E() + D() + C()) / F();
 	assert_eq!(division.to_string(), "1.4 + 1.4x^-3");
 
-	let zero = b() * d() - d() * b();
+	let zero = B() * D() - D() * B();
 	assert_eq!(zero.to_string(), "0");
 }
 
 #[test]
 fn parse() {
-	let expected = a() - d() - e() - e();
+	let expected = A() - D() - E() - E();
 
 	let mono = m("1") + m("-2.5x") + m("-2x^4");
 	assert_eq!(mono, expected);
