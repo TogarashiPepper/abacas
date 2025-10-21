@@ -24,9 +24,9 @@ impl Polynomial {
 	///
 	/// assert_eq!(a.gcd(b), coeff);
 	/// ```
-	pub fn gcd(mut self, mut b: Polynomial) -> Polynomial {
-		while b != Polynomial::ZERO {
-			(self, b) = (b.clone(), self % b);
+	pub fn gcd(mut self, mut other: Polynomial) -> Polynomial {
+		while other != Polynomial::ZERO {
+			(other, self) = (self.div_rem_mut(&other).unwrap(), other);
 		}
 
 		self.monic_mut();
