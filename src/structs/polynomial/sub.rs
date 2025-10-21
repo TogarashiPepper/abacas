@@ -38,7 +38,5 @@ impl SubAssign for Polynomial {
 		for monomial in rhs.0 {
 			*self -= monomial;
 		}
-
-		self.clean();
 	}
 }

@@ -21,7 +21,7 @@ use crate::error::ParseError;
 /// ```
 /// use abacas::structs::Monomial;
 ///
-/// let mono = Monomial::new(4.into(), 10.into());
+/// let mono = Monomial::new(4, 10);
 /// assert_eq!(mono.to_string(), "4x^10");
 ///
 /// let mono: Monomial = "4x^10".parse().unwrap();
@@ -33,10 +33,10 @@ use crate::error::ParseError;
 /// ```
 /// use abacas::structs::Monomial;
 ///
-/// let add = Monomial::new(4.into(), 10.into()) + Monomial::new(1.into(), 20.into());
+/// let add = Monomial::new(4, 10) + Monomial::new(1, 20);
 /// assert_eq!(add.to_string(), "x^20 + 4x^10");
 ///
-/// let mul = Monomial::new(4.into(), 10.into()) * Monomial::linear(2.into());
+/// let mul = Monomial::new(4, 10) * Monomial::linear(2);
 /// assert_eq!(mul.to_string(), "8x^11");
 /// ```
 #[derive(Clone, Debug, Eq, PartialEq)]
@@ -55,10 +55,13 @@ impl Monomial {
 	/// ```
 	/// use abacas::structs::Monomial;
 	///
-	/// let mono = Monomial::new(4.into(), 22.into());
+	/// let mono = Monomial::new(4, 22);
 	/// assert_eq!(mono.to_string(), "4x^22");
 	/// ```
-	pub const fn new(coeff: Rational, degree: Integer) -> Self {
+	pub fn new(coeff: impl Into<Rational>, degree: impl Into<Integer>) -> Self {
+		let coeff = coeff.into();
+		let degree = degree.into();
+
 		if coeff.is_zero() {
 			panic!("abacas: monomial coefficient must not be zero");
 		}
@@ -73,11 +76,11 @@ impl Monomial {
 	/// ```
 	/// use abacas::structs::Monomial;
 	///
-	/// let mono = Monomial::constant(4.into());
+	/// let mono = Monomial::constant(4);
 	/// assert_eq!(mono.to_string(), "4");
 	/// ```
-	pub const fn constant(coeff: Rational) -> Self {
-		Self::new(coeff, Integer::ZERO)
+	pub fn constant(coeff: impl Into<Rational>) -> Self {
+		Self::new(coeff, 0)
 	}
 
 	/// Creates a linear monomial. Panics if `coeff` is zero.
@@ -87,17 +90,17 @@ impl Monomial {
 	/// ```
 	/// use abacas::structs::Monomial;
 	///
-	/// let mono = Monomial::linear(2.into());
+	/// let mono = Monomial::linear(2);
 	/// assert_eq!(mono.to_string(), "2x");
 	/// ```
-	pub fn linear(coeff: Rational) -> Self {
-		Self::new(coeff, Integer::ONE.clone())
+	pub fn linear(coeff: impl Into<Rational>) -> Self {
+		Self::new(coeff, 1)
 	}
 }
 
 impl<T: Into<Rational>> From<T> for Monomial {
 	fn from(value: T) -> Self {
-		Self::constant(value.into())
+		Self::constant(value)
 	}
 }
 

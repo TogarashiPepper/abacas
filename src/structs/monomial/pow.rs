@@ -16,6 +16,6 @@ impl<T: Into<i32>> PowAssign<T> for Monomial {
 		let rhs = rhs.into();
 
 		self.coeff.pow_assign(rhs);
-		self.degree *= i64::from(rhs);
+		self.degree *= rhs;
 	}
 }
