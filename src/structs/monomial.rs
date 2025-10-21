@@ -20,9 +20,8 @@ use crate::error::ParseError;
 ///
 /// ```
 /// use abacas::structs::Monomial;
-/// use rug::{Integer, Rational};
 ///
-/// let mono = Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(10));
+/// let mono = Monomial::new(4.into(), 10.into());
 /// assert_eq!(mono.to_string(), "4x^10");
 ///
 /// let mono: Monomial = "4x^10".parse().unwrap();
@@ -33,16 +32,14 @@ use crate::error::ParseError;
 ///
 /// ```
 /// use abacas::structs::Monomial;
-/// use rug::{Integer, Rational};
 ///
-/// let add = Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(10)) + Monomial::new(Rational::ONE.clone(), Integer::from(20));
+/// let add = Monomial::new(4.into(), 10.into()) + Monomial::new(1.into(), 20.into());
 /// assert_eq!(add.to_string(), "x^20 + 4x^10");
 ///
-/// let mul = Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(10)) * Monomial::linear(Rational::from_f64(2.0).unwrap());
-///
+/// let mul = Monomial::new(4.into(), 10.into()) * Monomial::linear(2.into());
 /// assert_eq!(mul.to_string(), "8x^11");
 /// ```
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq)]
 pub struct Monomial {
 	/// The coefficient of the monomial
 	pub coeff: Rational,
@@ -57,13 +54,12 @@ impl Monomial {
 	///
 	/// ```
 	/// use abacas::structs::Monomial;
-	/// use rug::{Integer, Rational};
 	///
-	/// let mono = Monomial::new(Rational::from_f64(4.0).unwrap(), Integer::from(22));
+	/// let mono = Monomial::new(4.into(), 22.into());
 	/// assert_eq!(mono.to_string(), "4x^22");
 	/// ```
-	pub fn new(coeff: Rational, degree: Integer) -> Self {
-		if &coeff == Rational::ZERO {
+	pub const fn new(coeff: Rational, degree: Integer) -> Self {
+		if coeff.is_zero() {
 			panic!("abacas: monomial coefficient must not be zero");
 		}
 
@@ -76,12 +72,11 @@ impl Monomial {
 	///
 	/// ```
 	/// use abacas::structs::Monomial;
-	/// use rug::Rational;
 	///
-	/// let mono = Monomial::constant(Rational::from_f64(4.0).unwrap());
+	/// let mono = Monomial::constant(4.into());
 	/// assert_eq!(mono.to_string(), "4");
 	/// ```
-	pub fn constant(coeff: Rational) -> Self {
+	pub const fn constant(coeff: Rational) -> Self {
 		Self::new(coeff, Integer::ZERO)
 	}
 
@@ -91,9 +86,8 @@ impl Monomial {
 	///
 	/// ```
 	/// use abacas::structs::Monomial;
-	/// use rug::Rational;
 	///
-	/// let mono = Monomial::linear(Rational::from_f64(2.0).unwrap());
+	/// let mono = Monomial::linear(2.into());
 	/// assert_eq!(mono.to_string(), "2x");
 	/// ```
 	pub fn linear(coeff: Rational) -> Self {
@@ -109,12 +103,20 @@ impl<T: Into<Rational>> From<T> for Monomial {
 
 impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match (&self.coeff, &self.degree) {
-			(a, b) if a == Integer::ONE && b == Rational::ONE => write!(f, "x"),
-			(_, a) if a == &Integer::ZERO => write!(f, "{}", self.coeff.to_f64()),
-			(a, deg) if a == Rational::ONE => write!(f, "x^{deg}"),
-			(_, a) if a == Integer::ONE => write!(f, "{}x", self.coeff.to_f64()),
-			(_, _) => write!(f, "{}x^{}", self.coeff.to_f64(), self.degree),
+		if self.degree == 0 {
+			write!(f, "{}", self.coeff.to_f64())
+		} else if self.degree == 1 {
+			match self.coeff.to_f64() {
+				-1.0 => write!(f, "-x"),
+				1.0 => write!(f, "x"),
+				coeff => write!(f, "{coeff}x"),
+			}
+		} else {
+			match self.coeff.to_f64() {
+				-1.0 => write!(f, "-x^{}", self.degree),
+				1.0 => write!(f, "x^{}", self.degree),
+				coeff => write!(f, "{coeff}x^{}", self.degree),
+			}
 		}
 	}
 }

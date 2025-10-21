@@ -2,13 +2,12 @@ use rug::Rational;
 
 use crate::structs::Polynomial;
 
-/// Internal function that performs the euclidean algorithm.
-fn gcd(mut a: Rational, mut b: Rational) -> Rational {
-	while b != 0.0 {
-		(a, b) = (b.clone(), (a / b).rem_trunc());
-	}
+/// Internal function that calculates the greatest common divisor.
+fn gcd(a: Rational, b: &Rational) -> Rational {
+	let (numer, denom) = a.into_numer_denom();
 
-	a.abs()
+	// See: https://math.stackexchange.com/a/199905
+	(numer.gcd(b.numer()), denom.lcm(b.denom())).into()
 }
 
 impl Polynomial {
@@ -23,7 +22,7 @@ impl Polynomial {
 	/// let poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
 	/// let (factor, rest) = poly.factor().unwrap();
 	///
-	/// assert_eq!(factor, 4.0);
+	/// assert_eq!(factor, 4);
 	/// assert_eq!(rest.to_string(), "4x^2 + 2x + 1");
 	/// ```
 	pub fn factor(mut self) -> Option<(Rational, Self)> {
@@ -41,13 +40,13 @@ impl Polynomial {
 	/// let mut poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
 	/// let factor = poly.factor_mut().unwrap();
 	///
-	/// assert_eq!(factor, 4.0);
+	/// assert_eq!(factor, 4);
 	/// assert_eq!(poly.to_string(), "4x^2 + 2x + 1");
 	/// ```
 	pub fn factor_mut(&mut self) -> Option<Rational> {
-		let factor = self.0.iter().map(|mono| mono.coeff.clone()).reduce(gcd)?;
+		let factor = self.0.iter().map(|mono| &mono.coeff).fold(Rational::new(), gcd);
 
-		if factor <= 1.0 {
+		if factor <= 1 {
 			return None;
 		}
 
@@ -67,7 +66,7 @@ impl Polynomial {
 	/// let poly: Polynomial = "16x^9 + 4x^3 + 32".parse().unwrap();
 	/// let (factor, monic) = poly.monic().unwrap();
 	///
-	/// assert_eq!(factor, 16.0);
+	/// assert_eq!(factor, 16);
 	/// assert_eq!(monic.to_string(), "x^9 + 0.25x^3 + 2");
 	/// ```
 	pub fn monic(mut self) -> Option<(Rational, Self)> {
@@ -85,13 +84,13 @@ impl Polynomial {
 	/// let mut poly: Polynomial = "16x^9 + 4x^3 + 32".parse().unwrap();
 	/// let factor = poly.monic_mut().unwrap();
 	///
-	/// assert_eq!(factor, 16.0);
+	/// assert_eq!(factor, 16);
 	/// assert_eq!(poly.to_string(), "x^9 + 0.25x^3 + 2");
 	/// ```
 	pub fn monic_mut(&mut self) -> Option<Rational> {
 		let factor = self.0.first()?.coeff.clone();
 
-		if factor == Rational::ONE.clone() {
+		if factor == 1 {
 			return None;
 		}
 

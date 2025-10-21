@@ -2,173 +2,165 @@ use std::ops::{Add, Div, Mul, Sub};
 
 use rug::{Integer, Rational};
 
-/// Represents a Number
+/// Represents a number of any supported set.
 #[derive(Clone, Debug)]
 pub enum Number {
-	/// A number belonging to set of natural numbers (not including zero)
+	/// A number belonging to set of natural numbers (not including zero).
 	Natural(Integer),
-	/// A number belonging to the set of integers
+	/// A number belonging to the set of integers.
 	Integer(Integer),
-	/// A real number
-	Real(Rational),
+	/// A number belonging to the set of rational numbers.
+	Rational(Rational),
 }
 
-impl Number {
-	/// Convert rug::Integer to Number::Integer
-	pub fn from_integer(n: Integer) -> Self {
-		Self::Integer(n)
+impl From<Integer> for Number {
+	fn from(value: Integer) -> Self {
+		if value.is_positive() {
+			Self::Natural(value)
+		} else {
+			Self::Integer(value)
+		}
 	}
+}
 
-	/// Convert rug::Rational to Number::Real
-	pub fn from_rational(n: Rational) -> Self {
-		Self::Real(n)
+impl From<Rational> for Number {
+	fn from(value: Rational) -> Self {
+		if value.is_integer() {
+			Self::from(value.into_numer_denom().0)
+		} else {
+			Self::Rational(value)
+		}
 	}
 }
 
 impl Add for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn add(self, rhs: Self) -> Self::Output {
-		match (self, rhs) {
-			(Number::Natural(n1), Number::Natural(n2)) => Number::Natural(n1 + n2),
-			(Number::Natural(n), Number::Integer(i)) | (Number::Integer(i), Number::Natural(n)) => {
-				Number::from_integer(n + i)
-			}
-			(Number::Natural(n), Number::Real(r)) | (Number::Real(r), Number::Natural(n)) => {
-				Number::from_rational(n + r)
-			}
-			(Number::Integer(i1), Number::Integer(i2)) => Number::from_integer(i1 + i2),
-			(Number::Integer(i), Number::Real(r)) | (Number::Real(r), Number::Integer(i)) => {
-				Number::from_rational(i + r)
-			}
-			(Number::Real(r1), Number::Real(r2)) => Number::from_rational(r1 + r2),
+		match self {
+			Self::Natural(a) | Self::Integer(a) => match rhs {
+				Self::Natural(b) | Self::Integer(b) => Self::from(a + b),
+				Self::Rational(b) => Self::from(a + b),
+			},
+			Self::Rational(a) => match rhs {
+				Self::Natural(b) | Self::Integer(b) => Self::from(a + b),
+				Self::Rational(b) => Self::from(a + b),
+			},
 		}
 	}
 }
 
 impl Div for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn div(self, rhs: Self) -> Self::Output {
-		match (self, rhs) {
-			(Number::Natural(n1), Number::Natural(n2)) => Number::Natural(n1 / n2),
-			(Number::Natural(n), Number::Integer(i)) | (Number::Integer(i), Number::Natural(n)) => {
-				Number::from_integer(n / i)
-			}
-			(Number::Natural(n), Number::Real(r)) | (Number::Real(r), Number::Natural(n)) => {
-				Number::from_rational(n / r)
-			}
-			(Number::Integer(i1), Number::Integer(i2)) => Number::from_integer(i1 / i2),
-			(Number::Integer(i), Number::Real(r)) | (Number::Real(r), Number::Integer(i)) => {
-				Number::from_rational(i / r)
-			}
-			(Number::Real(r1), Number::Real(r2)) => Number::from_rational(r1 / r2),
+		match self {
+			Self::Natural(a) | Self::Integer(a) => match rhs {
+				Self::Natural(b) | Self::Integer(b) => Self::from(a / b),
+				Self::Rational(b) => Self::from(a / b),
+			},
+			Self::Rational(a) => match rhs {
+				Self::Natural(b) | Self::Integer(b) => Self::from(a / b),
+				Self::Rational(b) => Self::from(a / b),
+			},
 		}
 	}
 }
 
 impl Mul for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn mul(self, rhs: Self) -> Self::Output {
-		match (self, rhs) {
-			(Number::Natural(n1), Number::Natural(n2)) => Number::Natural(n1 * n2),
-			(Number::Natural(n), Number::Integer(i)) | (Number::Integer(i), Number::Natural(n)) => {
-				Number::from_integer(n * i)
-			}
-			(Number::Natural(n), Number::Real(r)) | (Number::Real(r), Number::Natural(n)) => {
-				Number::from_rational(n * r)
-			}
-			(Number::Integer(i1), Number::Integer(i2)) => Number::from_integer(i1 * i2),
-			(Number::Integer(i), Number::Real(r)) | (Number::Real(r), Number::Integer(i)) => {
-				Number::from_rational(i * r)
-			}
-			(Number::Real(r1), Number::Real(r2)) => Number::from_rational(r1 * r2),
+		match self {
+			Self::Natural(a) | Self::Integer(a) => match rhs {
+				Self::Natural(b) | Self::Integer(b) => Self::from(a * b),
+				Self::Rational(b) => Self::from(a * b),
+			},
+			Self::Rational(a) => match rhs {
+				Self::Natural(b) | Self::Integer(b) => Self::from(a * b),
+				Self::Rational(b) => Self::from(a * b),
+			},
 		}
 	}
 }
 
 impl Sub for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn sub(self, rhs: Self) -> Self::Output {
-		match (self, rhs) {
-			(Number::Natural(n1), Number::Natural(n2)) => Number::Natural(n1 - n2),
-			(Number::Natural(n), Number::Integer(i)) | (Number::Integer(i), Number::Natural(n)) => {
-				Number::from_integer(n - i)
-			}
-			(Number::Natural(n), Number::Real(r)) | (Number::Real(r), Number::Natural(n)) => {
-				Number::from_rational(n - r)
-			}
-			(Number::Integer(i1), Number::Integer(i2)) => Number::from_integer(i1 - i2),
-			(Number::Integer(i), Number::Real(r)) | (Number::Real(r), Number::Integer(i)) => {
-				Number::from_rational(i - r)
-			}
-			(Number::Real(r1), Number::Real(r2)) => Number::from_rational(r1 - r2),
+		match self {
+			Self::Natural(a) | Self::Integer(a) => match rhs {
+				Self::Natural(b) | Self::Integer(b) => Self::from(a - b),
+				Self::Rational(b) => Self::from(a - b),
+			},
+			Self::Rational(a) => match rhs {
+				Self::Natural(b) | Self::Integer(b) => Self::from(a - b),
+				Self::Rational(b) => Self::from(a - b),
+			},
 		}
 	}
 }
 
 impl Add<Integer> for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn add(self, rhs: Integer) -> Self::Output {
-		self + Number::Integer(rhs)
+		self + Self::Integer(rhs)
 	}
 }
 
 impl Div<Integer> for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn div(self, rhs: Integer) -> Self::Output {
-		self / Number::Integer(rhs)
+		self / Self::Integer(rhs)
 	}
 }
 
 impl Mul<Integer> for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn mul(self, rhs: Integer) -> Self::Output {
-		self * Number::Integer(rhs)
+		self * Self::Integer(rhs)
 	}
 }
 
 impl Sub<Integer> for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn sub(self, rhs: Integer) -> Self::Output {
-		self - Number::Integer(rhs)
+		self - Self::Integer(rhs)
 	}
 }
 
 impl Add<Rational> for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn add(self, rhs: Rational) -> Self::Output {
-		self + Number::Real(rhs)
+		self + Self::Rational(rhs)
 	}
 }
 
 impl Div<Rational> for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn div(self, rhs: Rational) -> Self::Output {
-		self / Number::Real(rhs)
+		self / Self::Rational(rhs)
 	}
 }
 
 impl Mul<Rational> for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn mul(self, rhs: Rational) -> Self::Output {
-		self * Number::Real(rhs)
+		self * Self::Rational(rhs)
 	}
 }
 
 impl Sub<Rational> for Number {
-	type Output = Number;
+	type Output = Self;
 
 	fn sub(self, rhs: Rational) -> Self::Output {
-		self - Number::Real(rhs)
+		self - Self::Rational(rhs)
 	}
 }
