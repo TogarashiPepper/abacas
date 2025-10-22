@@ -5,4 +5,4 @@ edition = "2024"
 
 [dependencies]
 itertools = { workspace = true }
-rug = { workspace = true}
+rug = { workspace = true }
