@@ -76,6 +76,14 @@ impl<'a> Lexer<'a> {
 					token.push(char.unwrap());
 				}
 
+				if tokens.last().is_some_and(|f| f == &Token::Sub) {
+					tokens.pop();
+					if tokens.len() > 0 {
+						tokens.push(Token::Add);
+					}
+					token = String::from("-") + &token;
+				}
+
 				tokens.push(Token::new(token));
 
 				if to_insert_mul {

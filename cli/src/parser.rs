@@ -11,6 +11,7 @@ impl Parser {
 	}
 
 	pub fn ast(&mut self) -> Vec<Expression> {
+		dbg!(&self.tokens);
 		vec![]
 	}
 }

@@ -3,7 +3,7 @@ use std::str::FromStr;
 use abacas::number::Number;
 use rug::{Integer, Rational};
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Token {
 	Number(Number),
 	Ident(String),
