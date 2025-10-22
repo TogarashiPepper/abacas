@@ -5,7 +5,7 @@ use std::ops::{Add, Div, Mul, Sub};
 use rug::{Integer, Rational};
 
 /// Represents a number of any supported set.
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Number {
 	/// A number belonging to set of natural numbers (not including zero).
 	Natural(Integer),
