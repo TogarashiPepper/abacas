@@ -1,3 +1,4 @@
+//! Module for the `Number` enum and all generic number operations
 use std::ops::{Add, Div, Mul, Sub};
 
 use rug::{Integer, Rational};

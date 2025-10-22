@@ -1,4 +1,4 @@
-use abacas::{Monomial, Polynomial};
+use abacas::{monomial::Monomial, polynomial::Polynomial};
 
 const A: fn() -> Monomial = || Monomial::new(1, 0);
 const B: fn() -> Monomial = || Monomial::new((5, 2), 0);

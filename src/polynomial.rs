@@ -1,10 +1,11 @@
+//! A module for polynomials and their related algorithms
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
 use std::{fmt, mem, str};
 
 use rug::ops::NegAssign;
 use rug::{Integer, Rational};
 
-use crate::Monomial;
+use crate::monomial::Monomial;
 use crate::error::ParseError;
 
 /// Internal function that calculates the greatest common divisor.
@@ -34,7 +35,7 @@ fn gcd(a: Rational, b: &Rational) -> Rational {
 /// Using arithmetic operations:
 ///
 /// ```
-/// use abacas::Polynomial;
+/// use abacas::polynomial::Polynomial;
 ///
 /// let a: Polynomial = "4x^4 + 3x^3 + 1".parse().unwrap();
 /// let b: Polynomial = "2x^2 - 5".parse().unwrap();
@@ -65,7 +66,7 @@ impl Polynomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::Polynomial;
+	/// use abacas::polynomial::Polynomial;
 	///
 	/// let poly: Polynomial = "4x^999 + 2x^3 + 1".parse().unwrap();
 	/// assert_eq!(poly.degree(), Some(&999.into()));
@@ -143,7 +144,7 @@ impl Polynomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::Polynomial;
+	/// use abacas::polynomial::Polynomial;
 	///
 	/// let coeff = "x - 1".parse::<Polynomial>().unwrap();
 	/// let a = coeff.clone() * "x - 21".parse::<Polynomial>().unwrap();
@@ -166,7 +167,7 @@ impl Polynomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::Polynomial;
+	/// use abacas::polynomial::Polynomial;
 	///
 	/// let poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
 	/// let (factor, rest) = poly.factor().unwrap();
@@ -184,7 +185,7 @@ impl Polynomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::Polynomial;
+	/// use abacas::polynomial::Polynomial;
 	///
 	/// let mut poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
 	/// let factor = poly.factor_mut().unwrap();
@@ -210,7 +211,7 @@ impl Polynomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::Polynomial;
+	/// use abacas::polynomial::Polynomial;
 	///
 	/// let poly: Polynomial = "16x^9 + 4x^3 + 32".parse().unwrap();
 	/// let (factor, monic) = poly.monic().unwrap();
@@ -228,7 +229,7 @@ impl Polynomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::Polynomial;
+	/// use abacas::polynomial::Polynomial;
 	///
 	/// let mut poly: Polynomial = "16x^9 + 4x^3 + 32".parse().unwrap();
 	/// let factor = poly.monic_mut().unwrap();
@@ -253,7 +254,7 @@ impl Polynomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::Polynomial;
+	/// use abacas::polynomial::Polynomial;
 	///
 	/// let dividend: Polynomial = "6x^5 + 5x^2 - 7".parse().unwrap();
 	/// let divisor: Polynomial = "2x^2 - 1".parse().unwrap();
@@ -273,7 +274,7 @@ impl Polynomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::Polynomial;
+	/// use abacas::polynomial::Polynomial;
 	///
 	/// let mut dividend: Polynomial = "6x^5 + 5x^2 - 7".parse().unwrap();
 	/// let divisor: Polynomial = "2x^2 - 1".parse().unwrap();

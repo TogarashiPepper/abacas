@@ -3,10 +3,6 @@
 
 pub mod error;
 
-mod monomial;
-mod number;
-mod polynomial;
-
-pub use monomial::*;
-pub use number::*;
-pub use polynomial::*;
+pub mod monomial;
+pub mod polynomial;
+pub mod number;
