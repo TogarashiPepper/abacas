@@ -1,3 +1,5 @@
+use abacas::VERSION;
+
 fn main() {
-	println!("Hello, world!");
+	println!("Running version: {VERSION}");
 }
