@@ -2,4 +2,7 @@
 #![warn(missing_docs)]
 
 pub mod error;
-pub mod structs;
+
+pub mod monomial;
+pub mod number;
+pub mod polynomial;
