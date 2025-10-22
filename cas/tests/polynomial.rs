@@ -28,6 +28,21 @@ fn construction() {
 }
 
 #[test]
+fn gcd() {
+	let a = p("x - 1") * p("x + 6");
+	let b = p("x - 1") * p("x - 20");
+
+	assert_eq!(a.clone().gcd(b.clone()), p("x - 1"));
+	assert_eq!(b.gcd(a), p("x - 1"));
+
+	let a = p("2x - 1") * p("x + 6") * p("41x + 2");
+	let b = p("2x - 1") * p("x - 20") * p("99999x^2 + 7");
+
+	assert_eq!(a.clone().gcd(b.clone()), p("x - 0.5"));
+	assert_eq!(b.gcd(a), p("x - 0.5"));
+}
+
+#[test]
 fn impls() {
 	use rug::ops::Pow;
 
@@ -71,7 +86,7 @@ fn parse() {
 }
 
 #[test]
-fn zeros() {
+fn polydiv() {
 	let dividend = p("6x^5 + 5x^2 - 7");
 	let divisor = p("2x^2 - 1");
 
@@ -86,19 +101,4 @@ fn zeros() {
 
 	let dividend_smaller = divisor.clone().div_rem(&dividend);
 	assert_eq!(dividend_smaller, Some((Polynomial::ZERO, divisor)));
-}
-
-#[test]
-fn gcd() {
-	let a = p("x - 1") * p("x + 6");
-	let b = p("x - 1") * p("x - 20");
-
-	assert_eq!(a.clone().gcd(b.clone()), p("x - 1"));
-	assert_eq!(b.gcd(a), p("x - 1"));
-
-	let a = p("2x - 1") * p("x + 6") * p("41x + 2");
-	let b = p("2x - 1") * p("x - 20") * p("99999x^2 + 7");
-
-	assert_eq!(a.clone().gcd(b.clone()), p("x - 0.5"));
-	assert_eq!(b.gcd(a), p("x - 0.5"));
 }

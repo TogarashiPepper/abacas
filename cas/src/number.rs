@@ -1,4 +1,5 @@
-//! Module for the `Number` enum and all generic number operations
+//! The number enum and its related operations.
+
 use std::ops::{Add, Div, Mul, Sub};
 
 use rug::{Integer, Rational};
@@ -51,6 +52,22 @@ impl Add for Number {
 	}
 }
 
+impl Add<Integer> for Number {
+	type Output = Self;
+
+	fn add(self, rhs: Integer) -> Self::Output {
+		self + Self::from(rhs)
+	}
+}
+
+impl Add<Rational> for Number {
+	type Output = Self;
+
+	fn add(self, rhs: Rational) -> Self::Output {
+		self + Self::from(rhs)
+	}
+}
+
 impl Div for Number {
 	type Output = Self;
 
@@ -65,6 +82,22 @@ impl Div for Number {
 				Self::Rational(b) => Self::from(a / b),
 			},
 		}
+	}
+}
+
+impl Div<Integer> for Number {
+	type Output = Self;
+
+	fn div(self, rhs: Integer) -> Self::Output {
+		self / Self::from(rhs)
+	}
+}
+
+impl Div<Rational> for Number {
+	type Output = Self;
+
+	fn div(self, rhs: Rational) -> Self::Output {
+		self / Self::from(rhs)
 	}
 }
 
@@ -85,6 +118,22 @@ impl Mul for Number {
 	}
 }
 
+impl Mul<Integer> for Number {
+	type Output = Self;
+
+	fn mul(self, rhs: Integer) -> Self::Output {
+		self * Self::from(rhs)
+	}
+}
+
+impl Mul<Rational> for Number {
+	type Output = Self;
+
+	fn mul(self, rhs: Rational) -> Self::Output {
+		self * Self::from(rhs)
+	}
+}
+
 impl Sub for Number {
 	type Output = Self;
 
@@ -102,59 +151,11 @@ impl Sub for Number {
 	}
 }
 
-impl Add<Integer> for Number {
-	type Output = Self;
-
-	fn add(self, rhs: Integer) -> Self::Output {
-		self + Self::Integer(rhs)
-	}
-}
-
-impl Div<Integer> for Number {
-	type Output = Self;
-
-	fn div(self, rhs: Integer) -> Self::Output {
-		self / Self::Integer(rhs)
-	}
-}
-
-impl Mul<Integer> for Number {
-	type Output = Self;
-
-	fn mul(self, rhs: Integer) -> Self::Output {
-		self * Self::Integer(rhs)
-	}
-}
-
 impl Sub<Integer> for Number {
 	type Output = Self;
 
 	fn sub(self, rhs: Integer) -> Self::Output {
-		self - Self::Integer(rhs)
-	}
-}
-
-impl Add<Rational> for Number {
-	type Output = Self;
-
-	fn add(self, rhs: Rational) -> Self::Output {
-		self + Self::Rational(rhs)
-	}
-}
-
-impl Div<Rational> for Number {
-	type Output = Self;
-
-	fn div(self, rhs: Rational) -> Self::Output {
-		self / Self::Rational(rhs)
-	}
-}
-
-impl Mul<Rational> for Number {
-	type Output = Self;
-
-	fn mul(self, rhs: Rational) -> Self::Output {
-		self * Self::Rational(rhs)
+		self - Self::from(rhs)
 	}
 }
 
@@ -162,6 +163,6 @@ impl Sub<Rational> for Number {
 	type Output = Self;
 
 	fn sub(self, rhs: Rational) -> Self::Output {
-		self - Self::Rational(rhs)
+		self - Self::from(rhs)
 	}
 }
