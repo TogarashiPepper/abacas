@@ -217,6 +217,39 @@ impl Polynomial {
 		self
 	}
 
+	/// Returns the GCD of two polynomials in monic form, along with their Bézout coefficients.
+	///
+	/// # Examples
+	/// ```
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// let coeff = "x - 1".parse::<Polynomial>().unwrap();
+	/// let a = coeff.clone() * "x - 21".parse::<Polynomial>().unwrap();
+	/// let b = coeff.clone() * "4x - 9".parse::<Polynomial>().unwrap();
+	///
+	/// let (t, s, gcd) = a.clone().gcd_ext(b.clone());
+	///
+	/// assert_eq!((s * a + b * t).monic().unwrap(), gcd);
+	/// ```
+	pub fn gcd_ext(self, other: Polynomial) -> (Polynomial, Polynomial, Polynomial) {
+		let one = Polynomial::new(["1".parse().unwrap()]);
+
+		let (mut old_r, mut r) = (self, other);
+		let (mut old_s, mut s) = (one.clone(), Polynomial::ZERO);
+		let (mut old_t, mut t) = (Polynomial::ZERO, one);
+
+		while r != Polynomial::ZERO {
+			let mut quotient = old_r;
+
+			(r, old_r) = (quotient.div_rem_mut(&r).unwrap(), r);
+			(old_s, s) = (s.clone(), old_s - quotient.clone() * s);
+			(old_t, t) = (t.clone(), old_t - quotient * t);
+		}
+
+		old_r.monic_mut();
+		(old_s, old_t, old_r)
+	}
+
 	/// Returns the monomial with the given degree, or [`None`] if the degree is not present.
 	///
 	/// # Examples
