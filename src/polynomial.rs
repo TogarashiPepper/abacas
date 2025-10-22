@@ -5,8 +5,8 @@ use std::{fmt, mem, str};
 use rug::ops::NegAssign;
 use rug::{Integer, Rational};
 
-use crate::monomial::Monomial;
 use crate::error::ParseError;
+use crate::monomial::Monomial;
 
 /// Internal function that calculates the greatest common divisor.
 fn gcd(a: Rational, b: &Rational) -> Rational {

@@ -7,8 +7,8 @@ use itertools::Itertools;
 use rug::ops::{NegAssign, Pow, PowAssign};
 use rug::{Integer, Rational};
 
-use crate::polynomial::Polynomial;
 use crate::error::ParseError;
+use crate::polynomial::Polynomial;
 
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
 ///
