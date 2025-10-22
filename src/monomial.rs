@@ -1,15 +1,11 @@
-mod add;
-mod div;
-mod mul;
-mod neg;
-mod pow;
-mod sub;
-
+use std::ops::{Add, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 use std::{fmt, str};
 
 use itertools::Itertools;
+use rug::ops::{NegAssign, Pow, PowAssign};
 use rug::{Integer, Rational};
 
+use crate::Polynomial;
 use crate::error::ParseError;
 
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
@@ -19,7 +15,7 @@ use crate::error::ParseError;
 /// Creating a [`Monomial`]:
 ///
 /// ```
-/// use abacas::structs::Monomial;
+/// use abacas::Monomial;
 ///
 /// let mono = Monomial::new(4, 10);
 /// assert_eq!(mono.to_string(), "4x^10");
@@ -31,7 +27,7 @@ use crate::error::ParseError;
 /// Using arithmetic operations:
 ///
 /// ```
-/// use abacas::structs::Monomial;
+/// use abacas::Monomial;
 ///
 /// let add = Monomial::new(4, 10) + Monomial::new(1, 20);
 /// assert_eq!(add.to_string(), "x^20 + 4x^10");
@@ -53,7 +49,7 @@ impl Monomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::structs::Monomial;
+	/// use abacas::Monomial;
 	///
 	/// let mono = Monomial::new(4, 22);
 	/// assert_eq!(mono.to_string(), "4x^22");
@@ -74,7 +70,7 @@ impl Monomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::structs::Monomial;
+	/// use abacas::Monomial;
 	///
 	/// let mono = Monomial::constant(4);
 	/// assert_eq!(mono.to_string(), "4");
@@ -88,7 +84,7 @@ impl Monomial {
 	/// # Examples
 	///
 	/// ```
-	/// use abacas::structs::Monomial;
+	/// use abacas::Monomial;
 	///
 	/// let mono = Monomial::linear(2);
 	/// assert_eq!(mono.to_string(), "2x");
@@ -156,5 +152,90 @@ impl str::FromStr for Monomial {
 			coeff: Rational::from_f64(coeff).unwrap(),
 			degree: Integer::from(degree),
 		})
+	}
+}
+
+impl<T: Into<Self>> Mul<T> for Monomial {
+	type Output = Self;
+
+	fn mul(mut self, rhs: T) -> Self::Output {
+		self *= rhs;
+		self
+	}
+}
+
+impl<T: Into<Self>> MulAssign<T> for Monomial {
+	fn mul_assign(&mut self, rhs: T) {
+		let rhs = rhs.into();
+
+		self.coeff *= rhs.coeff;
+		self.degree += rhs.degree;
+	}
+}
+
+impl<T: Into<Self>> Sub<T> for Monomial {
+	type Output = Polynomial;
+
+	fn sub(self, rhs: T) -> Self::Output {
+		Polynomial::new([self, -rhs.into()])
+	}
+}
+
+impl<T: Into<i32>> Pow<T> for Monomial {
+	type Output = Self;
+
+	fn pow(mut self, rhs: T) -> Self::Output {
+		self.pow_assign(rhs);
+		self
+	}
+}
+
+impl<T: Into<i32>> PowAssign<T> for Monomial {
+	fn pow_assign(&mut self, rhs: T) {
+		let rhs = rhs.into();
+
+		self.coeff.pow_assign(rhs);
+		self.degree *= rhs;
+	}
+}
+
+impl<T: Into<Self>> Div<T> for Monomial {
+	type Output = Self;
+
+	fn div(mut self, rhs: T) -> Self::Output {
+		self /= rhs;
+		self
+	}
+}
+
+impl<T: Into<Self>> DivAssign<T> for Monomial {
+	fn div_assign(&mut self, rhs: T) {
+		let rhs = rhs.into();
+
+		self.coeff /= rhs.coeff;
+		self.degree -= rhs.degree;
+	}
+}
+
+impl Neg for Monomial {
+	type Output = Self;
+
+	fn neg(mut self) -> Self::Output {
+		self.neg_assign();
+		self
+	}
+}
+
+impl NegAssign for Monomial {
+	fn neg_assign(&mut self) {
+		self.coeff.neg_assign();
+	}
+}
+
+impl<T: Into<Self>> Add<T> for Monomial {
+	type Output = Polynomial;
+
+	fn add(self, rhs: T) -> Self::Output {
+		Polynomial::new([self, rhs.into()])
 	}
 }
