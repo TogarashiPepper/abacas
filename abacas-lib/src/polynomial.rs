@@ -1,6 +1,7 @@
 //! The polynomial structure and its related algorithms.
 
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
+use std::slice::Iter;
 use std::{fmt, mem, str};
 
 use rug::ops::NegAssign;
@@ -184,7 +185,7 @@ impl Polynomial {
 	/// assert_eq!(poly.to_string(), "4x^2 + 2x + 1");
 	/// ```
 	pub fn factor_mut(&mut self) -> Option<Rational> {
-		let factor = self.0.iter().map(|mono| &mono.coeff).fold(Rational::new(), gcd);
+		let factor = self.monomials().map(|mono| &mono.coeff).fold(Rational::new(), gcd);
 
 		if factor <= 1 {
 			return None;
@@ -350,6 +351,20 @@ impl Polynomial {
 		*self /= &factor;
 
 		Some(factor)
+	}
+
+	/// Returns an iterator over the contained monomials.
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// let polynomial: Polynomial = "3x^2 + 2x + 1".parse().unwrap();
+	/// assert_eq!(polynomial.monomials().len(), 3);
+	/// ```
+	pub fn monomials(&self) -> Iter<'_, Monomial> {
+		self.0.iter()
 	}
 
 	/// Creates a new polynomial from the given monomials.
@@ -569,7 +584,7 @@ impl fmt::Display for Polynomial {
 			None => write!(f, "0")?,
 		}
 
-		for monomial in self.0.iter().skip(1) {
+		for monomial in self.monomials().skip(1) {
 			if monomial.coeff.is_positive() {
 				write!(f, " + {monomial}")?;
 			} else {
