@@ -209,7 +209,7 @@ impl Polynomial {
 	/// assert_eq!(a.gcd(b), coeff);
 	/// ```
 	pub fn gcd(mut self, mut other: Polynomial) -> Polynomial {
-		while other != Polynomial::ZERO {
+		while !other.is_zero() {
 			(other, self) = (self.div_rem_mut(&other).unwrap(), other);
 		}
 
@@ -239,14 +239,14 @@ impl Polynomial {
 		let (mut old_r, mut r) = (self.clone(), other.clone());
 		let (mut old_s, mut s) = (one, Polynomial::ZERO);
 
-		while r != Polynomial::ZERO {
+		while !r.is_zero() {
 			let mut quotient = old_r;
 
 			(r, old_r) = (quotient.div_rem_mut(&r).unwrap(), r);
 			(old_s, s) = (s.clone(), old_s - quotient * s);
 		}
 
-		let t = if other != Polynomial::ZERO {
+		let t = if !other.is_zero() {
 			(old_r.clone() - old_s.clone() * self) / other
 		} else {
 			Polynomial::ZERO
@@ -306,6 +306,20 @@ impl Polynomial {
 			.unwrap_or_else(|index| index);
 
 		&mut self.0[index]
+	}
+
+	/// Returns whether this is the zero polynomial.
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// assert!(Polynomial::ZERO.is_zero());
+	/// assert!(!Polynomial::from(1).is_zero());
+	/// ```
+	pub const fn is_zero(&self) -> bool {
+		self.0.is_empty()
 	}
 
 	/// Creates a monic polynomial by dividing all monomials by the leading coefficient.
