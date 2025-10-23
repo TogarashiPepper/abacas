@@ -274,24 +274,6 @@ impl Polynomial {
 			.and_then(|index| self.0.get(index))
 	}
 
-	/// Returns the monomial with the given degree, or [`None`] if the degree is not present.
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use abacas::monomial::Monomial;
-	/// use abacas::polynomial::Polynomial;
-	///
-	/// let mut poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
-	/// assert_eq!(poly.get_mut(&9.into()), Some(&mut Monomial::new(4, 9)));
-	/// ```
-	pub fn get_mut(&mut self, degree: &Integer) -> Option<&mut Monomial> {
-		self.0
-			.binary_search_by(|mono| degree.cmp(&mono.degree))
-			.ok()
-			.and_then(|index| self.0.get_mut(index))
-	}
-
 	/// Internal method to get a monomial or insert it if it does not exist.
 	fn get_or_insert(&mut self, degree: &Integer) -> &mut Monomial {
 		let index = self
