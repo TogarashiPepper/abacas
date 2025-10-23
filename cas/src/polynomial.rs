@@ -233,7 +233,7 @@ impl Polynomial {
 	/// assert_eq!(bezout, gcd);
 	/// ```
 	pub fn gcd_ext(self, other: Polynomial) -> (Polynomial, Polynomial, Polynomial) {
-		let one = Polynomial::new(["1".parse().unwrap()]);
+		let one = Polynomial::new([1.into()]);
 
 		let (mut old_r, mut r) = (self.clone(), other.clone());
 		let (mut old_s, mut s) = (one, Polynomial::ZERO);
