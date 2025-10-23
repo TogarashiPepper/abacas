@@ -324,8 +324,8 @@ impl Polynomial {
 	/// let poly = Polynomial::new([Monomial::new(4, 2), Monomial::new(9, 9)]);
 	/// assert_eq!(poly.to_string(), "9x^9 + 4x^2");
 	/// ```
-	pub fn new(monomials: impl IntoIterator<Item = Monomial>) -> Self {
-		Self::from_iter(monomials)
+	pub fn new(monomials: impl IntoIterator<Item = impl Into<Monomial>>) -> Self {
+		Self::from_iter(monomials.into_iter().map(|im| im.into()))
 	}
 }
 

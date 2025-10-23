@@ -23,7 +23,7 @@ fn construction() {
 	let polynomial = Polynomial::new([A(), D(), F(), D(), A()]);
 	assert_eq!(polynomial.to_string(), "2.5x^4 + 5x + 2");
 
-	let zero = Polynomial::new([]);
+	let zero = Polynomial::new([0]);
 	assert_eq!(zero.to_string(), "0");
 }
 
