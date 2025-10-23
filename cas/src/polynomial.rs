@@ -227,9 +227,10 @@ impl Polynomial {
 	/// let a = coeff.clone() * "x - 21".parse::<Polynomial>().unwrap();
 	/// let b = coeff.clone() * "4x - 9".parse::<Polynomial>().unwrap();
 	///
-	/// let (t, s, gcd) = a.clone().gcd_ext(b.clone());
-	///
-	/// assert_eq!((s * a + b * t).monic().unwrap(), gcd);
+	/// let (s, t, gcd) = a.clone().gcd_ext(b.clone());
+	/// let mut bezout = s * a + b * t;
+    /// bezout.monic_mut();
+	/// assert_eq!(bezout, gcd);
 	/// ```
 	pub fn gcd_ext(self, other: Polynomial) -> (Polynomial, Polynomial, Polynomial) {
 		let one = Polynomial::new(["1".parse().unwrap()]);
