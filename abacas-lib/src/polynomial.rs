@@ -209,9 +209,10 @@ impl Polynomial {
 	///
 	/// assert_eq!(a.gcd(b), coeff);
 	/// ```
-	pub fn gcd(mut self, mut other: Polynomial) -> Polynomial {
-		while !other.is_zero() {
-			(other, self) = (self.div_rem_mut(&other).unwrap(), other);
+	pub fn gcd(mut self, mut other: Self) -> Self {
+		while let Some(remainder) = self.div_rem_mut(&other) {
+			self = other;
+			other = remainder;
 		}
 
 		self.monic_mut();
@@ -221,6 +222,7 @@ impl Polynomial {
 	/// Returns the GCD of two polynomials in monic form, along with their Bézout coefficients.
 	///
 	/// # Examples
+	///
 	/// ```
 	/// use abacas::polynomial::Polynomial;
 	///
@@ -229,32 +231,33 @@ impl Polynomial {
 	/// let b = coeff.clone() * "4x - 9".parse::<Polynomial>().unwrap();
 	///
 	/// let (s, t, gcd) = a.clone().gcd_ext(b.clone());
-	/// let mut bezout = s * a + b * t;
-	/// bezout.monic_mut();
+	/// let bezout = s * a + t * b;
+	///
 	/// assert_eq!(bezout, gcd);
-	/// assert_eq!(gcd, coeff);
+	/// assert_eq!(coeff, gcd);
 	/// ```
-	pub fn gcd_ext(self, other: Polynomial) -> (Polynomial, Polynomial, Polynomial) {
-		let one = Polynomial::new([1.into()]);
-
+	pub fn gcd_ext(self, other: Self) -> (Self, Self, Self) {
 		let (mut old_r, mut r) = (self.clone(), other.clone());
-		let (mut old_s, mut s) = (one, Polynomial::ZERO);
+		let (mut old_s, mut s) = (Self::from(1), Self::ZERO);
 
-		while !r.is_zero() {
-			let mut quotient = old_r;
+		while let Some(remainder) = old_r.div_rem_mut(&r) {
+			let quotient = old_r;
 
-			(r, old_r) = (quotient.div_rem_mut(&r).unwrap(), r);
+			(old_r, r) = (r, remainder);
 			(old_s, s) = (s.clone(), old_s - quotient * s);
 		}
 
-		let t = if !other.is_zero() {
-			(old_r.clone() - old_s.clone() * self) / other
+		if let Some(factor) = old_r.monic_mut() {
+			old_s /= factor;
+		}
+
+		let old_t = if other.is_zero() {
+			Self::ZERO
 		} else {
-			Polynomial::ZERO
+			(old_r.clone() - self * old_s.clone()) / other
 		};
 
-		old_r.monic_mut();
-		(old_s, t, old_r)
+		(old_s, old_t, old_r)
 	}
 
 	/// Returns the monomial with the given degree, or [`None`] if the degree is not present.
@@ -375,7 +378,7 @@ impl Polynomial {
 	/// assert_eq!(poly.to_string(), "9x^9 + 4x^2");
 	/// ```
 	pub fn new(monomials: impl IntoIterator<Item = Monomial>) -> Self {
-		Self::from_iter(monomials)
+		monomials.into_iter().fold(Self::ZERO, Self::add)
 	}
 }
 
@@ -387,7 +390,7 @@ impl<T: Into<Monomial>> From<T> for Polynomial {
 
 impl FromIterator<Monomial> for Polynomial {
 	fn from_iter<T: IntoIterator<Item = Monomial>>(iter: T) -> Self {
-		iter.into_iter().fold(Self::ZERO, Self::add)
+		Self::new(iter)
 	}
 }
 
