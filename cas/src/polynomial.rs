@@ -231,7 +231,7 @@ impl Polynomial {
 	/// let mut bezout = s * a + b * t;
 	/// bezout.monic_mut();
 	/// assert_eq!(bezout, gcd);
-    /// assert_eq!(gcd, coeff);
+	/// assert_eq!(gcd, coeff);
 	/// ```
 	pub fn gcd_ext(self, other: Polynomial) -> (Polynomial, Polynomial, Polynomial) {
 		let one = Polynomial::new([1.into()]);
