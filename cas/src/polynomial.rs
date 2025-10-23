@@ -229,26 +229,30 @@ impl Polynomial {
 	///
 	/// let (s, t, gcd) = a.clone().gcd_ext(b.clone());
 	/// let mut bezout = s * a + b * t;
-    /// bezout.monic_mut();
+	/// bezout.monic_mut();
 	/// assert_eq!(bezout, gcd);
 	/// ```
 	pub fn gcd_ext(self, other: Polynomial) -> (Polynomial, Polynomial, Polynomial) {
 		let one = Polynomial::new(["1".parse().unwrap()]);
 
-		let (mut old_r, mut r) = (self, other);
-		let (mut old_s, mut s) = (one.clone(), Polynomial::ZERO);
-		let (mut old_t, mut t) = (Polynomial::ZERO, one);
+		let (mut old_r, mut r) = (self.clone(), other.clone());
+		let (mut old_s, mut s) = (one, Polynomial::ZERO);
 
 		while r != Polynomial::ZERO {
 			let mut quotient = old_r;
 
 			(r, old_r) = (quotient.div_rem_mut(&r).unwrap(), r);
-			(old_s, s) = (s.clone(), old_s - quotient.clone() * s);
-			(old_t, t) = (t.clone(), old_t - quotient * t);
+			(old_s, s) = (s.clone(), old_s - quotient * s);
 		}
 
+		let t = if other != Polynomial::ZERO {
+			(old_r.clone() - old_s.clone() * self) / other
+		} else {
+			Polynomial::ZERO
+		};
+
 		old_r.monic_mut();
-		(old_s, old_t, old_r)
+		(old_s, t, old_r)
 	}
 
 	/// Returns the monomial with the given degree, or [`None`] if the degree is not present.
