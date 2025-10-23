@@ -1,7 +1,8 @@
 [workspace]
-members = ["cas", "cli"]
+members = ["abacas-cli", "abacas-lib"]
 resolver = "3"
 
 [workspace.dependencies]
+abacas.path = "abacas-lib"
 itertools = "0.14.0"
 rug = "1.28.0"
