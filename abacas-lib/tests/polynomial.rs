@@ -48,9 +48,7 @@ fn gcd_ext() {
 	let b = p("2x - 1") * p("x - 20") * p("99999x^2 + 7");
 
 	let (s, t, gcd) = a.clone().gcd_ext(b.clone());
-
-	let mut bezout = s * a + b * t;
-	bezout.monic_mut();
+	let bezout = s * a + t * b;
 
 	assert_eq!(bezout, gcd);
 }
