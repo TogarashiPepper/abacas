@@ -600,21 +600,35 @@ impl str::FromStr for Polynomial {
 	type Err = ParseError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		if s.trim() == "0" {
-			Ok(Self::ZERO)
+		let input = s.trim();
+
+		if input.parse() == Ok(0.0) {
+			return Ok(Self::ZERO);
+		}
+
+		let (mut sign, full) = match input.chars().next() {
+			Some(sign @ ('+' | '-')) => (sign, &input[1..]),
+			Some(_) => ('+', input),
+			None => return Err(ParseError::InvalidSyntax),
+		};
+
+		let mut result = Self::ZERO;
+
+		for part in full.split_inclusive(['+', '-']) {
+			let init = part.strip_suffix(['+', '-']).unwrap_or(part);
+			let last = part.chars().last().ok_or(ParseError::InvalidSyntax)?;
+
+			if mem::replace(&mut sign, last) == '+' {
+				result += init.parse::<Monomial>()?;
+			} else {
+				result -= init.parse::<Monomial>()?;
+			}
+		}
+
+		if sign == '+' || sign == '-' {
+			Err(ParseError::InvalidSyntax)
 		} else {
-			let s: String = s.chars().filter(|c| !c.is_ascii_whitespace()).collect();
-
-			let (neg_first, s) = s.strip_prefix('-').map_or((false, s.as_str()), |rest| (true, rest));
-
-			s.replace("-", "+-")
-				.split('+')
-				.enumerate()
-				.map(|(i, m)| {
-					m.parse::<Monomial>()
-						.map(|mon| if i == 0 && neg_first { -mon } else { mon })
-				})
-				.collect()
+			Ok(result)
 		}
 	}
 }
