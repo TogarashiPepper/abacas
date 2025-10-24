@@ -3,7 +3,6 @@
 use std::ops::{Add, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 use std::{fmt, str};
 
-use itertools::Itertools;
 use rug::ops::{NegAssign, Pow, PowAssign};
 use rug::{Integer, Rational};
 
@@ -211,33 +210,30 @@ impl str::FromStr for Monomial {
 	type Err = ParseError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let mut chars = s.trim().chars();
+		let input = s.trim();
 
-		let init: String = chars.peeking_take_while(|&c| c != 'x').collect();
-		let coeff = if init.is_empty() { 1.0 } else { init.parse()? };
+		let (init, degree) = if let Some((init, tail)) = input.split_once("x^") {
+			(init, tail.parse()?)
+		} else if let Some(init) = input.strip_suffix('x') {
+			(init, 1)
+		} else {
+			(input, 0)
+		};
+
+		let coeff = match init {
+			"" | "+" if degree != 0 => 1.0,
+			"-" if degree != 0 => -1.0,
+			_ => init.parse()?,
+		};
 
 		if coeff == 0.0 {
-			return Err(ParseError::InvalidValue);
+			return Err(ParseError::InvalidValue(coeff));
 		}
 
-		match chars.next() {
-			None => return Ok(Self::constant(Rational::from_f64(coeff).unwrap())),
-			Some('x') => (),
-			Some(_) => return Err(ParseError::InvalidSyntax),
-		}
+		let Some(coeff) = Rational::from_f64(coeff) else {
+			return Err(ParseError::InvalidValue(coeff));
+		};
 
-		match chars.next() {
-			None => return Ok(Self::linear(Rational::from_f64(coeff).unwrap())),
-			Some('^') => (),
-			Some(_) => return Err(ParseError::InvalidSyntax),
-		}
-
-		let tail: String = chars.collect();
-		let degree: i64 = tail.parse()?;
-
-		Ok(Self {
-			coeff: Rational::from_f64(coeff).unwrap(),
-			degree: Integer::from(degree),
-		})
+		Ok(Self::new(coeff, degree))
 	}
 }

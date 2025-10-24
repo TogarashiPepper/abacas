@@ -10,7 +10,7 @@ pub enum ParseError {
 	/// The parser encountered invalid syntax.
 	InvalidSyntax,
 	/// The parser encountered an invalid value.
-	InvalidValue,
+	InvalidValue(f64),
 	/// A wrapper around a [`ParseFloatError`].
 	ParseFloat(ParseFloatError),
 	/// A wrapper around a [`ParseIntError`].
@@ -20,8 +20,8 @@ pub enum ParseError {
 impl fmt::Display for ParseError {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
-			Self::InvalidSyntax => f.write_str("invalid syntax"),
-			Self::InvalidValue => f.write_str("invalid value"),
+			Self::InvalidSyntax => write!(f, "invalid syntax"),
+			Self::InvalidValue(value) => write!(f, "invalid value: {value}"),
 			Self::ParseFloat(error) => error.fmt(f),
 			Self::ParseInt(error) => error.fmt(f),
 		}
@@ -32,7 +32,7 @@ impl Error for ParseError {
 	fn source(&self) -> Option<&(dyn Error + 'static)> {
 		match self {
 			Self::InvalidSyntax => None,
-			Self::InvalidValue => None,
+			Self::InvalidValue(_) => None,
 			Self::ParseFloat(error) => Some(error),
 			Self::ParseInt(error) => Some(error),
 		}
