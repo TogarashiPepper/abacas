@@ -7,7 +7,7 @@ use rug::{Integer, Rational};
 /// Represents a number of any supported set.
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Number {
-	/// A number belonging to set of natural numbers (not including zero).
+	/// A number belonging to the set of natural numbers (not including zero).
 	Natural(Integer),
 	/// A number belonging to the set of integers.
 	Integer(Integer),

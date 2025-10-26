@@ -7,8 +7,6 @@ use std::num::{ParseFloatError, ParseIntError};
 /// An error that can occur while parsing.
 #[derive(Clone, Debug)]
 pub enum ParseError {
-	/// The parser encountered invalid syntax.
-	InvalidSyntax,
 	/// The parser encountered an invalid value.
 	InvalidValue(f64),
 	/// A wrapper around a [`ParseFloatError`].
@@ -20,7 +18,6 @@ pub enum ParseError {
 impl fmt::Display for ParseError {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
-			Self::InvalidSyntax => write!(f, "invalid syntax"),
 			Self::InvalidValue(value) => write!(f, "invalid value: {value}"),
 			Self::ParseFloat(error) => error.fmt(f),
 			Self::ParseInt(error) => error.fmt(f),
@@ -31,7 +28,6 @@ impl fmt::Display for ParseError {
 impl Error for ParseError {
 	fn source(&self) -> Option<&(dyn Error + 'static)> {
 		match self {
-			Self::InvalidSyntax => None,
 			Self::InvalidValue(_) => None,
 			Self::ParseFloat(error) => Some(error),
 			Self::ParseInt(error) => Some(error),
