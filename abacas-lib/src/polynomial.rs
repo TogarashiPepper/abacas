@@ -359,8 +359,8 @@ impl Polynomial {
 	/// ```
 	/// use abacas::polynomial::Polynomial;
 	///
-	/// let polynomial: Polynomial = "3x^2 + 2x + 1".parse().unwrap();
-	/// assert_eq!(polynomial.monomials().len(), 3);
+	/// let poly: Polynomial = "3x^2 - 2x + x^-1".parse().unwrap();
+	/// assert_eq!(poly.monomials().len(), 3);
 	/// ```
 	pub fn monomials(&self) -> Iter<'_, Monomial> {
 		self.0.iter()
@@ -606,29 +606,20 @@ impl str::FromStr for Polynomial {
 			return Ok(Self::ZERO);
 		}
 
-		let (mut sign, full) = match input.chars().next() {
-			Some(sign @ ('+' | '-')) => (sign, &input[1..]),
-			Some(_) => ('+', input),
-			None => return Err(ParseError::InvalidSyntax),
-		};
-
 		let mut result = Self::ZERO;
 
-		for part in full.split_inclusive(['+', '-']) {
-			let init = part.strip_suffix(['+', '-']).unwrap_or(part);
-			let last = part.chars().last().ok_or(ParseError::InvalidSyntax)?;
+		for full in input.split(" + ") {
+			for (index, part) in full.split(" - ").enumerate() {
+				let monomial: Monomial = part.parse()?;
 
-			if mem::replace(&mut sign, last) == '+' {
-				result += init.parse::<Monomial>()?;
-			} else {
-				result -= init.parse::<Monomial>()?;
+				if index == 0 {
+					result += monomial;
+				} else {
+					result -= monomial;
+				}
 			}
 		}
 
-		if sign == '+' || sign == '-' {
-			Err(ParseError::InvalidSyntax)
-		} else {
-			Ok(result)
-		}
+		Ok(result)
 	}
 }
