@@ -141,7 +141,7 @@ fn prop_polydiv() {
 
 		if poly_a != recon_polya {
 			eprintln!("Assertion Failed:");
-			eprintln!("{poly_a:#}\n!=\n{recon_polya:#}");
+			eprintln!("{poly_a}\n!=\n{recon_polya}");
 			panic!("");
 		}
 	}
