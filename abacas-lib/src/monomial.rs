@@ -124,10 +124,20 @@ where
 	}
 }
 
-impl<T: Into<Self>> DivAssign<T> for Monomial {
+impl<T: Into<Rational>> DivAssign<T> for Monomial {
 	fn div_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
+		if rhs.is_zero() {
+			panic!("abacas: cannot divide by zero");
+		} else {
+			*self /= Self::from(rhs);
+		}
+	}
+}
+
+impl DivAssign for Monomial {
+	fn div_assign(&mut self, rhs: Self) {
 		self.coeff /= rhs.coeff;
 		self.degree -= rhs.degree;
 	}
@@ -145,10 +155,20 @@ where
 	}
 }
 
-impl<T: Into<Self>> MulAssign<T> for Monomial {
+impl<T: Into<Rational>> MulAssign<T> for Monomial {
 	fn mul_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
+		if rhs.is_zero() {
+			panic!("abacas: cannot multiply by zero");
+		} else {
+			*self *= Self::from(rhs);
+		}
+	}
+}
+
+impl MulAssign for Monomial {
+	fn mul_assign(&mut self, rhs: Self) {
 		self.coeff *= rhs.coeff;
 		self.degree += rhs.degree;
 	}
@@ -225,14 +245,12 @@ impl str::FromStr for Monomial {
 	type Err = ParseError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let input = s.trim();
-
-		let (init, degree) = if let Some((init, tail)) = input.split_once("x^") {
+		let (init, degree) = if let Some((init, tail)) = s.split_once("x^") {
 			(init, tail.parse()?)
-		} else if let Some(init) = input.strip_suffix('x') {
+		} else if let Some(init) = s.strip_suffix('x') {
 			(init, 1)
 		} else {
-			(input, 0)
+			(s, 0)
 		};
 
 		let coeff = match init {

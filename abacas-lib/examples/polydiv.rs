@@ -18,7 +18,7 @@ fn main() -> Result<()> {
 	stdout.flush()?;
 	stdin.read_line(&mut buffer)?;
 
-	let Ok(dividend) = buffer.parse::<Polynomial>() else {
+	let Ok(dividend) = buffer.trim().parse::<Polynomial>() else {
 		eprintln!("Could not parse dividend!");
 		return Ok(());
 	};
@@ -30,7 +30,7 @@ fn main() -> Result<()> {
 	stdout.flush()?;
 	stdin.read_line(&mut buffer)?;
 
-	let Ok(divisor) = buffer.parse::<Polynomial>() else {
+	let Ok(divisor) = buffer.trim().parse::<Polynomial>() else {
 		eprintln!("Could not parse divisor!");
 		return Ok(());
 	};

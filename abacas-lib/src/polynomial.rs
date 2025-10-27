@@ -382,9 +382,21 @@ impl Polynomial {
 	}
 }
 
-impl<T: Into<Monomial>> From<T> for Polynomial {
+impl<T: Into<Rational>> From<T> for Polynomial {
 	fn from(value: T) -> Self {
-		Self::new([value.into()])
+		let value = value.into();
+
+		if value.is_zero() {
+			Self::ZERO
+		} else {
+			Self::from(Monomial::from(value))
+		}
+	}
+}
+
+impl From<Monomial> for Polynomial {
+	fn from(value: Monomial) -> Self {
+		Self::new([value])
 	}
 }
 
@@ -406,10 +418,18 @@ where
 	}
 }
 
-impl<T: Into<Monomial>> AddAssign<T> for Polynomial {
+impl<T: Into<Rational>> AddAssign<T> for Polynomial {
 	fn add_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
+		if !rhs.is_zero() {
+			*self += Monomial::from(rhs);
+		}
+	}
+}
+
+impl AddAssign<Monomial> for Polynomial {
+	fn add_assign(&mut self, rhs: Monomial) {
 		match self.0.binary_search_by(|mono| rhs.degree.cmp(&mono.degree)) {
 			Ok(index) => self.0[index].coeff += rhs.coeff,
 			Err(index) => self.0.insert(index, rhs),
@@ -439,10 +459,20 @@ where
 	}
 }
 
-impl<T: Into<Monomial>> DivAssign<T> for Polynomial {
+impl<T: Into<Rational>> DivAssign<T> for Polynomial {
 	fn div_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
+		if rhs.is_zero() {
+			panic!("abacas: cannot divide by zero");
+		} else {
+			*self /= Monomial::from(rhs);
+		}
+	}
+}
+
+impl DivAssign<Monomial> for Polynomial {
+	fn div_assign(&mut self, rhs: Monomial) {
 		for monomial in self.0.iter_mut() {
 			*monomial /= rhs.clone();
 		}
@@ -467,10 +497,20 @@ where
 	}
 }
 
-impl<T: Into<Monomial>> MulAssign<T> for Polynomial {
+impl<T: Into<Rational>> MulAssign<T> for Polynomial {
 	fn mul_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
+		if rhs.is_zero() {
+			*self = Self::ZERO;
+		} else {
+			*self *= Monomial::from(rhs);
+		}
+	}
+}
+
+impl MulAssign<Monomial> for Polynomial {
+	fn mul_assign(&mut self, rhs: Monomial) {
 		for monomial in self.0.iter_mut() {
 			*monomial *= rhs.clone();
 		}
@@ -534,10 +574,18 @@ where
 	}
 }
 
-impl<T: Into<Monomial>> SubAssign<T> for Polynomial {
+impl<T: Into<Rational>> SubAssign<T> for Polynomial {
 	fn sub_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
+		if !rhs.is_zero() {
+			*self -= Monomial::from(rhs);
+		}
+	}
+}
+
+impl SubAssign<Monomial> for Polynomial {
+	fn sub_assign(&mut self, rhs: Monomial) {
 		match self.0.binary_search_by(|mono| rhs.degree.cmp(&mono.degree)) {
 			Ok(index) => self.0[index].coeff -= rhs.coeff,
 			Err(index) => self.0.insert(index, -rhs),
@@ -579,17 +627,15 @@ impl str::FromStr for Polynomial {
 	type Err = ParseError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let input = s.trim();
-
-		if input.parse() == Ok(0.0) {
-			return Ok(Self::ZERO);
-		}
-
 		let mut result = Self::ZERO;
 
-		for full in input.split(" + ") {
+		for full in s.split(" + ") {
 			for (index, part) in full.split(" - ").enumerate() {
-				let monomial: Monomial = part.parse()?;
+				let monomial: Monomial = match part.parse() {
+					Ok(monomial) => monomial,
+					Err(ParseError::InvalidValue(0.0)) => continue,
+					Err(error) => return Err(error),
+				};
 
 				if index == 0 {
 					result += monomial;

@@ -116,3 +116,24 @@ fn polydiv() {
 	let div_self = dividend.clone().div_rem(&dividend);
 	assert_eq!(div_self, Some((Polynomial::from(1), Polynomial::ZERO)));
 }
+
+#[test]
+fn zeros() {
+	let from = Polynomial::from(0);
+	assert_eq!(from, Polynomial::ZERO);
+
+	let parse = p("0x^2 - 0 + 0x^-1");
+	assert_eq!(parse, Polynomial::ZERO);
+
+	let mono = m("4x^3");
+	let poly = mono.clone().into();
+
+	assert_eq!(mono.clone() + 0 - 0, poly);
+	assert_eq!(poly.clone() + 0 - 0, poly);
+
+	#[expect(clippy::erasing_op)]
+	let zero = poly * 0;
+
+	assert_eq!(zero, Polynomial::ZERO);
+	assert_eq!(zero + 0 - 0, Polynomial::ZERO);
+}
