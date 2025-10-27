@@ -194,12 +194,14 @@ impl fmt::Display for Monomial {
 			match self.coeff.to_f64() {
 				-1.0 => write!(f, "-x"),
 				1.0 => write!(f, "x"),
+				_coeff if f.alternate() => write!(f, "{}x", self.coeff),
 				coeff => write!(f, "{coeff}x"),
 			}
 		} else {
 			match self.coeff.to_f64() {
 				-1.0 => write!(f, "-x^{}", self.degree),
 				1.0 => write!(f, "x^{}", self.degree),
+				_coeff if f.alternate() => write!(f, "{}x^{}", self.coeff, self.degree),
 				coeff => write!(f, "{coeff}x^{}", self.degree),
 			}
 		}
