@@ -101,15 +101,21 @@ impl<T: Into<Rational>> From<T> for Monomial {
 	}
 }
 
-impl<T: Into<Self>> Add<T> for Monomial {
+impl<T> Add<T> for Monomial
+where
+	Polynomial: Add<T, Output = Polynomial>,
+{
 	type Output = Polynomial;
 
 	fn add(self, rhs: T) -> Self::Output {
-		Polynomial::new([self, rhs.into()])
+		Polynomial::from(self) + rhs
 	}
 }
 
-impl<T: Into<Self>> Div<T> for Monomial {
+impl<T> Div<T> for Monomial
+where
+	Self: DivAssign<T>,
+{
 	type Output = Self;
 
 	fn div(mut self, rhs: T) -> Self::Output {
@@ -127,7 +133,10 @@ impl<T: Into<Self>> DivAssign<T> for Monomial {
 	}
 }
 
-impl<T: Into<Self>> Mul<T> for Monomial {
+impl<T> Mul<T> for Monomial
+where
+	Self: MulAssign<T>,
+{
 	type Output = Self;
 
 	fn mul(mut self, rhs: T) -> Self::Output {
@@ -160,7 +169,10 @@ impl NegAssign for Monomial {
 	}
 }
 
-impl<T: Into<i32>> Pow<T> for Monomial {
+impl<T> Pow<T> for Monomial
+where
+	Self: PowAssign<T>,
+{
 	type Output = Self;
 
 	fn pow(mut self, rhs: T) -> Self::Output {
@@ -178,11 +190,14 @@ impl<T: Into<i32>> PowAssign<T> for Monomial {
 	}
 }
 
-impl<T: Into<Self>> Sub<T> for Monomial {
+impl<T> Sub<T> for Monomial
+where
+	Polynomial: Sub<T, Output = Polynomial>,
+{
 	type Output = Polynomial;
 
 	fn sub(self, rhs: T) -> Self::Output {
-		Polynomial::new([self, -rhs.into()])
+		Polynomial::from(self) - rhs
 	}
 }
 
