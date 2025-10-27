@@ -579,25 +579,16 @@ impl SubAssign for Polynomial {
 impl fmt::Display for Polynomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self.0.first() {
-			Some(first) if f.alternate() => write!(f, "{first:#}")?,
 			Some(first) => write!(f, "{first}")?,
 			None => write!(f, "0")?,
 		}
 
 		for monomial in self.monomials().skip(1) {
 			if monomial.coeff.is_positive() {
-				if f.alternate() {
-					write!(f, " + {monomial:#}")?;
-				} else {
-					write!(f, " + {monomial}")?;
-				}
+				write!(f, " + {monomial}")?;
 			} else {
 				// TODO: Find an alternative without allocations
-				if f.alternate() {
-					write!(f, " - {:#}", -monomial.clone())?;
-				} else {
-					write!(f, " - {}", -monomial.clone())?;
-				}
+				write!(f, " - {}", -monomial.clone())?;
 			}
 		}
 
