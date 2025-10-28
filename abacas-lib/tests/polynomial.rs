@@ -1,5 +1,6 @@
 use abacas::monomial::Monomial;
 use abacas::polynomial::Polynomial;
+use rug::Rational;
 
 const A: fn() -> Monomial = || Monomial::new(1, 0);
 const B: fn() -> Monomial = || Monomial::new((5, 2), 0);
@@ -16,6 +17,17 @@ fn m(input: &str) -> Monomial {
 /// Helper to construct a polynomial without type inference required.
 fn p(input: &str) -> Polynomial {
 	input.parse().unwrap()
+}
+
+fn random_poly(deg: u32) -> Polynomial {
+	let mut poly = Vec::with_capacity(deg as usize);
+	for deg in 0..=deg {
+		let numer: u32 = rand::random();
+		let coeff = Rational::from(numer) / rand::random_range(1..=numer);
+		poly.push(Monomial::new(coeff, deg));
+	}
+
+	Polynomial::new(poly)
 }
 
 #[test]
@@ -112,4 +124,43 @@ fn polydiv() {
 
 	let dividend_smaller = divisor.clone().div_rem(&dividend);
 	assert_eq!(dividend_smaller, Some((Polynomial::ZERO, divisor)));
+
+	let div_self = dividend.clone().div_rem(&dividend).unwrap();
+	assert_eq!(div_self, (Polynomial::from(1), Polynomial::ZERO));
+}
+
+#[test]
+fn prop_polydiv() {
+	for _ in 0..5000 {
+		let poly_a = random_poly(10);
+		let poly_b = random_poly(5);
+
+		let (q, r) = poly_a.clone().div_rem(&poly_b).unwrap();
+
+		let recon_polya = q * poly_b + r;
+
+		if poly_a != recon_polya {
+			eprintln!("Assertion Failed:");
+			eprintln!("{poly_a}\n!=\n{recon_polya}");
+			panic!("");
+		}
+	}
+}
+
+#[test]
+fn prop_addsub() {
+	for _ in 0..5000 {
+		let poly_a = random_poly(50);
+		let poly_b = random_poly(50);
+
+		assert_eq!(poly_a, poly_a.clone() + poly_b.clone() - poly_b);
+	}
+}
+
+#[test]
+fn prop_muldiv() {
+	let poly_a = random_poly(25);
+	let poly_b = random_poly(25);
+
+	assert_eq!(poly_a, poly_a.clone() * poly_b.clone() / poly_b);
 }
