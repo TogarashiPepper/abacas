@@ -17,7 +17,7 @@ fn random_poly(degree: usize) -> Polynomial {
 
 #[test]
 fn addsub() {
-	for _ in 0..1000 {
+	for _ in 0..5000 {
 		let a = random_poly(50);
 		let b = random_poly(50);
 
@@ -27,7 +27,7 @@ fn addsub() {
 
 #[test]
 fn muldiv() {
-	for _ in 0..1000 {
+	for _ in 0..5000 {
 		let a = random_poly(20);
 		let b = random_poly(20);
 
@@ -37,7 +37,7 @@ fn muldiv() {
 
 #[test]
 fn polydiv() {
-	for _ in 0..1000 {
+	for _ in 0..5000 {
 		let a = random_poly(20);
 		let b = random_poly(10);
 
