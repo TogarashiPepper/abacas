@@ -11,6 +11,6 @@ harness = false
 rug.workspace = true
 
 [dev-dependencies]
-rand.workspace = true
 divan.workspace = true
+rand.workspace = true
 rand_xoshiro.workspace = true
