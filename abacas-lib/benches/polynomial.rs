@@ -12,10 +12,11 @@ fn main() {
 }
 
 fn random_poly(degree: usize) -> Polynomial {
-	static NTH_CALL: AtomicU64 = AtomicU64::new(42);
+    // Initial seed 42 chosen at random
+	static SEED: AtomicU64 = AtomicU64::new(42);
 
 	let mut poly = Vec::with_capacity(degree + 1);
-	let mut rng = Xoshiro256PlusPlus::seed_from_u64(NTH_CALL.fetch_add(1, Ordering::Relaxed));
+	let mut rng = Xoshiro256PlusPlus::seed_from_u64(SEED.fetch_add(1, Ordering::Relaxed));
 
 	for degree in 0..=degree {
 		let numer = rng.random_range(1..1000);
