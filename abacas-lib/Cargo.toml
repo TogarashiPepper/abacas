@@ -3,8 +3,14 @@ name = "abacas"
 version = "0.1.0"
 edition = "2024"
 
+[[bench]]
+name = "polynomial"
+harness = false
+
 [dependencies]
 rug.workspace = true
 
 [dev-dependencies]
+divan.workspace = true
 rand.workspace = true
+rand_xoshiro.workspace = true
