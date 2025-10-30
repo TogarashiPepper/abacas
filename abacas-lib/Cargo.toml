@@ -12,5 +12,4 @@ rug.workspace = true
 
 [dev-dependencies]
 divan.workspace = true
-rand.workspace = true
-rand_xoshiro.workspace = true
+fastrand.workspace = true
