@@ -12,7 +12,7 @@ fn main() {
 }
 
 fn random_poly(degree: usize) -> Polynomial {
-    // Initial seed 42 chosen at random
+	// Initial seed 42 chosen at random
 	static SEED: AtomicU64 = AtomicU64::new(42);
 
 	let mut poly = Vec::with_capacity(degree + 1);
