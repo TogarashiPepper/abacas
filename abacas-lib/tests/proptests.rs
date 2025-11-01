@@ -6,8 +6,8 @@ fn random_poly(degree: usize) -> Polynomial {
 	let mut poly = Vec::with_capacity(degree + 1);
 
 	for degree in 0..=degree {
-		let numer = rand::random_range(1..1000);
-		let denom = rand::random_range(1..1000);
+		let numer = fastrand::u16(1..);
+		let denom = fastrand::u16(1..);
 
 		poly.push(Monomial::new((numer, denom), degree));
 	}

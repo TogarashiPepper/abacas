@@ -4,8 +4,7 @@ use std::time::Duration;
 use abacas::monomial::Monomial;
 use abacas::polynomial::Polynomial;
 use divan::Bencher;
-use rand::{Rng, SeedableRng};
-use rand_xoshiro::Xoshiro256PlusPlus;
+use fastrand::Rng;
 
 fn main() {
 	divan::main();
@@ -16,11 +15,11 @@ fn random_poly(degree: usize) -> Polynomial {
 	static SEED: AtomicU64 = AtomicU64::new(42);
 
 	let mut poly = Vec::with_capacity(degree + 1);
-	let mut rng = Xoshiro256PlusPlus::seed_from_u64(SEED.fetch_add(1, Ordering::Relaxed));
+	let mut rng = Rng::with_seed(SEED.fetch_add(1, Ordering::Relaxed));
 
 	for degree in 0..=degree {
-		let numer = rng.random_range(1..1000);
-		let denom = rng.random_range(1..1000);
+		let numer = rng.u16(1..);
+		let denom = rng.u16(1..);
 
 		poly.push(Monomial::new((numer, denom), degree));
 	}
