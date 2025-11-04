@@ -7,10 +7,10 @@ use rug::{Integer, Rational};
 /// Represents a number of any supported set.
 #[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
 pub enum Number {
-	/// A number belonging to the set of natural numbers (not including zero).
-	Natural(Integer),
 	/// A number belonging to the set of integers.
 	Integer(Integer),
+	/// A number belonging to the set of natural numbers (not including zero).
+	Natural(Integer),
 	/// A number belonging to the set of rational numbers.
 	Rational(Rational),
 }
@@ -44,7 +44,7 @@ where
 
 	fn add(self, rhs: T) -> Self::Output {
 		match self {
-			Self::Natural(lhs) | Self::Integer(lhs) => (lhs + rhs).into(),
+			Self::Integer(lhs) | Self::Natural(lhs) => (lhs + rhs).into(),
 			Self::Rational(lhs) => (lhs + rhs).into(),
 		}
 	}
@@ -55,7 +55,7 @@ impl Add for Number {
 
 	fn add(self, rhs: Self) -> Self::Output {
 		match rhs {
-			Self::Natural(rhs) | Self::Integer(rhs) => self + rhs,
+			Self::Integer(rhs) | Self::Natural(rhs) => self + rhs,
 			Self::Rational(rhs) => self + rhs,
 		}
 	}
@@ -70,7 +70,7 @@ where
 
 	fn div(self, rhs: T) -> Self::Output {
 		match self {
-			Self::Natural(lhs) | Self::Integer(lhs) => (lhs / rhs).into(),
+			Self::Integer(lhs) | Self::Natural(lhs) => (lhs / rhs).into(),
 			Self::Rational(lhs) => (lhs / rhs).into(),
 		}
 	}
@@ -81,7 +81,7 @@ impl Div for Number {
 
 	fn div(self, rhs: Self) -> Self::Output {
 		match rhs {
-			Self::Natural(rhs) | Self::Integer(rhs) => self / rhs,
+			Self::Integer(rhs) | Self::Natural(rhs) => self / rhs,
 			Self::Rational(rhs) => self / rhs,
 		}
 	}
@@ -96,7 +96,7 @@ where
 
 	fn mul(self, rhs: T) -> Self::Output {
 		match self {
-			Self::Natural(lhs) | Self::Integer(lhs) => (lhs * rhs).into(),
+			Self::Integer(lhs) | Self::Natural(lhs) => (lhs * rhs).into(),
 			Self::Rational(lhs) => (lhs * rhs).into(),
 		}
 	}
@@ -107,7 +107,7 @@ impl Mul for Number {
 
 	fn mul(self, rhs: Self) -> Self::Output {
 		match rhs {
-			Self::Natural(rhs) | Self::Integer(rhs) => self * rhs,
+			Self::Integer(rhs) | Self::Natural(rhs) => self * rhs,
 			Self::Rational(rhs) => self * rhs,
 		}
 	}
@@ -122,7 +122,7 @@ where
 
 	fn sub(self, rhs: T) -> Self::Output {
 		match self {
-			Self::Natural(lhs) | Self::Integer(lhs) => (lhs - rhs).into(),
+			Self::Integer(lhs) | Self::Natural(lhs) => (lhs - rhs).into(),
 			Self::Rational(lhs) => (lhs - rhs).into(),
 		}
 	}
@@ -133,7 +133,7 @@ impl Sub for Number {
 
 	fn sub(self, rhs: Self) -> Self::Output {
 		match rhs {
-			Self::Natural(rhs) | Self::Integer(rhs) => self - rhs,
+			Self::Integer(rhs) | Self::Natural(rhs) => self - rhs,
 			Self::Rational(rhs) => self - rhs,
 		}
 	}
