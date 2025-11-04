@@ -394,19 +394,13 @@ impl FromIterator<Monomial> for Polynomial {
 	}
 }
 
-impl<T: Into<Monomial>> Add<T> for Polynomial {
+impl<T> Add<T> for Polynomial
+where
+	Self: AddAssign<T>,
+{
 	type Output = Self;
 
 	fn add(mut self, rhs: T) -> Self::Output {
-		self += rhs;
-		self
-	}
-}
-
-impl Add for Polynomial {
-	type Output = Self;
-
-	fn add(mut self, rhs: Self) -> Self::Output {
 		self += rhs;
 		self
 	}
@@ -433,19 +427,13 @@ impl AddAssign for Polynomial {
 	}
 }
 
-impl<T: Into<Monomial>> Div<T> for Polynomial {
+impl<T> Div<T> for Polynomial
+where
+	Self: DivAssign<T>,
+{
 	type Output = Self;
 
 	fn div(mut self, rhs: T) -> Self::Output {
-		self /= rhs;
-		self
-	}
-}
-
-impl Div for Polynomial {
-	type Output = Self;
-
-	fn div(mut self, rhs: Self) -> Self::Output {
 		self /= rhs;
 		self
 	}
@@ -467,19 +455,13 @@ impl DivAssign for Polynomial {
 	}
 }
 
-impl<T: Into<Monomial>> Mul<T> for Polynomial {
+impl<T> Mul<T> for Polynomial
+where
+	Self: MulAssign<T>,
+{
 	type Output = Self;
 
 	fn mul(mut self, rhs: T) -> Self::Output {
-		self *= rhs;
-		self
-	}
-}
-
-impl Mul for Polynomial {
-	type Output = Self;
-
-	fn mul(mut self, rhs: Self) -> Self::Output {
 		self *= rhs;
 		self
 	}
@@ -522,10 +504,13 @@ impl NegAssign for Polynomial {
 	}
 }
 
-impl Rem for Polynomial {
+impl<T> Rem<T> for Polynomial
+where
+	Self: RemAssign<T>,
+{
 	type Output = Self;
 
-	fn rem(mut self, rhs: Self) -> Self::Output {
+	fn rem(mut self, rhs: T) -> Self::Output {
 		self %= rhs;
 		self
 	}
@@ -537,19 +522,13 @@ impl RemAssign for Polynomial {
 	}
 }
 
-impl<T: Into<Monomial>> Sub<T> for Polynomial {
+impl<T> Sub<T> for Polynomial
+where
+	Self: SubAssign<T>,
+{
 	type Output = Self;
 
 	fn sub(mut self, rhs: T) -> Self::Output {
-		self -= rhs;
-		self
-	}
-}
-
-impl Sub for Polynomial {
-	type Output = Self;
-
-	fn sub(mut self, rhs: Self) -> Self::Output {
 		self -= rhs;
 		self
 	}
