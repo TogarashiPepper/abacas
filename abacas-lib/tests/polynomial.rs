@@ -116,3 +116,12 @@ fn polydiv() {
 	let div_self = dividend.clone().div_rem(&dividend);
 	assert_eq!(div_self, Some((Polynomial::from(1), Polynomial::ZERO)));
 }
+
+#[test]
+fn zeros() {
+	let from = Polynomial::from(0);
+	assert!(from.is_zero());
+
+	let parse = p("0x^2 + 2x - 2x + 0");
+	assert!(parse.is_zero());
+}

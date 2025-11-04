@@ -210,14 +210,12 @@ impl str::FromStr for Monomial {
 	type Err = ParseError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let input = s.trim();
-
-		let (init, degree) = if let Some((init, tail)) = input.split_once("x^") {
+		let (init, degree) = if let Some((init, tail)) = s.split_once("x^") {
 			(init, tail.parse()?)
-		} else if let Some(init) = input.strip_suffix('x') {
+		} else if let Some(init) = s.strip_suffix('x') {
 			(init, 1)
 		} else {
-			(input, 0)
+			(s, 0)
 		};
 
 		let coeff = match init {

@@ -8,29 +8,21 @@ const RED: &str = "\x1b[31m";
 const RESET: &str = "\x1b[0m";
 
 fn main() -> Result<()> {
-	let stdin = io::stdin();
-
-	let mut buffer = String::new();
+	let mut lines = io::stdin().lines();
 	let mut stdout = io::stdout();
 
 	print!("Enter {GREEN}dividend{RESET}: ");
-
 	stdout.flush()?;
-	stdin.read_line(&mut buffer)?;
 
-	let Ok(dividend) = buffer.parse::<Polynomial>() else {
+	let Ok(dividend) = lines.next().unwrap()?.parse::<Polynomial>() else {
 		eprintln!("Could not parse dividend!");
 		return Ok(());
 	};
 
-	buffer.clear();
-
 	print!("Enter {RED}divisor{RESET}: ");
-
 	stdout.flush()?;
-	stdin.read_line(&mut buffer)?;
 
-	let Ok(divisor) = buffer.parse::<Polynomial>() else {
+	let Ok(divisor) = lines.next().unwrap()?.parse::<Polynomial>() else {
 		eprintln!("Could not parse divisor!");
 		return Ok(());
 	};
