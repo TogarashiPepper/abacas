@@ -1,5 +1,4 @@
 use std::sync::atomic::{AtomicU64, Ordering};
-use std::time::Duration;
 
 use abacas::monomial::Monomial;
 use abacas::polynomial::Polynomial;
@@ -10,6 +9,7 @@ fn main() {
 	divan::main();
 }
 
+/// Helper to construct a random polynomial with the given degree.
 fn random_poly(degree: usize) -> Polynomial {
 	// Initial seed 42 chosen at random
 	static SEED: AtomicU64 = AtomicU64::new(42);
@@ -28,55 +28,43 @@ fn random_poly(degree: usize) -> Polynomial {
 }
 
 #[divan::bench]
-fn poly_add(bencher: Bencher) {
+fn add(bencher: Bencher) {
 	bencher
-		.with_inputs(|| (random_poly(100), random_poly(100)))
-		.bench_local_values(|(a, b)| {
-			let _ = a + b;
-		});
+		.with_inputs(|| (random_poly(100), random_poly(50)))
+		.bench_values(|(a, b)| a + b);
 }
 
 #[divan::bench]
-fn poly_sub(bencher: Bencher) {
+fn div(bencher: Bencher) {
 	bencher
-		.with_inputs(|| (random_poly(100), random_poly(100)))
-		.bench_local_values(|(a, b)| {
-			let _ = a - b;
-		});
+		.with_inputs(|| (random_poly(100), random_poly(50)))
+		.bench_values(|(a, b)| a / b);
 }
 
 #[divan::bench]
-fn poly_mul(bencher: Bencher) {
+fn gcd(bencher: Bencher) {
 	bencher
-		.with_inputs(|| (random_poly(100), random_poly(100)))
-		.bench_local_values(|(a, b)| {
-			let _ = a * b;
-		});
+		.with_inputs(|| (random_poly(20), random_poly(10)))
+		.bench_values(|(a, b)| a.gcd(b));
 }
 
 #[divan::bench]
-fn poly_div(bencher: Bencher) {
+fn gcd_ext(bencher: Bencher) {
 	bencher
-		.with_inputs(|| (random_poly(100), random_poly(25)))
-		.bench_local_values(|(a, b)| {
-			let _ = a / b;
-		});
+		.with_inputs(|| (random_poly(20), random_poly(10)))
+		.bench_values(|(a, b)| a.gcd_ext(b));
 }
 
-#[divan::bench(max_time = Duration::from_secs(15))]
-fn poly_gcd(bencher: Bencher) {
+#[divan::bench]
+fn mul(bencher: Bencher) {
 	bencher
-		.with_inputs(|| (random_poly(20), random_poly(20)))
-		.bench_local_values(|(a, b)| {
-			let _ = a.gcd(b);
-		});
+		.with_inputs(|| (random_poly(100), random_poly(50)))
+		.bench_values(|(a, b)| a * b);
 }
 
-#[divan::bench(max_time = Duration::from_secs(15))]
-fn poly_gcd_ext(bencher: Bencher) {
+#[divan::bench]
+fn sub(bencher: Bencher) {
 	bencher
-		.with_inputs(|| (random_poly(20), random_poly(20)))
-		.bench_local_values(|(a, b)| {
-			let _ = a.gcd_ext(b);
-		});
+		.with_inputs(|| (random_poly(100), random_poly(50)))
+		.bench_values(|(a, b)| a - b);
 }
