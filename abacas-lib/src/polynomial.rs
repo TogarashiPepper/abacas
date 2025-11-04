@@ -382,9 +382,21 @@ impl Polynomial {
 	}
 }
 
-impl<T: Into<Monomial>> From<T> for Polynomial {
+impl<T: Into<Rational>> From<T> for Polynomial {
 	fn from(value: T) -> Self {
-		Self::new([value.into()])
+		let value = value.into();
+
+		if value.is_zero() {
+			Self::ZERO
+		} else {
+			Self::new([value.into()])
+		}
+	}
+}
+
+impl From<Monomial> for Polynomial {
+	fn from(value: Monomial) -> Self {
+		Self::new([value])
 	}
 }
 
@@ -600,17 +612,15 @@ impl str::FromStr for Polynomial {
 	type Err = ParseError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let input = s.trim();
-
-		if input.parse() == Ok(0.0) {
-			return Ok(Self::ZERO);
-		}
-
 		let mut result = Self::ZERO;
 
-		for full in input.split(" + ") {
+		for full in s.split(" + ") {
 			for (index, part) in full.split(" - ").enumerate() {
-				let monomial: Monomial = part.parse()?;
+				let monomial: Monomial = match part.parse() {
+					Ok(monomial) => monomial,
+					Err(ParseError::InvalidValue(0.0)) => continue,
+					Err(error) => return Err(error),
+				};
 
 				if index == 0 {
 					result += monomial;
