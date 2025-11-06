@@ -100,9 +100,9 @@ fn main() {
 
 				let tokens = Token::lexer(&line).collect::<Result<Vec<Token>, ()>>().unwrap();
 
-				let mut parser = Parser::new(vec![tokens]);
+				let parser = Parser::new(vec![tokens]);
 
-				let ast = parser.ast();
+				let ast = parser.parse();
 
 				let data = match Interpreter::execute(ast) {
 					Some(tuple) => tuple,
@@ -112,7 +112,7 @@ fn main() {
 					}
 				};
 
-				println!("{data:?}");
+				println!("{data:#?}");
 			}
 			Err(ReadlineError::Interrupted) => {
 				println!("CTRL-C");
