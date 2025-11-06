@@ -1,4 +1,5 @@
 use abacas::VERSION;
+use logos::Logos;
 
 mod expr;
 mod interpreter;
@@ -19,8 +20,8 @@ use syntect::highlighting::ThemeSet;
 use syntect::parsing::SyntaxSet;
 
 use crate::interpreter::Interpreter;
-use crate::lexer::Lexer;
 use crate::parser::Parser;
+use crate::token::Token;
 
 #[derive(Helper, Completer, Hinter, Validator)]
 struct HighlightHelper {
@@ -98,9 +99,9 @@ fn main() {
 
 				println!("\x1b[1m\x1b[31m[Out]:\x1b[0m ");
 
-				let tokens = Lexer::new(&line).tokens();
+				let tokens = Token::lexer(&line).collect::<Result<Vec<Token>, ()>>().unwrap();
 
-				let mut parser = Parser::new(tokens);
+				let mut parser = Parser::new(vec![tokens]);
 
 				let ast = parser.ast();
 
