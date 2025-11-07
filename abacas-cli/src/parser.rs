@@ -19,7 +19,7 @@ impl Parser {
 	fn parse_line(line: Vec<Token>) -> Expression {
 		let mut it = line.into_iter().peekable();
 
-		Self::expr_bp(0, &mut it)
+		Self::expr_bp(0, &mut it).fold()
 	}
 
 	fn expr_bp<T>(min_bp: u8, tokens: &mut Peekable<T>) -> Expression

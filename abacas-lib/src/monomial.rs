@@ -7,6 +7,7 @@ use rug::ops::{NegAssign, Pow, PowAssign};
 use rug::{Integer, Rational};
 
 use crate::error::ParseError;
+use crate::number::Number;
 use crate::polynomial::Polynomial;
 
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
@@ -98,6 +99,16 @@ impl Monomial {
 impl<T: Into<Rational>> From<T> for Monomial {
 	fn from(value: T) -> Self {
 		Self::constant(value)
+	}
+}
+
+impl From<Number> for Monomial {
+	fn from(value: Number) -> Self {
+		match value {
+			Number::Integer(integer) => Monomial::constant(integer),
+			Number::Natural(integer) => Monomial::constant(integer),
+			Number::Rational(rational) => Monomial::constant(rational),
+		}
 	}
 }
 
