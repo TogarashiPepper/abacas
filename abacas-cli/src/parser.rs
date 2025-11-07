@@ -29,14 +29,21 @@ impl Parser {
 		let mut lhs = match tokens.next() {
 			Some(Token::Number(num)) => Expression::Number(num),
 			Some(Token::Ident(name)) => Expression::Ident(name),
+			Some(Token::LParen) => {
+				let lhs = Self::expr_bp(0, tokens);
+				assert_eq!(tokens.next(), Some(Token::RParen));
+
+				lhs
+			}
 			_ => panic!("Bad token"),
 		};
 
 		loop {
 			let op = match tokens.peek() {
 				Some(t @ (Add | Sub | Mul | Div | Rem | Pow)) => t,
+				None | Some(Token::RParen) => break,
+
 				Some(t) => panic!("bad token: {t:#?}"),
-				None => break,
 			};
 
 			let (l_bp, r_bp) = infix_binding_power(op.clone());

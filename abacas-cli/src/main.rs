@@ -104,15 +104,15 @@ fn main() {
 
 				let ast = parser.parse();
 
-				let data = match Interpreter::execute(ast) {
-					Some(tuple) => tuple,
-					None => {
-						eprintln!("no output!");
-						continue;
-					}
-				};
-
-				println!("{data:#?}");
+				// let data = match Interpreter::execute(ast) {
+				// 	Some(tuple) => tuple,
+				// 	None => {
+				// 		eprintln!("no output!");
+				// 		continue;
+				// 	}
+				// };
+				//
+				println!("{ast:#?}");
 			}
 			Err(ReadlineError::Interrupted) => {
 				println!("CTRL-C");
