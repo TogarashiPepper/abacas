@@ -7,7 +7,7 @@ use rug::{Integer, Rational};
 #[derive(Logos, Debug, Clone, PartialEq, PartialOrd)]
 #[logos(skip r"[ \t\n\f]+")]
 pub enum Token {
-	#[regex(r"-?\d+(\.\d+)?", |lex| parse_num(lex.slice()))]
+	#[regex(r"\d+(\.\d+)?", |lex| parse_num(lex.slice()))]
 	Number(Number),
 	#[regex(r"[a-zA-Z]+", |lex| lex.slice().to_owned())]
 	Ident(String),
