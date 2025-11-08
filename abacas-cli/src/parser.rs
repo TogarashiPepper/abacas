@@ -27,11 +27,15 @@ impl Parser {
 		T: Iterator<Item = Token>,
 	{
 		let mut lhs = match tokens.next() {
-			Some(Token::Number(num)) => Expression::Number(num),
-			Some(Token::Ident(name)) => Expression::Ident(name),
-			Some(Token::LParen) => {
+			Some(Sub) => Expression::PreOp {
+				op: Sub,
+				rhs: Box::new(Self::expr_bp(prefix_bp(Sub), tokens)),
+			},
+			Some(Number(num)) => Expression::Number(num),
+			Some(Ident(name)) => Expression::Ident(name),
+			Some(LParen) => {
 				let lhs = Self::expr_bp(0, tokens);
-				assert_eq!(tokens.next(), Some(Token::RParen));
+				assert_eq!(tokens.next(), Some(RParen));
 
 				lhs
 			}
@@ -39,38 +43,79 @@ impl Parser {
 		};
 
 		loop {
-			let op = match tokens.peek() {
-				Some(t @ (Add | Sub | Mul | Div | Rem | Pow)) => t,
-				None | Some(Token::RParen) => break,
+			match tokens.peek() {
+				Some(t @ (Add | Sub | Mul | Div | Rem | Pow)) => {
+					let (l_bp, r_bp) = infix_bp(t.clone());
+
+					if l_bp < min_bp {
+						break;
+					}
+
+					let op = tokens.next().unwrap();
+					let rhs = Self::expr_bp(r_bp, tokens);
+
+					lhs = Expression::BinOp {
+						lhs: Box::new(lhs),
+						op,
+						rhs: Box::new(rhs),
+					};
+				}
+				Some(LParen) => {
+					let _ = tokens.next();
+					let rhs = Self::expr_bp(0, tokens);
+					assert_eq!(tokens.next().unwrap(), Token::RParen);
+
+					lhs = Expression::BinOp {
+						lhs: Box::new(lhs),
+						op: Mul,
+						rhs: Box::new(rhs),
+					};
+				}
+				Some(Number(_)) => {
+					let Token::Number(num) = tokens.next().unwrap() else {
+						unreachable!()
+					};
+
+					lhs = Expression::BinOp {
+						lhs: Box::new(lhs),
+						op: Mul,
+						rhs: Box::new(Expression::Number(num)),
+					};
+				}
+				Some(Ident(_)) => {
+					let Token::Ident(ident) = tokens.next().unwrap() else {
+						unreachable!()
+					};
+
+					lhs = Expression::BinOp {
+						lhs: Box::new(lhs),
+						op: Mul,
+						rhs: Box::new(Expression::Ident(ident)),
+					};
+				}
+				None | Some(RParen) => break,
 
 				Some(t) => panic!("bad token: {t:#?}"),
-			};
-
-			let (l_bp, r_bp) = infix_binding_power(op.clone());
-
-			if l_bp < min_bp {
-				break;
 			}
-
-			let op = tokens.next().unwrap();
-			let rhs = Self::expr_bp(r_bp, tokens);
-
-			lhs = Expression::BinOp {
-				lhs: Box::new(lhs),
-				op,
-				rhs: Box::new(rhs),
-			};
 		}
 
 		lhs
 	}
 }
 
-fn infix_binding_power(op: Token) -> (u8, u8) {
+fn infix_bp(op: Token) -> (u8, u8) {
 	match op {
-		Token::Sub | Token::Add => (1, 2),
-		Token::Mul | Token::Div | Token::Rem => (3, 4),
-		Token::Pow => (5, 6),
+		Sub | Add => (1, 2),
+		Mul | Div | Rem => (3, 4),
+		Pow => (5, 6),
+
+		_ => unreachable!(),
+	}
+}
+
+fn prefix_bp(op: Token) -> u8 {
+	match op {
+		Sub => 5,
 
 		_ => unreachable!(),
 	}
