@@ -1,9 +1,9 @@
+use std::f64::consts::E;
 use std::ops::{Add, Mul, Sub};
 
 use abacas::monomial::Monomial;
 use abacas::number::Number;
 use abacas::polynomial::Polynomial;
-use rug::Integer;
 
 use crate::token::Token;
 
@@ -35,7 +35,7 @@ impl Expression {
 				(Token::Sub, Exp::Polynomial(p)) => Exp::Polynomial(-p),
 				(Token::Sub, Exp::Number(n)) => match n {
 					Number::Integer(int) => Exp::Number((-int).into()),
-					Number::Natural(nat) => Exp::Number((-Integer::from(nat)).into()),
+					Number::Natural(nat) => Exp::Number((-nat).into()),
 					Number::Rational(rat) => Exp::Number((-rat).into()),
 				},
 
@@ -121,6 +121,20 @@ impl Expression {
 					assert_eq!(rem, Polynomial::ZERO);
 
 					Exp::Polynomial(div)
+				}
+
+				// Fold x {+, -} num into Poly
+				(Exp::Ident(i), Token::Add, Exp::Number(num))
+				| (Exp::Number(num), Token::Add, Exp::Ident(i))
+					if i == "x" =>
+				{
+					Exp::Polynomial(Monomial::linear(1) + num)
+				}
+				(Exp::Ident(i), Token::Sub, Exp::Number(n)) if i == "x" => {
+					Exp::Polynomial(Monomial::linear(1) - n)
+				}
+				(Exp::Number(n), Token::Sub, Exp::Ident(i)) if i == "x" => {
+					Exp::Polynomial(Polynomial::new([Monomial::from(n), Monomial::linear(-1)]))
 				}
 
 				(lhs, _, rhs) => Exp::BinOp {
