@@ -4,6 +4,7 @@ use std::ops::{Add, Mul, Sub};
 use abacas::monomial::Monomial;
 use abacas::number::Number;
 use abacas::polynomial::Polynomial;
+use rug::Integer;
 
 use crate::token::Token;
 
