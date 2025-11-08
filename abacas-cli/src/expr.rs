@@ -3,6 +3,7 @@ use std::ops::{Add, Mul, Sub};
 use abacas::monomial::Monomial;
 use abacas::number::Number;
 use abacas::polynomial::Polynomial;
+use rug::Integer;
 
 use crate::token::Token;
 
@@ -16,6 +17,10 @@ pub enum Expression {
 		op: Token,
 		rhs: Box<Expression>,
 	},
+	PreOp {
+		op: Token,
+		rhs: Box<Expression>,
+	},
 }
 
 impl Expression {
@@ -25,6 +30,20 @@ impl Expression {
 		match self {
 			// Numbers and idents cant be reduced further, polynomials handle their own reducing
 			x @ (Exp::Number(_) | Exp::Ident(_) | Exp::Polynomial(_)) => x,
+
+			Exp::PreOp { op, rhs } => match (op, rhs.fold()) {
+				(Token::Sub, Exp::Polynomial(p)) => Exp::Polynomial(-p),
+				(Token::Sub, Exp::Number(n)) => match n {
+					Number::Integer(int) => Exp::Number((-int).into()),
+					Number::Natural(nat) => Exp::Number((-Integer::from(nat)).into()),
+					Number::Rational(rat) => Exp::Number((-rat).into()),
+				},
+
+				(op, rhs) => Exp::PreOp {
+					op,
+					rhs: Box::new(rhs),
+				},
+			},
 
 			Exp::BinOp { lhs, op, rhs } => match (lhs.fold(), op.clone(), rhs.fold()) {
 				// Fold x * number into Poly
@@ -59,6 +78,30 @@ impl Expression {
 					};
 
 					Exp::Polynomial(op(m, m2))
+				}
+
+				// Fold Poly {+, *} Ident into Poly (given same ident)
+				(Exp::Polynomial(p), Token::Add | Token::Mul, Expression::Ident(n))
+				| (Exp::Ident(n), Token::Add | Token::Mul, Exp::Polynomial(p))
+					if n == "x" =>
+				{
+					let mon = Monomial::linear(1);
+					let op = match op {
+						Token::Add => Add::add,
+						Token::Mul => Mul::mul,
+
+						_ => unreachable!(),
+					};
+
+					Exp::Polynomial(op(p, mon))
+				}
+
+				// Fold Poly - Ident into Poly (given same ident)
+				(Exp::Polynomial(p), Token::Sub, Expression::Ident(n)) if n == "x" => {
+					Exp::Polynomial(p - Monomial::linear(1))
+				}
+				(Exp::Ident(n), Token::Sub, Expression::Polynomial(p)) if n == "x" => {
+					Exp::Polynomial(Monomial::linear(1) - p)
 				}
 
 				// Fold Poly + num into Poly
