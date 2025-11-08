@@ -1,4 +1,3 @@
-use std::f64::consts::E;
 use std::ops::{Add, Mul, Sub};
 
 use abacas::monomial::Monomial;
