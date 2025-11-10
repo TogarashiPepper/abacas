@@ -82,9 +82,13 @@ impl Expression {
 				}
 
 				// Fold Num {op} Num into Num
-				(Exp::Number(n1), Token::Add | Token::Sub | Token::Mul | Token::Div, Exp::Number(n2)) => {
+				(
+					Exp::Number(n1),
+					Token::Add | Token::Sub | Token::Mul | Token::Div,
+					Exp::Number(n2),
+				) => {
 					let op = match op {
-					    Token::Add => Add::add,
+						Token::Add => Add::add,
 						Token::Sub => Sub::sub,
 						Token::Mul => Mul::mul,
 						Token::Div => Div::div,
