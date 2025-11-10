@@ -27,7 +27,7 @@ use crate::token::Token;
 /// Configuation options for Abacas. Pass no arguments for REPL
 struct CasConfig {
 	#[argh(option, short = 'e')]
-	/// mathematical expression to run through the CAS. Options to simplify/expand coming soon
+	/// mathematical expression to run through the CAS.
 	expr: Option<String>,
 
 	#[argh(switch)]
