@@ -60,37 +60,18 @@ impl Parser {
 						rhs: Box::new(rhs),
 					};
 				}
-				Some(LParen) => {
-					let _ = tokens.next();
-					let rhs = Self::expr_bp(0, tokens);
-					assert_eq!(tokens.next().unwrap(), Token::RParen);
+				Some(Number(_) | Ident(_) | LParen) => {
+					let (l_bp, r_bp) = infix_bp(Token::Mul);
+					if l_bp < min_bp {
+						break;
+					}
+
+					let rhs = Self::expr_bp(r_bp, tokens);
 
 					lhs = Expression::BinOp {
 						lhs: Box::new(lhs),
-						op: Mul,
+						op: Token::Mul,
 						rhs: Box::new(rhs),
-					};
-				}
-				Some(Number(_)) => {
-					let Token::Number(num) = tokens.next().unwrap() else {
-						unreachable!()
-					};
-
-					lhs = Expression::BinOp {
-						lhs: Box::new(lhs),
-						op: Mul,
-						rhs: Box::new(Expression::Number(num)),
-					};
-				}
-				Some(Ident(_)) => {
-					let Token::Ident(ident) = tokens.next().unwrap() else {
-						unreachable!()
-					};
-
-					lhs = Expression::BinOp {
-						lhs: Box::new(lhs),
-						op: Mul,
-						rhs: Box::new(Expression::Ident(ident)),
 					};
 				}
 				None | Some(RParen) => break,
