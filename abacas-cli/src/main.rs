@@ -36,7 +36,7 @@ struct CasConfig {
 }
 
 fn main() {
-	let cas_cfg: CasConfig = argh::from_env();
+	let cfg: CasConfig = argh::from_env();
 
 	if cas_cfg.expr.is_none() {
 		repl(cas_cfg);
