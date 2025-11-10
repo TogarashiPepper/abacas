@@ -1,4 +1,5 @@
-use std::{fmt::Display, str::FromStr};
+use std::fmt::Display;
+use std::str::FromStr;
 
 use abacas::number::Number;
 use logos::Logos;
@@ -43,7 +44,7 @@ impl Display for Token {
 			Token::Add => write!(f, "+"),
 			Token::Sub => write!(f, "-"),
 			Token::Mul => write!(f, "*"),
-			Token::Div => write!(f, "/"),		
+			Token::Div => write!(f, "/"),
 			Token::Pow => write!(f, "^"),
 			Token::Rem => write!(f, "%"),
 			Token::LParen => write!(f, "("),
