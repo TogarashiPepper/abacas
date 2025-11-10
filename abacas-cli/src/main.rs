@@ -24,7 +24,7 @@ use crate::parser::Parser;
 use crate::token::Token;
 
 #[derive(FromArgs)]
-/// Configuation options for Abacas. Pass no arguments for REPL
+/// Configuation options for abacas. Pass no arguments for REPL
 struct CasConfig {
 	#[argh(option, short = 'e')]
 	/// mathematical expression to run through the CAS.
