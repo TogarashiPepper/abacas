@@ -1,6 +1,9 @@
 //! The number enum and its related operations.
 
-use std::ops::{Add, Div, Mul, Sub};
+use std::{
+	fmt::Display,
+	ops::{Add, Div, Mul, Sub},
+};
 
 use rug::{Integer, Rational};
 
@@ -135,6 +138,16 @@ impl Sub for Number {
 		match rhs {
 			Self::Integer(rhs) | Self::Natural(rhs) => self - rhs,
 			Self::Rational(rhs) => self - rhs,
+		}
+	}
+}
+
+impl Display for Number {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Number::Integer(integer) => write!(f, "{integer}"),
+			Number::Natural(integer) => write!(f, "{integer}"),
+			Number::Rational(rational) => write!(f, "{rational}"),
 		}
 	}
 }

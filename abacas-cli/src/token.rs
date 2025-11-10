@@ -1,4 +1,4 @@
-use std::str::FromStr;
+use std::{fmt::Display, str::FromStr};
 
 use abacas::number::Number;
 use logos::Logos;
@@ -32,6 +32,24 @@ pub enum Token {
 	LParen,
 	#[token(")")]
 	RParen,
+}
+
+impl Display for Token {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Token::Number(number) => write!(f, "{number}"),
+			Token::Ident(name) => write!(f, "{name}"),
+			Token::Eq => write!(f, "="),
+			Token::Add => write!(f, "+"),
+			Token::Sub => write!(f, "-"),
+			Token::Mul => write!(f, "*"),
+			Token::Div => write!(f, "/"),		
+			Token::Pow => write!(f, "^"),
+			Token::Rem => write!(f, "%"),
+			Token::LParen => write!(f, "("),
+			Token::RParen => write!(f, ")"),
+		}
+	}
 }
 
 fn parse_num(st: &str) -> Number {
