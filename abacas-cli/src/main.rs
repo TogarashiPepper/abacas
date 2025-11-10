@@ -38,19 +38,19 @@ struct CasConfig {
 fn main() {
 	let cfg: CasConfig = argh::from_env();
 
-	if cas_cfg.expr.is_none() {
-		repl(cas_cfg);
+	if cfg.expr.is_none() {
+		repl(cfg);
 		return;
 	}
-	
-	let exp = cas_cfg.expr.unwrap();
+
+	let exp = cfg.expr.unwrap();
 	let tokens = Token::lexer(&exp)
 		.collect::<Result<Vec<Token>, ()>>()
 		.unwrap();
 
 	let mut ast = Parser::parse_line(tokens);
 
-	if !cas_cfg.no_fold {
+	if !cfg.no_fold {
 		ast = ast.fold();
 	}
 
