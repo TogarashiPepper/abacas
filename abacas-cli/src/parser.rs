@@ -16,10 +16,10 @@ impl Parser {
 		self.tokens.into_iter().map(Self::parse_line).collect()
 	}
 
-	fn parse_line(line: Vec<Token>) -> Expression {
+	pub fn parse_line(line: Vec<Token>) -> Expression {
 		let mut it = line.into_iter().peekable();
 
-		Self::expr_bp(0, &mut it).fold()
+		Self::expr_bp(0, &mut it)
 	}
 
 	fn expr_bp<T>(min_bp: u8, tokens: &mut Peekable<T>) -> Expression
