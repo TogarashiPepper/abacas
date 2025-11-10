@@ -1,9 +1,7 @@
 //! The number enum and its related operations.
 
-use std::{
-	fmt::Display,
-	ops::{Add, Div, Mul, Sub},
-};
+use std::fmt::Display;
+use std::ops::{Add, Div, Mul, Sub};
 
 use rug::{Integer, Rational};
 
