@@ -1,4 +1,5 @@
 use abacas::VERSION;
+use argh::FromArgs;
 use logos::Logos;
 
 mod expr;
@@ -21,6 +22,40 @@ use syntect::parsing::SyntaxSet;
 use crate::interpreter::Interpreter;
 use crate::parser::Parser;
 use crate::token::Token;
+
+#[derive(FromArgs)]
+/// Configuation options for abacas. Pass no arguments for REPL
+struct CasConfig {
+	#[argh(option, short = 'e')]
+	/// mathematical expression to run through the CAS.
+	expr: Option<String>,
+
+	#[argh(switch)]
+	/// prevent the CAS from folding the parsed expr
+	no_fold: bool,
+}
+
+fn main() {
+	let cfg: CasConfig = argh::from_env();
+
+	if cas_cfg.expr.is_none() {
+		repl(cas_cfg);
+		return;
+	}
+	
+	let exp = cas_cfg.expr.unwrap();
+	let tokens = Token::lexer(&exp)
+		.collect::<Result<Vec<Token>, ()>>()
+		.unwrap();
+
+	let mut ast = Parser::parse_line(tokens);
+
+	if !cas_cfg.no_fold {
+		ast = ast.fold();
+	}
+
+	println!("{ast}");
+}
 
 #[derive(Helper, Completer, Hinter, Validator)]
 struct HighlightHelper {
@@ -76,7 +111,7 @@ impl Highlighter for HighlightHelper {
 	}
 }
 
-fn main() {
+fn repl(cfg: CasConfig) {
 	println!(
 		"Welcome to abacas v{}\nTo exit, press CTRL+C or CTRL+D",
 		VERSION
@@ -109,9 +144,11 @@ fn main() {
 					.collect::<Result<Vec<Token>, ()>>()
 					.unwrap();
 
-				let parser = Parser::new(vec![tokens]);
+				let mut ast = Parser::parse_line(tokens);
 
-				let ast = parser.parse();
+				if !cfg.no_fold {
+					ast = ast.fold();
+				}
 
 				// let data = match Interpreter::execute(ast) {
 				// 	Some(tuple) => tuple,
@@ -121,10 +158,7 @@ fn main() {
 				// 	}
 				// };
 				//
-				println!("{ast:#?}");
-				for ast in ast {
-					println!("\n{ast}");
-				}
+				println!("{ast:?}");
 			}
 			Err(ReadlineError::Interrupted) => {
 				println!("CTRL-C");
