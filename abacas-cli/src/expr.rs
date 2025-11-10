@@ -1,10 +1,11 @@
+use std::fmt::Display;
 use std::ops::{Add, Mul, Sub};
 
 use abacas::monomial::Monomial;
 use abacas::number::Number;
 use abacas::polynomial::Polynomial;
-use rug::Integer;
 
+use crate::parser::infix_bp;
 use crate::token::Token;
 
 #[derive(Debug, Clone)]
@@ -142,6 +143,75 @@ impl Expression {
 					op,
 					rhs: Box::new(rhs),
 				},
+			},
+		}
+	}
+}
+
+impl Display for Expression {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Expression::Number(number) => write!(f, "{number}"),
+			Expression::Ident(name) => write!(f, "{name}"),
+			Expression::Polynomial(polynomial) => write!(f, "{polynomial}"),
+			Expression::BinOp { lhs, op, rhs } => {
+				let (l_bp, r_bp) = infix_bp(op.clone());
+
+				match &**lhs {
+					x @ (Expression::Number(_)
+					| Expression::Ident(_)
+					| Expression::PreOp { .. }) => write!(f, "{x}")?,
+					Expression::Polynomial(polynomial) => {
+						if l_bp <= infix_bp(Token::Add).1 {
+							write!(f, "{polynomial}")?
+						} else {
+							write!(f, "({polynomial})")?
+						}
+					}
+					x @ Expression::BinOp { op, .. } => {
+						if l_bp <= infix_bp(op.clone()).1 {
+							write!(f, "{x}")?
+						} else {
+							write!(f, "({x})")?
+						}
+					}
+				};
+
+				if matches!(op, Token::Pow) {
+					write!(f, "{op}")?;
+				} else {
+					write!(f, " {op} ")?;
+				}
+
+				match &**rhs {
+					x @ (Expression::Number(_)
+					| Expression::Ident(_)
+					| Expression::PreOp { .. }) => write!(f, "{x}")?,
+					Expression::Polynomial(polynomial) => {
+						if r_bp <= infix_bp(Token::Add).1 {
+							write!(f, "{polynomial}")?
+						} else {
+							write!(f, "({polynomial})")?
+						}
+					}
+					x @ Expression::BinOp { op, .. } => {
+						if r_bp <= infix_bp(op.clone()).1 {
+							write!(f, "{x}")?
+						} else {
+							write!(f, "({x})")?
+						}
+					}
+				};
+
+				Ok(())
+			}
+			Expression::PreOp { op, rhs } => match &**rhs {
+				x @ (Expression::Number(_) | Expression::Ident(_) | Expression::PreOp { .. }) => {
+					write!(f, "{op}{x}")
+				}
+				x @ (Expression::Polynomial(_) | Expression::BinOp { .. }) => {
+					write!(f, "{op}({x})")
+				}
 			},
 		}
 	}

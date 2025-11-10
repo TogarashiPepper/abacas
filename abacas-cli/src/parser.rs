@@ -103,7 +103,7 @@ impl Parser {
 	}
 }
 
-fn infix_bp(op: Token) -> (u8, u8) {
+pub fn infix_bp(op: Token) -> (u8, u8) {
 	match op {
 		Sub | Add => (1, 2),
 		Mul | Div | Rem => (3, 4),
@@ -113,7 +113,7 @@ fn infix_bp(op: Token) -> (u8, u8) {
 	}
 }
 
-fn prefix_bp(op: Token) -> u8 {
+pub fn prefix_bp(op: Token) -> u8 {
 	match op {
 		Sub => 5,
 
