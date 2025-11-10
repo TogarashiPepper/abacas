@@ -122,6 +122,9 @@ fn main() {
 				// };
 				//
 				println!("{ast:#?}");
+				for ast in ast {
+					println!("\n{ast}");
+				}
 			}
 			Err(ReadlineError::Interrupted) => {
 				println!("CTRL-C");

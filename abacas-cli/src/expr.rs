@@ -1,10 +1,11 @@
+use std::fmt::Display;
 use std::ops::{Add, Mul, Sub};
 
 use abacas::monomial::Monomial;
 use abacas::number::Number;
 use abacas::polynomial::Polynomial;
-use rug::Integer;
 
+use crate::parser::infix_bp;
 use crate::token::Token;
 
 #[derive(Debug, Clone)]
@@ -142,6 +143,82 @@ impl Expression {
 					op,
 					rhs: Box::new(rhs),
 				},
+			},
+		}
+	}
+}
+
+impl Display for Expression {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		match self {
+			Expression::Number(number) => write!(f, "{number}"),
+			Expression::Ident(name) => write!(f, "{name}"),
+			Expression::Polynomial(polynomial) => write!(f, "{polynomial}"),
+			Expression::BinOp { lhs, op, rhs } => {
+				let (l_bp, r_bp) = infix_bp(op.clone());
+
+				match &**lhs {
+					Expression::Number(n) => {
+						write!(f, "{n}")?;
+					}
+					Expression::Ident(n) => {
+						write!(f, "{n}")?;
+					}
+					Expression::Polynomial(polynomial) => {
+						if l_bp <= infix_bp(Token::Add).1 {
+							write!(f, "{polynomial}")?;
+						} else {
+							write!(f, "({polynomial})")?;
+						}
+					}
+					x @ Expression::BinOp { op, .. } => {
+						if l_bp <= infix_bp(op.clone()).1 {
+							write!(f, "{x}")?;
+						} else {
+							write!(f, "({x})")?;
+						}
+					}
+					x @ Expression::PreOp { .. } => {
+						write!(f, "{x}")?;
+					}
+				}
+
+				write!(f, " {op} ")?;
+
+				match &**rhs {
+					Expression::Number(n) => {
+						write!(f, "{n}")?;
+					}
+					Expression::Ident(n) => {
+						write!(f, "{n}")?;
+					}
+					Expression::Polynomial(polynomial) => {
+						if r_bp <= infix_bp(Token::Add).1 {
+							write!(f, "{polynomial}")?;
+						} else {
+							write!(f, "({polynomial})")?;
+						}
+					}
+					x @ Expression::BinOp { op, .. } => {
+						if r_bp <= infix_bp(op.clone()).1 {
+							write!(f, "{x}")?;
+						} else {
+							write!(f, "({x})")?;
+						}
+					}
+					x @ Expression::PreOp { .. } => {
+						write!(f, "{x}")?;
+					}
+				};
+
+				Ok(())
+			}
+			Expression::PreOp { op, rhs } => match &**rhs {
+				Expression::Number(number) => write!(f, "{op}{number}"),
+				Expression::Ident(name) => write!(f, "{op}{name}"),
+				Expression::Polynomial(polynomial) => write!(f, "{op}({polynomial})"),
+				x @ Expression::PreOp { .. } => write!(f, "{op}{x}"),
+				x @ Expression::BinOp { .. } => write!(f, "{op}({x})"),
 			},
 		}
 	}
