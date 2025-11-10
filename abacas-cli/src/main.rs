@@ -38,21 +38,23 @@ struct CasConfig {
 fn main() {
 	let cas_cfg: CasConfig = argh::from_env();
 
-	if let Some(exp) = cas_cfg.expr {
-		let tokens = Token::lexer(&exp)
-			.collect::<Result<Vec<Token>, ()>>()
-			.unwrap();
-
-		let mut ast = Parser::parse_line(tokens);
-
-		if !cas_cfg.no_fold {
-			ast = ast.fold();
-		}
-
-		println!("{ast}");
-	} else {
+	if cas_cfg.expr.is_none() {
 		repl(cas_cfg);
+		return;
 	}
+	
+	let exp = cas_cfg.expr.unwrap();
+	let tokens = Token::lexer(&exp)
+		.collect::<Result<Vec<Token>, ()>>()
+		.unwrap();
+
+	let mut ast = Parser::parse_line(tokens);
+
+	if !cas_cfg.no_fold {
+		ast = ast.fold();
+	}
+
+	println!("{ast}");
 }
 
 #[derive(Helper, Completer, Hinter, Validator)]
