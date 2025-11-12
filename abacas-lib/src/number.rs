@@ -1,11 +1,14 @@
 //! The number enum and its related operations.
 
+use std::cmp::Ordering;
 use std::ops::{Add, Div, Mul, Sub};
+use std::{fmt, str};
 
+use rug::rational::ParseRationalError;
 use rug::{Integer, Rational};
 
 /// Represents a number of any supported set.
-#[derive(Clone, Debug, Eq, Ord, PartialEq, PartialOrd)]
+#[derive(Clone, Debug)]
 pub enum Number {
 	/// A number belonging to the set of integers.
 	Integer(Integer),
@@ -13,6 +16,17 @@ pub enum Number {
 	Natural(Integer),
 	/// A number belonging to the set of rational numbers.
 	Rational(Rational),
+}
+
+impl Number {
+	/// The number zero.
+	pub const ZERO: Self = Self::Integer(Integer::ZERO);
+}
+
+impl Default for Number {
+	fn default() -> Self {
+		Self::ZERO
+	}
 }
 
 impl From<Integer> for Number {
@@ -31,6 +45,50 @@ impl From<Rational> for Number {
 			Self::from(value.into_numer_denom().0)
 		} else {
 			Self::Rational(value)
+		}
+	}
+}
+
+impl<T> PartialEq<T> for Number
+where
+	Integer: PartialEq<T>,
+	Rational: PartialEq<T>,
+{
+	fn eq(&self, other: &T) -> bool {
+		match self {
+			Self::Integer(lhs) | Self::Natural(lhs) => lhs == other,
+			Self::Rational(lhs) => lhs == other,
+		}
+	}
+}
+
+impl PartialEq for Number {
+	fn eq(&self, other: &Self) -> bool {
+		match other {
+			Self::Integer(rhs) | Self::Natural(rhs) => self == rhs,
+			Self::Rational(rhs) => self == rhs,
+		}
+	}
+}
+
+impl<T> PartialOrd<T> for Number
+where
+	Integer: PartialOrd<T>,
+	Rational: PartialOrd<T>,
+{
+	fn partial_cmp(&self, other: &T) -> Option<Ordering> {
+		match self {
+			Self::Integer(lhs) | Self::Natural(lhs) => lhs.partial_cmp(other),
+			Self::Rational(lhs) => lhs.partial_cmp(other),
+		}
+	}
+}
+
+impl PartialOrd for Number {
+	fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+		match other {
+			Self::Integer(rhs) | Self::Natural(rhs) => self.partial_cmp(rhs),
+			Self::Rational(rhs) => self.partial_cmp(rhs),
 		}
 	}
 }
@@ -136,5 +194,22 @@ impl Sub for Number {
 			Self::Integer(rhs) | Self::Natural(rhs) => self - rhs,
 			Self::Rational(rhs) => self - rhs,
 		}
+	}
+}
+
+impl fmt::Display for Number {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			Self::Integer(inner) | Self::Natural(inner) => inner.fmt(f),
+			Self::Rational(inner) => inner.fmt(f),
+		}
+	}
+}
+
+impl str::FromStr for Number {
+	type Err = ParseRationalError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		Rational::from_str(s).map(Self::from)
 	}
 }
