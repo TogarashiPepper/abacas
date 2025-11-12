@@ -1,5 +1,3 @@
-use std::str::FromStr;
-
 use abacas::number::Number;
 use rug::Rational;
 
@@ -30,9 +28,9 @@ fn from() {
 
 #[test]
 fn from_str() {
-	let int = Number::from_str("0");
-	let nat = Number::from_str("2");
-	let rat = Number::from_str("5/2");
+	let int = "0".parse();
+	let nat = "2".parse();
+	let rat = "5/2".parse();
 
 	assert!(matches!(int, Ok(Number::Integer(_))));
 	assert!(matches!(nat, Ok(Number::Natural(_))));
