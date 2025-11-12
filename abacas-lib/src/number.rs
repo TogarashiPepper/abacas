@@ -1,9 +1,10 @@
 //! The number enum and its related operations.
 
 use std::cmp::Ordering;
-use std::fmt;
 use std::ops::{Add, Div, Mul, Sub};
+use std::{fmt, str};
 
+use rug::rational::ParseRationalError;
 use rug::{Integer, Rational};
 
 /// Represents a number of any supported set.
@@ -202,5 +203,13 @@ impl fmt::Display for Number {
 			Self::Integer(inner) | Self::Natural(inner) => inner.fmt(f),
 			Self::Rational(inner) => inner.fmt(f),
 		}
+	}
+}
+
+impl str::FromStr for Number {
+	type Err = ParseRationalError;
+
+	fn from_str(s: &str) -> Result<Self, Self::Err> {
+		Rational::from_str(s).map(Self::from)
 	}
 }
