@@ -32,7 +32,7 @@ struct CasConfig {
 
 	#[argh(switch)]
 	/// prevent the CAS from folding the parsed expr
-	no_fold: bool,
+	raw: bool,
 }
 
 fn main() {
@@ -50,11 +50,15 @@ fn main() {
 
 	let mut ast = Parser::parse_line(tokens);
 
-	if !cfg.no_fold {
+	if !cfg.raw {
 		ast = ast.fold();
 	}
 
-	println!("{ast}");
+	let mut interpreter = Interpreter::new();
+
+	let data = interpreter.execute_line(ast);
+
+	println!("{data}");
 }
 
 #[derive(Helper, Completer, Hinter, Validator)]
@@ -84,6 +88,7 @@ impl Highlighter for HighlightHelper {
 	fn highlight<'l>(&self, line: &'l str, _: usize) -> Cow<'l, str> {
 		let ps = SyntaxSet::load_defaults_newlines();
 		let ts = ThemeSet::load_defaults();
+		// TODO: add support for light theme terminals
 		let theme = ts.themes["base16-mocha.dark"].clone();
 
 		let syntax = ps.find_syntax_by_extension("rs").unwrap();
@@ -126,6 +131,8 @@ fn repl(cfg: CasConfig) {
 	let mut rl = Editor::with_config(config).unwrap();
 	rl.set_helper(Some(h));
 
+	let mut interpreter = Interpreter::new();
+
 	loop {
 		"\x1b[1m\x1b[32m[In]:\x1b[0m "
 			.clone_into(&mut rl.helper_mut().expect("No helper").colored_prompt);
@@ -146,19 +153,13 @@ fn repl(cfg: CasConfig) {
 
 				let mut ast = Parser::parse_line(tokens);
 
-				if !cfg.no_fold {
+				if !cfg.raw {
 					ast = ast.fold();
 				}
 
-				// let data = match Interpreter::execute(ast) {
-				// 	Some(tuple) => tuple,
-				// 	None => {
-				// 		eprintln!("no output!");
-				// 		continue;
-				// 	}
-				// };
-				//
-				println!("{ast:?}");
+				let data = interpreter.execute_line(ast);
+
+				println!("{data}");
 			}
 			Err(ReadlineError::Interrupted) => {
 				println!("CTRL-C");

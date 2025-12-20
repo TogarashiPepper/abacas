@@ -3,19 +3,9 @@ use std::iter::Peekable;
 use crate::expr::Expression;
 use crate::token::Token::{self, *};
 
-pub struct Parser {
-	tokens: Vec<Vec<Token>>,
-}
+pub struct Parser {}
 
 impl Parser {
-	pub fn new(tokens: Vec<Vec<Token>>) -> Self {
-		Self { tokens }
-	}
-
-	pub fn parse(self) -> Vec<Expression> {
-		self.tokens.into_iter().map(Self::parse_line).collect()
-	}
-
 	pub fn parse_line(line: Vec<Token>) -> Expression {
 		let mut it = line.into_iter().peekable();
 
@@ -44,7 +34,7 @@ impl Parser {
 
 		loop {
 			match tokens.peek() {
-				Some(t @ (Add | Sub | Mul | Div | Rem | Pow)) => {
+				Some(t @ (Add | Sub | Mul | Div | Rem | Pow | Eq)) => {
 					let (l_bp, r_bp) = infix_bp(t.clone());
 
 					if l_bp < min_bp {
@@ -86,9 +76,10 @@ impl Parser {
 
 pub fn infix_bp(op: Token) -> (u8, u8) {
 	match op {
-		Sub | Add => (1, 2),
-		Mul | Div | Rem => (3, 4),
-		Pow => (5, 6),
+		Eq => (1, 2),
+		Sub | Add => (3, 4),
+		Mul | Div | Rem => (5, 6),
+		Pow => (7, 8),
 
 		_ => unreachable!(),
 	}
@@ -96,7 +87,7 @@ pub fn infix_bp(op: Token) -> (u8, u8) {
 
 pub fn prefix_bp(op: Token) -> u8 {
 	match op {
-		Sub => 5,
+		Sub => 7,
 
 		_ => unreachable!(),
 	}

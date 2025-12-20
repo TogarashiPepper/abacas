@@ -15,7 +15,6 @@ pub enum Token {
 
 	#[token("=")]
 	Eq,
-
 	#[token("+")]
 	Add,
 	#[token("-")]
