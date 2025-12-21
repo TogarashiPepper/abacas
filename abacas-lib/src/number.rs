@@ -186,6 +186,17 @@ impl Mul for Number {
 	}
 }
 
+impl Neg for Number {
+	type Output = Self;
+
+	fn neg(self) -> Self::Output {
+		match self {
+			Self::Integer(n) | Self::Natural(n) => (-n).into(),
+			Self::Rational(n) => (-n).into(),
+		}
+	}
+}
+
 impl<T> Sub<T> for Number
 where
 	Integer: Sub<T, Output: Into<Self>>,
@@ -208,24 +219,6 @@ impl Sub for Number {
 		match rhs {
 			Self::Integer(rhs) | Self::Natural(rhs) => self - rhs,
 			Self::Rational(rhs) => self - rhs,
-		}
-	}
-}
-
-impl Neg for Number {
-	type Output = Self;
-
-	fn neg(self) -> Self::Output {
-		match self {
-			Self::Integer(n) => {
-				if n.is_positive() {
-					Self::Integer(-n)
-				} else {
-					Self::Natural(-n)
-				}
-			}
-			Self::Natural(n) => Self::Integer(0 - n),
-			Self::Rational(n) => Self::Rational(0 - n),
 		}
 	}
 }
