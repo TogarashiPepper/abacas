@@ -217,7 +217,14 @@ impl Neg for Number {
 
 	fn neg(self) -> Self::Output {
 		match self {
-			Self::Integer(n) | Self::Natural(n) => Self::Integer(0 - n),
+			Self::Integer(n) => {
+				if n.is_positive() {
+					Self::Integer(-n)
+				} else {
+					Self::Natural(-n)
+				}
+			}
+			Self::Natural(n) => Self::Integer(0 - n),
 			Self::Rational(n) => Self::Rational(0 - n),
 		}
 	}
