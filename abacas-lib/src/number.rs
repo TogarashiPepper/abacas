@@ -1,7 +1,7 @@
 //! The number enum and its related operations.
 
 use std::cmp::Ordering;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 use std::{fmt, str};
 
 use rug::rational::ParseRationalError;
@@ -193,6 +193,17 @@ impl Sub for Number {
 		match rhs {
 			Self::Integer(rhs) | Self::Natural(rhs) => self - rhs,
 			Self::Rational(rhs) => self - rhs,
+		}
+	}
+}
+
+impl Neg for Number {
+	type Output = Self;
+
+	fn neg(self) -> Self::Output {
+		match self {
+			Self::Integer(n) | Self::Natural(n) => Self::Integer(0 - n),
+			Self::Rational(n) => Self::Rational(0 - n),
 		}
 	}
 }
