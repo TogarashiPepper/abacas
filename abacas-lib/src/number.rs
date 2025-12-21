@@ -21,6 +21,21 @@ pub enum Number {
 impl Number {
 	/// The number zero.
 	pub const ZERO: Self = Self::Integer(Integer::ZERO);
+
+	/// Returns the remainder of division operation
+	///
+	/// # Panics
+	///
+	/// Panics if `self` or `rhs` is Rational
+	pub fn rem(self, rhs: Self) -> Self {
+		match (self, rhs) {
+			(Self::Integer(lhs), Self::Integer(rhs)) => lhs.div_rem(rhs).1.into(),
+			(Self::Integer(lhs), Self::Natural(rhs)) => lhs.div_rem(rhs).1.into(),
+			(Self::Natural(lhs), Self::Integer(rhs)) => lhs.div_rem(rhs).1.into(),
+			(Self::Natural(lhs), Self::Natural(rhs)) => lhs.div_rem(rhs).1.into(),
+			_ => unimplemented!(),
+		}
+	}
 }
 
 impl Default for Number {
