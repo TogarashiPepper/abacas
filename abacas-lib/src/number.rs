@@ -1,5 +1,6 @@
 //! The number enum and its related operations.
 
+use std::cmp::Ordering;
 use std::fmt::Display;
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
 

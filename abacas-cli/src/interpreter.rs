@@ -155,9 +155,8 @@ impl Interpreter {
 							op: Rem,
 							rhs: Box::new(Expression::Polynomial(p)),
 						},
-						(Expression::Number(_), Expression::Number(_)) => {
-							// TODO: implement when number has method for rem
-							unimplemented!()
+						(Expression::Number(n1), Expression::Number(n2)) => {
+							Expression::Number(n1.rem(n2))
 						}
 
 						_ => unreachable!(),
@@ -171,11 +170,7 @@ impl Interpreter {
 					let rhd = self.evaluate_expression(*rhs);
 
 					match rhd {
-						Expression::Number(_) => {
-							// TODO: impl when Number has Neg trait
-							// Expression::Number(-number)
-							unimplemented!()
-						}
+						Expression::Number(number) => Expression::Number(-number),
 						Expression::Ident(ident) => Expression::PreOp {
 							op: Sub,
 							rhs: Box::new(Expression::Ident(ident)),
