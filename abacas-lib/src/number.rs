@@ -1,7 +1,7 @@
 //! The number enum and its related operations.
 
 use std::cmp::Ordering;
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 use std::{fmt, str};
 
 use rug::rational::ParseRationalError;
@@ -21,6 +21,21 @@ pub enum Number {
 impl Number {
 	/// The number zero.
 	pub const ZERO: Self = Self::Integer(Integer::ZERO);
+
+	/// Returns the remainder of division operation
+	///
+	/// # Panics
+	///
+	/// Panics if `self` or `rhs` is Rational
+	pub fn rem(self, rhs: Self) -> Self {
+		match (self, rhs) {
+			(Self::Integer(lhs), Self::Integer(rhs)) => lhs.div_rem(rhs).1.into(),
+			(Self::Integer(lhs), Self::Natural(rhs)) => lhs.div_rem(rhs).1.into(),
+			(Self::Natural(lhs), Self::Integer(rhs)) => lhs.div_rem(rhs).1.into(),
+			(Self::Natural(lhs), Self::Natural(rhs)) => lhs.div_rem(rhs).1.into(),
+			_ => unimplemented!(),
+		}
+	}
 }
 
 impl Default for Number {
@@ -167,6 +182,17 @@ impl Mul for Number {
 		match rhs {
 			Self::Integer(rhs) | Self::Natural(rhs) => self * rhs,
 			Self::Rational(rhs) => self * rhs,
+		}
+	}
+}
+
+impl Neg for Number {
+	type Output = Self;
+
+	fn neg(self) -> Self::Output {
+		match self {
+			Self::Integer(n) | Self::Natural(n) => (-n).into(),
+			Self::Rational(n) => (-n).into(),
 		}
 	}
 }
