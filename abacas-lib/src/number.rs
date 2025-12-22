@@ -2,6 +2,7 @@
 
 use std::cmp::Ordering;
 use std::ops::{Add, Div, Mul, Neg, Sub};
+use std::str::FromStr;
 use std::{fmt, str};
 
 use rug::rational::ParseRationalError;
@@ -21,6 +22,16 @@ pub enum Number {
 impl Number {
 	/// The number zero.
 	pub const ZERO: Self = Self::Integer(Integer::ZERO);
+
+	/// The number pi.
+	pub fn PI() -> Self {
+		Self::Rational(Rational::from_str("3141592653589793 / 1000000000000000").unwrap())
+	}
+
+	/// The eulers number.
+	pub fn E() -> Self {
+		Self::Rational(Rational::from_str("2718281828459045 / 1000000000000000").unwrap())
+	}
 
 	/// Returns the remainder of division operation
 	///
