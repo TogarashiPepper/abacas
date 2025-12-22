@@ -1,8 +1,9 @@
 //! The number enum and its related operations.
 
 use std::cmp::Ordering;
+use std::fmt::{self, Display};
 use std::ops::{Add, Div, Mul, Neg, Rem, Sub};
-use std::{fmt, str};
+use std::str;
 
 use rug::rational::ParseRationalError;
 use rug::{Integer, Rational};
@@ -232,7 +233,7 @@ impl Sub for Number {
 	}
 }
 
-impl fmt::Display for Number {
+impl Display for Number {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
 			Self::Integer(inner) | Self::Natural(inner) => inner.fmt(f),
