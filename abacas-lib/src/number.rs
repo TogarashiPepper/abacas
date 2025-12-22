@@ -24,13 +24,13 @@ impl Number {
 	pub const ZERO: Self = Self::Integer(Integer::ZERO);
 
 	/// The number pi.
-	pub fn PI() -> Self {
-		Self::Rational(Rational::from_str("3141592653589793 / 1000000000000000").unwrap())
+	pub fn pi() -> Self {
+		Self::Rational(Rational::from((3141592653589793u64, 1000000000000000u64)))
 	}
 
 	/// The eulers number.
-	pub fn E() -> Self {
-		Self::Rational(Rational::from_str("2718281828459045 / 1000000000000000").unwrap())
+	pub fn e() -> Self {
+		Self::Rational(Rational::from((2718281828459045u64, 1000000000000000u64)))
 	}
 
 	/// Returns the remainder of division operation
