@@ -6,6 +6,7 @@ edition = "2024"
 [dependencies]
 abacas.workspace = true
 argh = { version = "0.1.13", default-features = false, features = ["help"] }
+dark-light = "2.0.0"
 logos = "0.15.1"
 rug.workspace = true
 rustyline = { version = "17.0.2", features = ["derive"] }

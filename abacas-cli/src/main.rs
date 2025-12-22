@@ -1,5 +1,6 @@
 use abacas::VERSION;
 use argh::FromArgs;
+use dark_light::{Mode, detect};
 use logos::Logos;
 
 mod expr;
@@ -88,8 +89,14 @@ impl Highlighter for HighlightHelper {
 	fn highlight<'l>(&self, line: &'l str, _: usize) -> Cow<'l, str> {
 		let ps = SyntaxSet::load_defaults_newlines();
 		let ts = ThemeSet::load_defaults();
-		// TODO: add support for light theme terminals
-		let theme = ts.themes["base16-mocha.dark"].clone();
+
+		let light_theme = ts.themes["base16-ocean.light"].clone();
+		let dark_theme = ts.themes["base16-mocha.dark"].clone();
+
+		let theme = match detect().unwrap_or(Mode::Unspecified) {
+			Mode::Dark => dark_theme,
+			_ => light_theme,
+		};
 
 		let syntax = ps.find_syntax_by_extension("rs").unwrap();
 		let mut highlighter = HighlightLines::new(syntax, &theme);
