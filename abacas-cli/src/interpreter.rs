@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use abacas::number::Number;
 use abacas::polynomial::Polynomial;
 
 use crate::expr::Expression;
@@ -11,9 +12,10 @@ pub struct Interpreter {
 
 impl Interpreter {
 	pub fn new() -> Self {
-		let variables = HashMap::new();
+		let mut variables = HashMap::new();
 
-		// TODO: add constants like PI, E
+		variables.insert("pi".to_string(), Expression::Number(Number::pi()));
+		variables.insert("e".to_string(), Expression::Number(Number::e()));
 
 		Self { variables }
 	}
@@ -156,7 +158,7 @@ impl Interpreter {
 							rhs: Box::new(Expression::Polynomial(p)),
 						},
 						(Expression::Number(n1), Expression::Number(n2)) => {
-							Expression::Number(n1.rem(n2))
+							Expression::Number(n1 % n2)
 						}
 
 						_ => unreachable!(),
