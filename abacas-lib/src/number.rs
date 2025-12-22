@@ -197,10 +197,10 @@ impl Rem for Number {
 
 	fn rem(self, rhs: Self) -> Self {
 		match (self, rhs) {
-			(Self::Integer(lhs), Self::Integer(rhs)) => lhs.div_rem(rhs).1.into(),
-			(Self::Integer(lhs), Self::Natural(rhs)) => lhs.div_rem(rhs).1.into(),
-			(Self::Natural(lhs), Self::Integer(rhs)) => lhs.div_rem(rhs).1.into(),
-			(Self::Natural(lhs), Self::Natural(rhs)) => lhs.div_rem(rhs).1.into(),
+			(Self::Integer(lhs), Self::Integer(rhs)) => (lhs % rhs).into(),
+			(Self::Integer(lhs), Self::Natural(rhs)) => (lhs % rhs).into(),
+			(Self::Natural(lhs), Self::Integer(rhs)) => (lhs % rhs).into(),
+			(Self::Natural(lhs), Self::Natural(rhs)) => (lhs % rhs).into(),
 			_ => unimplemented!(),
 		}
 	}
