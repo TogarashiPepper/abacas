@@ -40,16 +40,12 @@ impl Expression {
 					Number::Rational(rat) => Exp::Number((-rat).into()),
 				},
 
-				(op, rhs) => Exp::PreOp {
-					op,
-					rhs: Box::new(rhs),
-				},
+				(op, rhs) => Exp::PreOp { op, rhs: Box::new(rhs) },
 			},
 
 			Exp::BinOp { lhs, op, rhs } => match (lhs.fold(), op.clone(), rhs.fold()) {
 				// Fold x * number into Poly
-				(Exp::Number(n), Token::Mul, Exp::Ident(i))
-				| (Exp::Ident(i), Token::Mul, Exp::Number(n))
+				(Exp::Number(n), Token::Mul, Exp::Ident(i)) | (Exp::Ident(i), Token::Mul, Exp::Number(n))
 					if i == "x" =>
 				{
 					let mono = Monomial::linear(1);
@@ -58,15 +54,14 @@ impl Expression {
 				}
 
 				// Fold (x ^ number) into a polynomial (x^n)
-				(
-					Exp::Ident(name),
-					Token::Pow,
-					Exp::Number(Number::Integer(i) | Number::Natural(i)),
-				) if name == "x" => Expression::Polynomial(Monomial::new(1, i).into()),
+				(Exp::Ident(name), Token::Pow, Exp::Number(Number::Integer(i) | Number::Natural(i))) if name == "x" => {
+					Expression::Polynomial(Monomial::new(1, i).into())
+				}
 
 				// Fold the number * poly into poly
-				(Exp::Number(n), Token::Mul, Exp::Polynomial(m))
-				| (Exp::Polynomial(m), Token::Mul, Exp::Number(n)) => Exp::Polynomial(m * n),
+				(Exp::Number(n), Token::Mul, Exp::Polynomial(m)) | (Exp::Polynomial(m), Token::Mul, Exp::Number(n)) => {
+					Exp::Polynomial(m * n)
+				}
 
 				// Fold Poly {+, -, *} Poly into Poly
 				(Exp::Polynomial(m), Token::Add | Token::Sub | Token::Mul, Exp::Polynomial(m2)) => {
@@ -82,11 +77,7 @@ impl Expression {
 				}
 
 				// Fold Num {op} Num into Num
-				(
-					Exp::Number(n1),
-					Token::Add | Token::Sub | Token::Mul | Token::Div,
-					Exp::Number(n2),
-				) => {
+				(Exp::Number(n1), Token::Add | Token::Sub | Token::Mul | Token::Div, Exp::Number(n2)) => {
 					let op = match op {
 						Token::Add => Add::add,
 						Token::Sub => Sub::sub,
@@ -124,8 +115,9 @@ impl Expression {
 				}
 
 				// Fold Poly + num into Poly
-				(Exp::Polynomial(p), Token::Add, Exp::Number(n))
-				| (Exp::Number(n), Token::Add, Exp::Polynomial(p)) => Exp::Polynomial(p + n),
+				(Exp::Polynomial(p), Token::Add, Exp::Number(n)) | (Exp::Number(n), Token::Add, Exp::Polynomial(p)) => {
+					Exp::Polynomial(p + n)
+				}
 
 				// Fold poly - num into Poly
 				(Exp::Polynomial(p), Token::Sub, Exp::Number(n)) => Exp::Polynomial(p - n),
@@ -143,15 +135,12 @@ impl Expression {
 				}
 
 				// Fold x {+, -} num into Poly
-				(Exp::Ident(i), Token::Add, Exp::Number(num))
-				| (Exp::Number(num), Token::Add, Exp::Ident(i))
+				(Exp::Ident(i), Token::Add, Exp::Number(num)) | (Exp::Number(num), Token::Add, Exp::Ident(i))
 					if i == "x" =>
 				{
 					Exp::Polynomial(Monomial::linear(1) + num)
 				}
-				(Exp::Ident(i), Token::Sub, Exp::Number(n)) if i == "x" => {
-					Exp::Polynomial(Monomial::linear(1) - n)
-				}
+				(Exp::Ident(i), Token::Sub, Exp::Number(n)) if i == "x" => Exp::Polynomial(Monomial::linear(1) - n),
 				(Exp::Number(n), Token::Sub, Exp::Ident(i)) if i == "x" => {
 					Exp::Polynomial(Polynomial::new([Monomial::from(n), Monomial::linear(-1)]))
 				}
@@ -176,9 +165,7 @@ impl Display for Expression {
 				let (l_bp, r_bp) = infix_bp(op.clone());
 
 				match &**lhs {
-					x @ (Expression::Number(_)
-					| Expression::Ident(_)
-					| Expression::PreOp { .. }) => write!(f, "{x}")?,
+					x @ (Expression::Number(_) | Expression::Ident(_) | Expression::PreOp { .. }) => write!(f, "{x}")?,
 					Expression::Polynomial(polynomial) => {
 						if l_bp <= infix_bp(Token::Add).1 {
 							write!(f, "{polynomial}")?
@@ -202,9 +189,7 @@ impl Display for Expression {
 				}
 
 				match &**rhs {
-					x @ (Expression::Number(_)
-					| Expression::Ident(_)
-					| Expression::PreOp { .. }) => write!(f, "{x}")?,
+					x @ (Expression::Number(_) | Expression::Ident(_) | Expression::PreOp { .. }) => write!(f, "{x}")?,
 					Expression::Polynomial(polynomial) => {
 						if r_bp <= infix_bp(Token::Add).1 {
 							write!(f, "{polynomial}")?

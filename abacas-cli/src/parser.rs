@@ -1,6 +1,6 @@
 use std::iter::Peekable;
 
-use crate::expr::Expression;
+use crate::expression::Expression;
 use crate::token::Token::{self, *};
 
 pub struct Parser {}
@@ -65,8 +65,6 @@ impl Parser {
 					};
 				}
 				None | Some(RParen) => break,
-
-				Some(t) => panic!("bad token: {t:#?}"),
 			}
 		}
 

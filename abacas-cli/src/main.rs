@@ -3,7 +3,7 @@ use argh::FromArgs;
 use dark_light::{Mode, detect};
 use logos::Logos;
 
-mod expr;
+mod expression;
 mod interpreter;
 mod parser;
 mod token;
@@ -45,9 +45,7 @@ fn main() {
 	}
 
 	let exp = cfg.expr.unwrap();
-	let tokens = Token::lexer(&exp)
-		.collect::<Result<Vec<Token>, ()>>()
-		.unwrap();
+	let tokens = Token::lexer(&exp).collect::<Result<Vec<Token>, ()>>().unwrap();
 
 	let mut ast = Parser::parse_line(tokens);
 
@@ -70,11 +68,7 @@ struct HighlightHelper {
 }
 
 impl Highlighter for HighlightHelper {
-	fn highlight_prompt<'b, 's: 'b, 'p: 'b>(
-		&'s self,
-		prompt: &'p str,
-		default: bool,
-	) -> Cow<'b, str> {
+	fn highlight_prompt<'b, 's: 'b, 'p: 'b>(&'s self, prompt: &'p str, default: bool) -> Cow<'b, str> {
 		if default {
 			Borrowed(&self.colored_prompt)
 		} else {
@@ -101,19 +95,20 @@ impl Highlighter for HighlightHelper {
 		let syntax = ps.find_syntax_by_extension("rs").unwrap();
 		let mut highlighter = HighlightLines::new(syntax, &theme);
 
-		let highlighted = highlighter
-			.highlight_line(line, &ps)
-			.unwrap()
-			.into_iter()
-			.fold(String::new(), |mut acc, (style, text)| {
-				let _ = write!(
-					acc,
-					"\x1b[38;2;{};{};{}m{}\x1b[0m",
-					style.foreground.r, style.foreground.g, style.foreground.b, text
-				);
+		let highlighted =
+			highlighter
+				.highlight_line(line, &ps)
+				.unwrap()
+				.into_iter()
+				.fold(String::new(), |mut acc, (style, text)| {
+					let _ = write!(
+						acc,
+						"\x1b[38;2;{};{};{}m{}\x1b[0m",
+						style.foreground.r, style.foreground.g, style.foreground.b, text
+					);
 
-				acc
-			});
+					acc
+				});
 
 		Cow::Owned(highlighted)
 	}
@@ -124,10 +119,7 @@ impl Highlighter for HighlightHelper {
 }
 
 fn repl(cfg: CasConfig) {
-	println!(
-		"Welcome to abacas v{}\nTo exit, press CTRL+C or CTRL+D",
-		VERSION
-	);
+	println!("Welcome to abacas v{}\nTo exit, press CTRL+C or CTRL+D", VERSION);
 
 	let config = Config::builder().build();
 
@@ -141,8 +133,7 @@ fn repl(cfg: CasConfig) {
 	let mut interpreter = Interpreter::new();
 
 	loop {
-		"\x1b[1m\x1b[32m[In]:\x1b[0m "
-			.clone_into(&mut rl.helper_mut().expect("No helper").colored_prompt);
+		"\x1b[1m\x1b[32m[In]:\x1b[0m ".clone_into(&mut rl.helper_mut().expect("No helper").colored_prompt);
 
 		let readline = rl.readline("\x1b[1m\x1b[32m[In]:\x1b[0m ");
 
@@ -154,9 +145,7 @@ fn repl(cfg: CasConfig) {
 
 				println!("\x1b[1m\x1b[31m[Out]:\x1b[0m ");
 
-				let tokens = Token::lexer(&line)
-					.collect::<Result<Vec<Token>, ()>>()
-					.unwrap();
+				let tokens = Token::lexer(&line).collect::<Result<Vec<Token>, ()>>().unwrap();
 
 				let mut ast = Parser::parse_line(tokens);
 
