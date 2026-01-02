@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
-use abacas::number::Number;
 use abacas::polynomial::Polynomial;
+use rug::Rational;
 
 use crate::expression::Expression;
 use crate::token::Token::*;
@@ -14,8 +14,14 @@ impl Interpreter {
 	pub fn new() -> Self {
 		let mut variables = HashMap::new();
 
-		variables.insert("pi".to_string(), Expression::Number(Number::pi()));
-		variables.insert("e".to_string(), Expression::Number(Number::e()));
+		variables.insert(
+			"pi".to_string(),
+			Expression::Number(Rational::from((3141592653589793u64, 1000000000000000u64))),
+		);
+		variables.insert(
+			"e".to_string(),
+			Expression::Number(Rational::from((2718281828459045u64, 1000000000000000u64))),
+		);
 
 		Self { variables }
 	}
@@ -133,7 +139,12 @@ impl Interpreter {
 							op: Rem,
 							rhs: Box::new(Expression::Polynomial(p)),
 						},
-						(Expression::Number(n1), Expression::Number(n2)) => Expression::Number(n1 % n2),
+						(Expression::Number(n1), Expression::Number(n2)) => {
+							if n1.denom() != &1 && n2.denom() != &1 {
+								unimplemented!()
+							};
+							Expression::Number((n1.numer() % n2.numer()).into())
+						}
 
 						_ => unreachable!(),
 					}
