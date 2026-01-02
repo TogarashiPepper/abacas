@@ -1,15 +1,14 @@
 use std::fmt::Display;
 use std::str::FromStr;
 
-use abacas::number::Number;
 use logos::Logos;
-use rug::{Integer, Rational};
+use rug::Rational;
 
 #[derive(Logos, Debug, Clone, PartialEq, PartialOrd)]
 #[logos(skip r"[ \t\n\f]+")]
 pub enum Token {
 	#[regex(r"\d+(\.\d+)?", |lex| parse_num(lex.slice()))]
-	Number(Number),
+	Number(Rational),
 	#[regex(r"[a-zA-Z]+", |lex| lex.slice().to_owned())]
 	Ident(String),
 
@@ -52,7 +51,7 @@ impl Display for Token {
 	}
 }
 
-fn parse_num(st: &str) -> Number {
+fn parse_num(st: &str) -> Rational {
 	let (dec, int) = st.split_once(".").unwrap_or((st, ""));
 
 	let formatted = if !int.is_empty() {
@@ -61,10 +60,8 @@ fn parse_num(st: &str) -> Number {
 		dec.to_owned()
 	};
 
-	if let Ok(integer) = Integer::from_str(&formatted) {
-		Number::from(integer)
-	} else if let Ok(rational) = Rational::from_str(&formatted) {
-		Number::from(rational)
+	if let Ok(rational) = Rational::from_str(&formatted) {
+		rational
 	} else {
 		unreachable!()
 	}
