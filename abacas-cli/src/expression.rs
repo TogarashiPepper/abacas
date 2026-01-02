@@ -50,10 +50,7 @@ impl Expression {
 					}
 
 					// Fold (x ^ number) into a polynomial (x^n)
-					(Exp::Ident(name), Token::Pow, Exp::Number(i)) if name == "x" => {
-						if i.denom() != &1 {
-							unimplemented!()
-						}
+					(Exp::Ident(name), Token::Pow, Exp::Number(i)) if name == "x" && *i.denom() != 1 => {
 						Expression::Polynomial(Monomial::new(1, i.numer()).into())
 					}
 					// Fold the number * poly into poly

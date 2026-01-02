@@ -140,7 +140,7 @@ impl Interpreter {
 							rhs: Box::new(Expression::Polynomial(p)),
 						},
 						(Expression::Number(n1), Expression::Number(n2)) => {
-							if n1.denom() != &1 && n2.denom() != &1 {
+							if n1.denom() != &1 || n2.denom() != &1 {
 								unimplemented!()
 							};
 							Expression::Number((n1.numer() % n2.numer()).into())
