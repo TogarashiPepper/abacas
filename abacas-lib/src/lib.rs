@@ -2,6 +2,7 @@
 #![warn(missing_docs)]
 
 pub mod error;
+pub mod expr;
 pub mod monomial;
 pub mod polynomial;
 
