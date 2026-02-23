@@ -1,16 +1,16 @@
 //! Module containing [`Expr`] and related structs, like [`Symbol`]
-use std::ops;
+use std::{collections::HashMap, ops};
 
 use rug::Rational;
 
 use crate::polynomial::Polynomial;
 
 /// Struct representing a Symbol, i.e. `x`, `π`, or even something like `T_area`.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Symbol(String);
 
 /// Represents a general expression
-#[derive(PartialEq)]
+#[derive(PartialEq, Eq, Hash, Clone, PartialOrd)]
 pub enum Expr {
 	/// Represents the sum of some [`Expr`]s
 	Add(Vec<Expr>),
@@ -30,13 +30,37 @@ pub enum Expr {
 	Poly(Symbol, Polynomial),
 }
 
+impl VExpr {
+	fn new(mut v: Vec<Expr>) -> Self {
+		v.sort();
+
+		Self(v)
+	}
+}
+
 impl Expr {
 	/// Returns `true` if the expr is [`Number`].
 	///
 	/// [`Number`]: Expr::Number
 	#[must_use]
-	pub fn is_number(&self) -> bool {
+	fn is_number(&self) -> bool {
 		matches!(self, Self::Number(..))
+	}
+
+	fn as_var(&self) -> Option<&Symbol> {
+		if let Self::Var(v) = self {
+			Some(v)
+		} else {
+			None
+		}
+	}
+
+	fn zero() -> Expr {
+		Expr::Number(Rational::ZERO.clone())
+	}
+
+	fn one() -> Expr {
+		Expr::Number(Rational::ONE.clone())
 	}
 
 	fn inv(self) -> Self {
@@ -46,6 +70,26 @@ impl Expr {
 			Inv(expr) => *expr,
 			Number(rational) => Number(rational.recip()),
 		}
+	}
+
+	/// Simplify a sum. Currently handles:
+	/// - reducing 2 + 3 + x + 4 -> x + 9
+	fn simplify_add(mut exprs: Vec<Expr>) -> Vec<Expr> {
+		let sum = exprs
+			.extract_if(.., |e| e.is_number())
+			.fold(Expr::zero(), |a, b| a + b);
+
+		push(exprs, sum)
+	}
+
+	/// Simplify a product. Currently handles:
+	/// - reducing 2 * 4 * x * y * 3 -> x * y * 24
+	fn simplify_mul(mut exprs: Vec<Expr>) -> Vec<Expr> {
+		let prod = exprs
+			.extract_if(.., |e| e.is_number())
+			.fold(Expr::one(), |a, b| a * b);
+
+		push(exprs, prod)
 	}
 }
 
@@ -60,10 +104,12 @@ fn push<T>(mut l: Vec<T>, r: T) -> Vec<T> {
 }
 
 fn find_num(v: &mut [Expr]) -> Option<&mut Rational> {
-	v.iter().position(|e| e.is_number()).map(|p| match &mut v[p] {
-		Expr::Number(n) => n,
-		_ => unreachable!(),
-	})
+	v.iter()
+		.position(|e| e.is_number())
+		.map(|p| match &mut v[p] {
+			Expr::Number(n) => n,
+			_ => unreachable!(),
+		})
 }
 
 use Expr::*;
