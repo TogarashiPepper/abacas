@@ -91,71 +91,75 @@ impl Expr {
 				let mut p = p.clone();
 				let mut q = q.clone();
 
-				p.sort_by(|a, b| Expr::cmp(a, b));
-				q.sort_by(|a, b| Expr::cmp(a, b));
+				p.sort_by(Expr::cmp);
+				q.sort_by(Expr::cmp);
 
 				let (a, b) = p
 					.into_iter()
-					.zip(q.into_iter())
+					.zip(q)
 					.find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal)
 					.unwrap();
 
 				Expr::cmp(&a, &b)
 			}
 			(Add(..), _) => Ordering::Greater,
-			(Mul(..), Add(..)) => Ordering::Less,
+			(_, Add(..)) => Ordering::Less,
+
 			(Mul(p), Mul(q)) => {
 				let mut p = p.clone();
 				let mut q = q.clone();
 
-				p.sort_by(|a, b| Expr::cmp(a, b));
-				q.sort_by(|a, b| Expr::cmp(a, b));
+				p.sort_by(Expr::cmp);
+				q.sort_by(Expr::cmp);
 
 				let (a, b) = p
 					.into_iter()
-					.zip(q.into_iter())
+					.zip(q)
 					.find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal)
 					.unwrap();
 
 				Expr::cmp(&a, &b)
 			}
 			(Mul(..), _) => Ordering::Greater,
-			(Neg(..), Add(..)) | (Neg(..), Mul(..)) => Ordering::Less,
+			(_, Mul(..)) => Ordering::Less,
+
 			(Neg(p), Neg(q)) => Expr::cmp(p, q),
 			(Neg(..), _) => Ordering::Greater,
-			(Inv(..), Add(..)) | (Inv(..), Mul(..)) | (Inv(..), Neg(..)) => Ordering::Less,
+			(_, Neg(..)) => Ordering::Less,
+
 			(Inv(p), Inv(q)) => Expr::cmp(p, q),
 			(Inv(..), _) => Ordering::Greater,
-			(Number(..), Add(..))
-			| (Number(..), Mul(..))
-			| (Number(..), Neg(..))
-			| (Number(..), Inv(..)) => Ordering::Less,
-			(Number(p), Number(q)) => p.cmp(&q),
+			(_, Inv(..)) => Ordering::Less,
+
+			(Number(p), Number(q)) => p.cmp(q),
 			(Number(..), _) => Ordering::Greater,
-			(Var(p), Var(q)) => p.cmp(&q),
-			(Var(..), Fun(..)) | (Var(..), Poly(..)) => Ordering::Greater,
-			(Var(..), _) => Ordering::Less,
+			(_, Number(..)) => Ordering::Less,
+
+			(Var(p), Var(q)) => p.cmp(q),
+			(Var(..), _) => Ordering::Greater,
+			(_, Var(..)) => Ordering::Less,
+
 			(Fun(r, p), Fun(s, q)) => {
 				let ord = Expr::cmp(p, q);
 
 				if ord == Ordering::Equal {
-					r.cmp(&s)
+					r.cmp(s)
 				} else {
 					ord
 				}
 			}
-			(Fun(..), Poly(..)) => Ordering::Greater,
-			(Fun(..), _) => Ordering::Less,
+			(Fun(..), _) => Ordering::Greater,
+			(_, Fun(..)) => Ordering::Less,
+
 			(Poly(r, p), Poly(s, q)) => {
-				let mut ord = r.cmp(&s);
+				let mut ord = r.cmp(s);
 
 				if ord == Ordering::Equal {
 					ord = p.degree().cmp(&q.degree());
 				}
 
 				ord
-			}
-			(Poly(..), _) => Ordering::Less,
+			} // Poly catchalls aren't needed since theres nothing after poly
 		}
 	}
 }
