@@ -32,7 +32,11 @@ impl Interpreter {
 	fn evaluate_expression(&mut self, expr: Expression) -> Expression {
 		match expr {
 			Expression::Number(number) => Expression::Number(number),
-			Expression::Ident(ident) => self.variables.get(&ident).unwrap_or(&Expression::Ident(ident)).clone(),
+			Expression::Ident(ident) => self
+				.variables
+				.get(&ident)
+				.unwrap_or(&Expression::Ident(ident))
+				.clone(),
 			Expression::Polynomial(polynomial) => Expression::Polynomial(polynomial),
 			Expression::BinOp { lhs, op, rhs } => match op {
 				Eq => {
@@ -51,10 +55,14 @@ impl Interpreter {
 					let rhs = self.evaluate_expression(*rhs);
 
 					match (lhs, rhs) {
-						(Expression::Polynomial(p1), Expression::Polynomial(p2)) => Expression::Polynomial(p1 + p2),
+						(Expression::Polynomial(p1), Expression::Polynomial(p2)) => {
+							Expression::Polynomial(p1 + p2)
+						}
 						(Expression::Polynomial(p), Expression::Number(n))
 						| (Expression::Number(n), Expression::Polynomial(p)) => Expression::Polynomial(p + n),
-						(Expression::Number(n1), Expression::Number(n2)) => Expression::Number(n1 + n2),
+						(Expression::Number(n1), Expression::Number(n2)) => {
+							Expression::Number(n1 + n2)
+						}
 
 						_ => unreachable!(),
 					}
@@ -64,10 +72,14 @@ impl Interpreter {
 					let rhs = self.evaluate_expression(*rhs);
 
 					match (lhs, rhs) {
-						(Expression::Polynomial(p1), Expression::Polynomial(p2)) => Expression::Polynomial(p1 - p2),
+						(Expression::Polynomial(p1), Expression::Polynomial(p2)) => {
+							Expression::Polynomial(p1 - p2)
+						}
 						(Expression::Polynomial(p), Expression::Number(n))
 						| (Expression::Number(n), Expression::Polynomial(p)) => Expression::Polynomial(p - n),
-						(Expression::Number(n1), Expression::Number(n2)) => Expression::Number(n1 - n2),
+						(Expression::Number(n1), Expression::Number(n2)) => {
+							Expression::Number(n1 - n2)
+						}
 
 						_ => unreachable!(),
 					}
@@ -77,10 +89,14 @@ impl Interpreter {
 					let rhs = self.evaluate_expression(*rhs);
 
 					match (lhs, rhs) {
-						(Expression::Polynomial(p1), Expression::Polynomial(p2)) => Expression::Polynomial(p1 * p2),
+						(Expression::Polynomial(p1), Expression::Polynomial(p2)) => {
+							Expression::Polynomial(p1 * p2)
+						}
 						(Expression::Polynomial(p), Expression::Number(n))
 						| (Expression::Number(n), Expression::Polynomial(p)) => Expression::Polynomial(p * n),
-						(Expression::Number(n1), Expression::Number(n2)) => Expression::Number(n1 * n2),
+						(Expression::Number(n1), Expression::Number(n2)) => {
+							Expression::Number(n1 * n2)
+						}
 
 						_ => unreachable!(),
 					}
@@ -90,10 +106,14 @@ impl Interpreter {
 					let rhs = self.evaluate_expression(*rhs);
 
 					match (lhs, rhs) {
-						(Expression::Polynomial(p1), Expression::Polynomial(p2)) => Expression::Polynomial(p1 / p2),
+						(Expression::Polynomial(p1), Expression::Polynomial(p2)) => {
+							Expression::Polynomial(p1 / p2)
+						}
 						(Expression::Polynomial(p), Expression::Number(n))
 						| (Expression::Number(n), Expression::Polynomial(p)) => Expression::Polynomial(p / n),
-						(Expression::Number(n1), Expression::Number(n2)) => Expression::Number(n1 / n2),
+						(Expression::Number(n1), Expression::Number(n2)) => {
+							Expression::Number(n1 / n2)
+						}
 
 						_ => unreachable!(),
 					}
@@ -103,11 +123,13 @@ impl Interpreter {
 					let rhs = self.evaluate_expression(*rhs);
 
 					match (lhs, rhs) {
-						(Expression::Polynomial(p1), Expression::Polynomial(p2)) => Expression::BinOp {
-							lhs: Box::new(Expression::Polynomial(p1)),
-							op: Pow,
-							rhs: Box::new(Expression::Polynomial(p2)),
-						},
+						(Expression::Polynomial(p1), Expression::Polynomial(p2)) => {
+							Expression::BinOp {
+								lhs: Box::new(Expression::Polynomial(p1)),
+								op: Pow,
+								rhs: Box::new(Expression::Polynomial(p2)),
+							}
+						}
 						(Expression::Polynomial(_), Expression::Number(_)) => {
 							// TODO: implement when polynomial has method for pow
 							unimplemented!()
@@ -133,7 +155,9 @@ impl Interpreter {
 						(Expression::Polynomial(mut p1), Expression::Polynomial(p2)) => {
 							Expression::Polynomial(p1.div_rem_mut(&p2).unwrap_or(Polynomial::ZERO))
 						}
-						(Expression::Polynomial(_), Expression::Number(_)) => Expression::Polynomial(Polynomial::ZERO),
+						(Expression::Polynomial(_), Expression::Number(_)) => {
+							Expression::Polynomial(Polynomial::ZERO)
+						}
 						(Expression::Number(n), Expression::Polynomial(p)) => Expression::BinOp {
 							lhs: Box::new(Expression::Number(n)),
 							op: Rem,

@@ -1,5 +1,6 @@
 //! Module containing [`Expr`] and related structs, like [`Symbol`]
-use std::{collections::HashMap, ops};
+use std::cmp::Ordering;
+use std::ops;
 
 use rug::Rational;
 
@@ -10,7 +11,7 @@ use crate::polynomial::Polynomial;
 pub struct Symbol(String);
 
 /// Represents a general expression
-#[derive(PartialEq, Eq, Hash, Clone, PartialOrd)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 pub enum Expr {
 	/// Represents the sum of some [`Expr`]s
 	Add(Vec<Expr>),
@@ -28,14 +29,6 @@ pub enum Expr {
 	Fun(Symbol, Box<Expr>),
 	/// Special form of [`Expr`] that permits extra operations
 	Poly(Symbol, Polynomial),
-}
-
-impl VExpr {
-	fn new(mut v: Vec<Expr>) -> Self {
-		v.sort();
-
-		Self(v)
-	}
 }
 
 impl Expr {
@@ -90,6 +83,80 @@ impl Expr {
 			.fold(Expr::one(), |a, b| a * b);
 
 		push(exprs, prod)
+	}
+
+	fn cmp(a: &Expr, b: &Expr) -> Ordering {
+		match (a, b) {
+			(Add(p), Add(q)) => {
+				let mut p = p.clone();
+				let mut q = q.clone();
+
+				p.sort_by(|a, b| Expr::cmp(a, b));
+				q.sort_by(|a, b| Expr::cmp(a, b));
+
+				let (a, b) = p
+					.into_iter()
+					.zip(q.into_iter())
+					.find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal)
+					.unwrap();
+
+				Expr::cmp(&a, &b)
+			}
+			(Add(..), _) => Ordering::Greater,
+			(Mul(..), Add(..)) => Ordering::Less,
+			(Mul(p), Mul(q)) => {
+				let mut p = p.clone();
+				let mut q = q.clone();
+
+				p.sort_by(|a, b| Expr::cmp(a, b));
+				q.sort_by(|a, b| Expr::cmp(a, b));
+
+				let (a, b) = p
+					.into_iter()
+					.zip(q.into_iter())
+					.find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal)
+					.unwrap();
+
+				Expr::cmp(&a, &b)
+			}
+			(Mul(..), _) => Ordering::Greater,
+			(Neg(..), Add(..)) | (Neg(..), Mul(..)) => Ordering::Less,
+			(Neg(p), Neg(q)) => Expr::cmp(p, q),
+			(Neg(..), _) => Ordering::Greater,
+			(Inv(..), Add(..)) | (Inv(..), Mul(..)) | (Inv(..), Neg(..)) => Ordering::Less,
+			(Inv(p), Inv(q)) => Expr::cmp(p, q),
+			(Inv(..), _) => Ordering::Greater,
+			(Number(..), Add(..))
+			| (Number(..), Mul(..))
+			| (Number(..), Neg(..))
+			| (Number(..), Inv(..)) => Ordering::Less,
+			(Number(p), Number(q)) => p.cmp(&q),
+			(Number(..), _) => Ordering::Greater,
+			(Var(p), Var(q)) => p.cmp(&q),
+			(Var(..), Fun(..)) | (Var(..), Poly(..)) => Ordering::Greater,
+			(Var(..), _) => Ordering::Less,
+			(Fun(r, p), Fun(s, q)) => {
+				let ord = Expr::cmp(p, q);
+
+				if ord == Ordering::Equal {
+					r.cmp(&s)
+				} else {
+					ord
+				}
+			}
+			(Fun(..), Poly(..)) => Ordering::Greater,
+			(Fun(..), _) => Ordering::Less,
+			(Poly(r, p), Poly(s, q)) => {
+				let mut ord = r.cmp(&s);
+
+				if ord == Ordering::Equal {
+					ord = p.degree().cmp(&q.degree());
+				}
+
+				ord
+			}
+			(Poly(..), _) => Ordering::Less,
+		}
 	}
 }
 
