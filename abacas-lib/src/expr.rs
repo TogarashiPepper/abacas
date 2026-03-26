@@ -2,7 +2,7 @@
 use std::cmp::Ordering;
 use std::ops;
 
-use rug::Rational;
+use rug::{Complete, Rational};
 
 use crate::polynomial::Polynomial;
 
@@ -65,19 +65,83 @@ impl Expr {
 		}
 	}
 
+	// Normalize the representation
+	// At the moment:
+	// - turns Mul[x] -> x
+	// - turns Add[x] -> x
+	fn normalize(&mut self) {
+		match self {
+			Add(exprs) | Mul(exprs) if exprs.len() == 1 => *self = exprs.remove(0),
+			_ => {}
+		}
+	}
+
 	/// Simplify a sum. Currently handles:
 	/// - reducing 2 + 3 + x + 4 -> x + 9
 	fn simplify_add(mut exprs: Vec<Expr>) -> Vec<Expr> {
+		for exp in &mut exprs {
+			exp.normalize();
+		}
+		exprs.sort_by(Expr::cmp);
+
+		// Group all lone numbers into one
 		let sum = exprs
 			.extract_if(.., |e| e.is_number())
 			.fold(Expr::zero(), |a, b| a + b);
 
-		push(exprs, sum)
+		let mut multiset: Vec<(Expr, Rational)> = vec![];
+
+		for mut exp in exprs {
+			match exp {
+				Mul(es) => exp = Mul(Expr::simplify_mul(es)),
+				Add(es) => exp = Add(Expr::simplify_add(es)),
+				_ => {}
+			}
+
+			let (coeff, core) = match exp {
+				c @ (Add(_) | Inv(_) | Var(_) | Fun(..) | Poly(..)) => (Rational::ONE.clone(), c),
+				Neg(exp) => (-Rational::ONE.clone(), *exp),
+				Mul(exprs) => {
+					let (x, y) = get_number(exprs);
+					(x, Mul(y))
+				}
+				Number(_) => unreachable!(),
+			};
+
+			match multiset.binary_search_by(|(e, _)| Expr::cmp(e, &core)) {
+				Ok(idx) => multiset[idx].1 += coeff,
+				Err(idx) => multiset.insert(idx, (core, coeff)),
+			}
+		}
+
+		let mut end: Vec<Expr> = multiset
+			.into_iter()
+			.flat_map(|(exp, coeff)| {
+				if coeff.is_zero() {
+					None
+				} else if &coeff == Rational::ONE {
+					Some(exp)
+				} else if coeff == (-Rational::ONE).complete() {
+					Some(Neg(Box::new(exp)))
+				} else {
+					Some(Mul(vec![Number(coeff), exp]))
+				}
+			})
+			.collect();
+		end.push(sum);
+		end.sort_by(Expr::cmp);
+
+		end
 	}
 
 	/// Simplify a product. Currently handles:
 	/// - reducing 2 * 4 * x * y * 3 -> x * y * 24
 	fn simplify_mul(mut exprs: Vec<Expr>) -> Vec<Expr> {
+		for exp in &mut exprs {
+			exp.normalize();
+		}
+		exprs.sort_by(Expr::cmp);
+
 		let prod = exprs
 			.extract_if(.., |e| e.is_number())
 			.fold(Expr::one(), |a, b| a * b);
@@ -164,14 +228,25 @@ impl Expr {
 	}
 }
 
-fn concat<T>(mut l: Vec<T>, r: Vec<T>) -> Vec<T> {
+fn concat(mut l: Vec<Expr>, r: Vec<Expr>) -> Vec<Expr> {
 	l.extend(r);
 	l
 }
 
-fn push<T>(mut l: Vec<T>, r: T) -> Vec<T> {
-	l.push(r);
+fn push(mut l: Vec<Expr>, r: Expr) -> Vec<Expr> {
+	let (Ok(idx) | Err(idx)) = l.binary_search_by(|x| Expr::cmp(x, &r));
+	l.insert(idx, r);
 	l
+}
+
+fn get_number(mut v: Vec<Expr>) -> (Rational, Vec<Expr>) {
+	let idx = v.iter().position(|e| matches!(e, Number(..))).unwrap();
+	let num = match v.remove(idx) {
+		Number(n) => n,
+		_ => unreachable!(),
+	};
+
+	(num, v)
 }
 
 fn find_num(v: &mut [Expr]) -> Option<&mut Rational> {
