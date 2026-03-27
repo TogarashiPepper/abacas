@@ -3,8 +3,6 @@ use argh::FromArgs;
 use dark_light::{Mode, detect};
 use logos::Logos;
 
-mod expression;
-mod interpreter;
 mod parser;
 mod token;
 
@@ -20,7 +18,6 @@ use syntect::easy::HighlightLines;
 use syntect::highlighting::ThemeSet;
 use syntect::parsing::SyntaxSet;
 
-use crate::interpreter::Interpreter;
 use crate::parser::Parser;
 use crate::token::Token;
 
@@ -52,14 +49,10 @@ fn main() {
 	let mut ast = Parser::parse_line(tokens);
 
 	if !cfg.raw {
-		ast = ast.fold();
+		ast = ast.simplify();
 	}
 
-	let mut interpreter = Interpreter::new();
-
-	let data = interpreter.execute_line(ast);
-
-	println!("{data}");
+	println!("{ast}");
 }
 
 #[derive(Helper, Completer, Hinter, Validator)]
@@ -157,6 +150,8 @@ fn repl(cfg: CasConfig) {
 					.unwrap();
 
 				let mut ast = Parser::parse_line(tokens);
+
+				ast = ast.simplify();
 
 				println!("{ast}");
 			}

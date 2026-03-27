@@ -9,8 +9,11 @@ use rug::Rational;
 pub enum Token {
 	#[regex(r"\d+(\.\d+)?", |lex| parse_num(lex.slice()))]
 	Number(Rational),
-	#[regex(r"[a-zA-Z]+", |lex| lex.slice().to_owned())]
+	// #[regex(r"[a-zA-Z]+", |lex| lex.slice().to_owned())]
+	// Ident(String),
+	#[regex(r"[a-zA-Z]", |lex| lex.slice().to_owned())]
 	Ident(String),
+	
 
 	#[token("=")]
 	Eq,

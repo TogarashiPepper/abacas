@@ -16,6 +16,11 @@ impl Symbol {
 	pub fn new(name: String) -> Self {
 		Self(name)
 	}
+
+	/// Gets the name of the symbol
+	pub fn name(&self) -> &str {
+		&self.0
+	}
 }
 
 impl Display for Symbol {
@@ -54,14 +59,6 @@ impl Expr {
 		matches!(self, Self::Number(..))
 	}
 
-	fn as_var(&self) -> Option<&Symbol> {
-		if let Self::Var(v) = self {
-			Some(v)
-		} else {
-			None
-		}
-	}
-
 	fn zero() -> Expr {
 		Expr::Number(Rational::ZERO.clone())
 	}
@@ -86,7 +83,32 @@ impl Expr {
 	fn normalize(&mut self) {
 		match self {
 			Add(exprs) | Mul(exprs) if exprs.len() == 1 => *self = exprs.remove(0),
+			Add(exps) | Mul(exps) => exps.sort_by(Expr::cmp),
 			_ => {}
+		}
+	}
+
+	/// Simplify an expression (best-effort, may not fully simplify)
+	pub fn simplify(self) -> Self {
+		match self {
+			Add(exprs) => Add(Self::simplify_add(exprs)),
+			Mul(exprs) => Mul(Self::simplify_mul(exprs)),
+			Neg(expr) => {
+				if let Neg(inner_expr) = *expr {
+					*inner_expr
+				} else {
+					Neg(expr)
+				}
+			}
+			Inv(expr) => {
+				if let Inv(inner_expr) = *expr {
+					*inner_expr
+				} else {
+					Inv(expr)
+				}
+			}
+
+			other => other,
 		}
 	}
 
@@ -96,7 +118,6 @@ impl Expr {
 		for exp in &mut exprs {
 			exp.normalize();
 		}
-		exprs.sort_by(Expr::cmp);
 
 		// Group all lone numbers into one
 		let sum = exprs
@@ -142,9 +163,16 @@ impl Expr {
 				}
 			})
 			.collect();
-		end.push(sum);
-		end.sort_by(Expr::cmp);
 
+		let Number(n) = sum else {
+			unreachable!();
+		};
+
+		if &n != Rational::ZERO {
+			end.push(Number(n));
+		}
+
+		end.sort_by(Expr::cmp);
 		end
 	}
 
@@ -172,13 +200,15 @@ impl Expr {
 				p.sort_by(Expr::cmp);
 				q.sort_by(Expr::cmp);
 
-				let (a, b) = p
+				let r = p
 					.into_iter()
 					.zip(q)
-					.find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal)
-					.unwrap();
+					.find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal);
 
-				Expr::cmp(&a, &b)
+				match r {
+					Some((a, b)) => Expr::cmp(&a, &b),
+					None => Ordering::Equal,
+				}
 			}
 			(Add(..), _) => Ordering::Greater,
 			(_, Add(..)) => Ordering::Less,
@@ -190,13 +220,15 @@ impl Expr {
 				p.sort_by(Expr::cmp);
 				q.sort_by(Expr::cmp);
 
-				let (a, b) = p
+				let r = p
 					.into_iter()
 					.zip(q)
-					.find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal)
-					.unwrap();
+					.find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal);
 
-				Expr::cmp(&a, &b)
+				match r {
+					Some((a, b)) => Expr::cmp(&a, &b),
+					None => Ordering::Equal,
+				}
 			}
 			(Mul(..), _) => Ordering::Greater,
 			(_, Mul(..)) => Ordering::Less,
@@ -237,7 +269,7 @@ impl Expr {
 				}
 
 				ord
-			} // Poly catchalls aren't needed since theres nothing after poly
+			}
 		}
 	}
 }
@@ -378,7 +410,16 @@ impl Display for Expr {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		let st = match self {
 			Add(exprs) => exprs.iter().map(|e| format!("{e}")).join(" + "),
-			Mul(exprs) => exprs.iter().map(|e| format!("{e}")).join(" × "),
+			Mul(exprs) => exprs
+				.iter()
+				.map(|e| {
+					if matches!(e, Add(..) | Poly(..)) {
+						format!("({e})")
+					} else {
+						format!("{e}")
+					}
+				})
+				.join("×"),
 			Neg(expr) => match &**expr {
 				Add(_) | Mul(_) | Inv(_) | Poly(..) => format!("-({expr})"),
 				_ => format!("-{expr}"),
@@ -389,8 +430,8 @@ impl Display for Expr {
 			},
 			Number(rational) => format!("{rational}"),
 			Var(symbol) => format!("{symbol}"),
-			Fun(symbol, expr) => todo!(),
-			Poly(symbol, polynomial) => todo!(),
+			Fun(symbol, expr) => format!("{symbol}({expr})"),
+			Poly(symbol, polynomial) => format!("{polynomial}").replace("x", &symbol.0),
 		};
 
 		write!(f, "{st}")?;
