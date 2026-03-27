@@ -1,28 +1,25 @@
 use std::iter::Peekable;
 
-use crate::expression::Expression;
 use crate::token::Token::{self, *};
+use abacas::expr::{Expr, Symbol};
 
 pub struct Parser {}
 
 impl Parser {
-	pub fn parse_line(line: Vec<Token>) -> Expression {
+	pub fn parse_line(line: Vec<Token>) -> Expr {
 		let mut it = line.into_iter().peekable();
 
 		Self::expr_bp(0, &mut it)
 	}
 
-	fn expr_bp<T>(min_bp: u8, tokens: &mut Peekable<T>) -> Expression
+	fn expr_bp<T>(min_bp: u8, tokens: &mut Peekable<T>) -> Expr
 	where
 		T: Iterator<Item = Token>,
 	{
 		let mut lhs = match tokens.next() {
-			Some(Sub) => Expression::PreOp {
-				op: Sub,
-				rhs: Box::new(Self::expr_bp(prefix_bp(Sub), tokens)),
-			},
-			Some(Number(num)) => Expression::Number(num),
-			Some(Ident(name)) => Expression::Ident(name),
+			Some(Sub) => Expr::Neg(Box::new(Self::expr_bp(prefix_bp(Sub), tokens))),
+			Some(Number(num)) => Expr::Number(num),
+			Some(Ident(name)) => Expr::Var(Symbol::new(name)),
 			Some(LParen) => {
 				let lhs = Self::expr_bp(0, tokens);
 				assert_eq!(tokens.next(), Some(RParen));
@@ -44,11 +41,17 @@ impl Parser {
 					let op = tokens.next().unwrap();
 					let rhs = Self::expr_bp(r_bp, tokens);
 
-					lhs = Expression::BinOp {
-						lhs: Box::new(lhs),
-						op,
-						rhs: Box::new(rhs),
-					};
+					match op {
+						Eq => todo!(),
+						Add => lhs = lhs + rhs,
+						Sub => lhs = lhs - rhs,
+						Mul => lhs = lhs * rhs,
+						Div => lhs = lhs / rhs,
+						Pow => todo!(),
+						Rem => todo!(),
+
+						_ => unreachable!(),
+					}
 				}
 				Some(Number(_) | Ident(_) | LParen) => {
 					let (l_bp, r_bp) = infix_bp(Token::Mul);
@@ -58,11 +61,7 @@ impl Parser {
 
 					let rhs = Self::expr_bp(r_bp, tokens);
 
-					lhs = Expression::BinOp {
-						lhs: Box::new(lhs),
-						op: Token::Mul,
-						rhs: Box::new(rhs),
-					};
+					lhs = lhs * rhs;
 				}
 				None | Some(RParen) => break,
 			}

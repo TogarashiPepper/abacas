@@ -138,8 +138,6 @@ fn repl(cfg: CasConfig) {
 	let mut rl = Editor::with_config(config).unwrap();
 	rl.set_helper(Some(h));
 
-	let mut interpreter = Interpreter::new();
-
 	loop {
 		"\x1b[1m\x1b[32m[In]:\x1b[0m "
 			.clone_into(&mut rl.helper_mut().expect("No helper").colored_prompt);
@@ -160,13 +158,7 @@ fn repl(cfg: CasConfig) {
 
 				let mut ast = Parser::parse_line(tokens);
 
-				if !cfg.raw {
-					ast = ast.fold();
-				}
-
-				let data = interpreter.execute_line(ast);
-
-				println!("{data}");
+				println!("{ast}");
 			}
 			Err(ReadlineError::Interrupted) => {
 				println!("CTRL-C");

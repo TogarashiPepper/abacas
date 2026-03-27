@@ -1,7 +1,8 @@
 //! Module containing [`Expr`] and related structs, like [`Symbol`]
-use std::cmp::Ordering;
 use std::ops;
+use std::{cmp::Ordering, fmt::Display};
 
+use itertools::Itertools;
 use rug::{Complete, Rational};
 
 use crate::polynomial::Polynomial;
@@ -9,6 +10,19 @@ use crate::polynomial::Polynomial;
 /// Struct representing a Symbol, i.e. `x`, `π`, or even something like `T_area`.
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
 pub struct Symbol(String);
+
+impl Symbol {
+	/// Initialize a symbol with the given name
+	pub fn new(name: String) -> Self {
+		Self(name)
+	}
+}
+
+impl Display for Symbol {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		write!(f, "{}", self.0)
+	}
+}
 
 /// Represents a general expression
 #[derive(PartialEq, Eq, Hash, Clone)]
@@ -357,5 +371,30 @@ impl ops::Div for Expr {
 	#[allow(clippy::suspicious_arithmetic_impl)]
 	fn div(self, rhs: Self) -> Self::Output {
 		self * rhs.inv()
+	}
+}
+
+impl Display for Expr {
+	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+		let st = match self {
+			Add(exprs) => exprs.iter().map(|e| format!("{e}")).join(" + "),
+			Mul(exprs) => exprs.iter().map(|e| format!("{e}")).join(" × "),
+			Neg(expr) => match &**expr {
+				Add(_) | Mul(_) | Inv(_) | Poly(..) => format!("-({expr})"),
+				_ => format!("-{expr}"),
+			},
+			Inv(expr) => match &**expr {
+				Add(_) | Mul(_) | Poly(..) => format!("1/({expr})"),
+				_ => format!("1/{expr}"),
+			},
+			Number(rational) => format!("{rational}"),
+			Var(symbol) => format!("{symbol}"),
+			Fun(symbol, expr) => todo!(),
+			Poly(symbol, polynomial) => todo!(),
+		};
+
+		write!(f, "{st}")?;
+
+		Ok(())
 	}
 }
