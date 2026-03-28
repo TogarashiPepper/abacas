@@ -32,6 +32,8 @@ impl Display for Symbol {
 /// Represents a general expression
 #[derive(PartialEq, Eq, Hash, Clone)]
 pub enum Expr {
+	/// Represents .0 to the power of .1
+	Pow(Box<Expr>, Box<Expr>),
 	/// Represents the sum of some [`Expr`]s
 	Add(Vec<Expr>),
 	/// Represents the product of some [`Expr`]s
@@ -73,6 +75,7 @@ impl Expr {
 			Mul(exprs) => Mul(exprs.into_iter().map(Self::inv).collect()),
 			Inv(expr) => *expr,
 			Number(rational) => Number(rational.recip()),
+			Pow(..) => todo!(),
 		}
 	}
 
@@ -134,7 +137,9 @@ impl Expr {
 			}
 
 			let (coeff, core) = match exp {
-				c @ (Add(_) | Inv(_) | Var(_) | Fun(..) | Poly(..)) => (Rational::ONE.clone(), c),
+				c @ (Add(_) | Inv(_) | Var(_) | Fun(..) | Poly(..) | Pow(..)) => {
+					(Rational::ONE.clone(), c)
+				}
 				Neg(exp) => (-Rational::ONE.clone(), *exp),
 				Mul(exprs) => {
 					let (x, y) = get_number(exprs);
@@ -188,6 +193,20 @@ impl Expr {
 			.extract_if(.., |e| e.is_number())
 			.fold(Expr::one(), |a, b| a * b);
 
+		// .0 is base, .1 is exponent
+		let mut multiset: Vec<(Expr, Expr)> = vec![];
+
+		for mut exp in exprs {
+			match exp {
+				Mul(es) => exp = Mul(Expr::simplify_mul(es)),
+				Add(es) => exp = Add(Expr::simplify_add(es)),
+				_ => {}
+			}
+
+			// Figure out simplification?, need to break things into base + exponent
+			let (base, exponent)
+		}
+
 		push(exprs, prod)
 	}
 
@@ -236,6 +255,17 @@ impl Expr {
 			(Neg(p), Neg(q)) => Expr::cmp(p, q),
 			(Neg(..), _) => Ordering::Greater,
 			(_, Neg(..)) => Ordering::Less,
+
+			(Pow(b1, e1), Pow(b2, e2)) => {
+				let cmp_base = Expr::cmp(&b1, &b2);
+
+				match cmp_base {
+					Ordering::Less | Ordering::Greater => cmp_base,
+					Ordering::Equal => Expr::cmp(&e1, &e2),
+				}
+			}
+			(Pow(..), _) => Ordering::Greater,
+			(_, Pow(..)) => Ordering::Less,
 
 			(Inv(p), Inv(q)) => Expr::cmp(p, q),
 			(Inv(..), _) => Ordering::Greater,
