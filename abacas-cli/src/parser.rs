@@ -47,7 +47,7 @@ impl Parser {
 						Sub => lhs = lhs - rhs,
 						Mul => lhs = lhs * rhs,
 						Div => lhs = lhs / rhs,
-						Pow => todo!(),
+						Pow => lhs = lhs.pow(rhs),
 						Rem => todo!(),
 
 						_ => unreachable!(),

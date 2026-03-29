@@ -30,7 +30,7 @@ impl Display for Symbol {
 }
 
 /// Represents a general expression
-#[derive(PartialEq, Eq, Hash, Clone)]
+#[derive(PartialEq, Debug, Eq, Hash, Clone)]
 pub enum Expr {
 	/// Represents .0 to the power of .1
 	Pow(Box<Expr>, Box<Expr>),
@@ -69,6 +69,20 @@ impl Expr {
 		Expr::Number(Rational::ONE.clone())
 	}
 
+	fn is_one(&self) -> bool {
+		match self {
+			Number(n) => n == Rational::ONE,
+			_ => false,
+		}
+	}
+
+	fn is_zero(&self) -> bool {
+		match self {
+			Number(n) => n.is_zero(),
+			_ => false,
+		}
+	}
+
 	fn inv(self) -> Self {
 		match self {
 			a @ (Add(_) | Neg(_) | Var(_) | Fun(..) | Poly(..)) => Inv(Box::new(a)),
@@ -86,7 +100,13 @@ impl Expr {
 	fn normalize(&mut self) {
 		match self {
 			Add(exprs) | Mul(exprs) if exprs.len() == 1 => *self = exprs.remove(0),
-			Add(exps) | Mul(exps) => exps.sort_by(Expr::cmp),
+			Pow(base, exp) if exp.is_one() => *self = *base.clone(),
+			Add(exprs) | Mul(exprs) => {
+				for exp in exprs.iter_mut() {
+					exp.normalize();
+				}
+				exprs.sort_by(Expr::cmp);
+			}
 			_ => {}
 		}
 	}
@@ -136,17 +156,21 @@ impl Expr {
 				_ => {}
 			}
 
-			let (coeff, core) = match exp {
+			exp.normalize();
+
+			let (coeff, mut core) = match exp {
 				c @ (Add(_) | Inv(_) | Var(_) | Fun(..) | Poly(..) | Pow(..)) => {
 					(Rational::ONE.clone(), c)
 				}
 				Neg(exp) => (-Rational::ONE.clone(), *exp),
 				Mul(exprs) => {
 					let (x, y) = get_number(exprs);
-					(x, Mul(y))
+					(x.unwrap_or_else(|| Rational::ONE.clone()), Mul(y))
 				}
 				Number(_) => unreachable!(),
 			};
+
+			core.normalize();
 
 			match multiset.binary_search_by(|(e, _)| Expr::cmp(e, &core)) {
 				Ok(idx) => multiset[idx].1 += coeff,
@@ -169,14 +193,13 @@ impl Expr {
 			})
 			.collect();
 
-		let Number(n) = sum else {
-			unreachable!();
-		};
-
-		if &n != Rational::ZERO {
-			end.push(Number(n));
+		if !sum.is_zero() {
+			end.push(sum);
 		}
 
+		for exp in &mut end {
+			exp.normalize();
+		}
 		end.sort_by(Expr::cmp);
 		end
 	}
@@ -193,6 +216,10 @@ impl Expr {
 			.extract_if(.., |e| e.is_number())
 			.fold(Expr::one(), |a, b| a * b);
 
+		if prod.is_zero() {
+			return vec![];
+		}
+
 		// .0 is base, .1 is exponent
 		let mut multiset: Vec<(Expr, Expr)> = vec![];
 
@@ -203,11 +230,50 @@ impl Expr {
 				_ => {}
 			}
 
-			// Figure out simplification?, need to break things into base + exponent
-			let (base, exponent)
+			exp.normalize();
+
+			let (mut base, mut exponent) = match exp {
+				Pow(base, exp) => (*base, *exp),
+				Inv(base) => (*base, Number(-Rational::ONE.clone())),
+				other => (other, Number(Rational::ONE.clone())),
+			};
+
+			base.normalize();
+			exponent.normalize();
+
+			match multiset.binary_search_by(|(e, _)| Expr::cmp(e, &base)) {
+				// TODO: impl AddAssign for Expr
+				Ok(idx) => multiset[idx].1 = multiset[idx].1.clone() + exponent,
+				Err(idx) => multiset.insert(idx, (base, exponent)),
+			}
 		}
 
-		push(exprs, prod)
+		let mut end: Vec<Expr> = multiset
+			.into_iter()
+			.flat_map(|(base, exp)| {
+				if exp.is_one() {
+					Some(base)
+				} else if exp.is_zero() {
+					None
+				} else {
+					Some(Pow(Box::new(base), Box::new(exp)))
+				}
+			})
+			.collect();
+
+		if !prod.is_one() {
+			end.push(prod);
+		}
+
+		for exp in &mut end {
+			exp.normalize();
+		}
+		end.sort_by(Expr::cmp);
+		end
+	}
+
+	pub fn pow(self, rhs: Self) -> Self {
+		Pow(Box::new(self), Box::new(rhs))
 	}
 
 	fn cmp(a: &Expr, b: &Expr) -> Ordering {
@@ -257,11 +323,11 @@ impl Expr {
 			(_, Neg(..)) => Ordering::Less,
 
 			(Pow(b1, e1), Pow(b2, e2)) => {
-				let cmp_base = Expr::cmp(&b1, &b2);
+				let cmp_base = Expr::cmp(b1, b2);
 
 				match cmp_base {
 					Ordering::Less | Ordering::Greater => cmp_base,
-					Ordering::Equal => Expr::cmp(&e1, &e2),
+					Ordering::Equal => Expr::cmp(e1, e2),
 				}
 			}
 			(Pow(..), _) => Ordering::Greater,
@@ -315,14 +381,19 @@ fn push(mut l: Vec<Expr>, r: Expr) -> Vec<Expr> {
 	l
 }
 
-fn get_number(mut v: Vec<Expr>) -> (Rational, Vec<Expr>) {
-	let idx = v.iter().position(|e| matches!(e, Number(..))).unwrap();
-	let num = match v.remove(idx) {
-		Number(n) => n,
-		_ => unreachable!(),
-	};
+fn get_number(mut v: Vec<Expr>) -> (Option<Rational>, Vec<Expr>) {
+	let idx = v.iter().position(|e| matches!(e, Number(..)));
+	match idx {
+		Some(idx) => {
+			let num = match v.remove(idx) {
+				Number(n) => n,
+				_ => unreachable!(),
+			};
 
-	(num, v)
+			(Some(num), v)
+		}
+		None => (None, v),
+	}
 }
 
 fn find_num(v: &mut [Expr]) -> Option<&mut Rational> {
@@ -377,7 +448,7 @@ impl ops::Neg for Expr {
 
 	fn neg(self) -> Self::Output {
 		match self {
-			e @ (Mul(_) | Inv(_) | Var(_) | Fun(..)) => Neg(Box::new(e)),
+			e @ (Mul(_) | Inv(_) | Var(_) | Fun(..) | Pow(..)) => Neg(Box::new(e)),
 			Add(exprs) => Add(exprs.into_iter().map(|e| -e).collect()),
 			Poly(sym, inner) => Poly(sym, -inner),
 			Neg(expr) => *expr,
@@ -436,6 +507,10 @@ impl ops::Div for Expr {
 	}
 }
 
+fn needs_parens(exp: &Expr) -> bool {
+	matches!(exp, Add(_) | Mul(_) | Inv(_) | Poly(..) | Pow(..))
+}
+
 impl Display for Expr {
 	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
 		let st = match self {
@@ -462,6 +537,12 @@ impl Display for Expr {
 			Var(symbol) => format!("{symbol}"),
 			Fun(symbol, expr) => format!("{symbol}({expr})"),
 			Poly(symbol, polynomial) => format!("{polynomial}").replace("x", &symbol.0),
+			Pow(base, exp) => match (needs_parens(base), needs_parens(exp)) {
+				(false, false) => format!("{base}^{exp}"),
+				(true, true) => format!("(){base})^({exp})"),
+				(true, false) => format!("({base})^{exp}"),
+				(false, true) => format!("{base}^({exp})"),
+			},
 		};
 
 		write!(f, "{st}")?;
