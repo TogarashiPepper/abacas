@@ -41,8 +41,6 @@ pub enum Expr {
 	Mul(Vec<Expr>),
 	/// Represents the additive inverse of an [`Expr`]
 	Neg(Box<Expr>),
-	/// Represents the multiplicative inverse of an [`Expr`]
-	Inv(Box<Expr>),
 	/// A constant number
 	Number(Rational),
 	/// A variable
@@ -84,13 +82,22 @@ impl Expr {
 		}
 	}
 
+	fn is_neg_one(&self) -> bool {
+		match self {
+			Number(n) => n == &-Rational::ONE.clone(),
+			_ => false,
+		}
+	}
+
 	fn inv(self) -> Self {
 		match self {
-			a @ (Add(_) | Neg(_) | Var(_) | Fun(..) | Poly(..)) => Inv(Box::new(a)),
+			a @ (Add(_) | Neg(_) | Var(_) | Fun(..) | Poly(..)) => {
+				Pow(Box::new(a), Box::new(Number(-Rational::ONE.clone())))
+			}
 			Mul(exprs) => Mul(exprs.into_iter().map(Self::inv).collect()),
-			Inv(expr) => *expr,
+			Pow(base, expr) if expr.is_neg_one() => *base,
+			Pow(base, exp) => Pow(base, Box::new(-*exp)),
 			Number(rational) => Number(rational.recip()),
-			Pow(..) => todo!(),
 		}
 	}
 
@@ -124,13 +131,11 @@ impl Expr {
 					Neg(expr)
 				}
 			}
-			Inv(expr) => {
-				if let Inv(inner_expr) = *expr {
-					*inner_expr
-				} else {
-					Inv(expr)
-				}
-			}
+			Pow(base, exp) if exp.is_neg_one() => match *base {
+				Pow(inner_base, exp2) if exp2.is_neg_one() => *inner_base,
+
+				base => Pow(Box::new(base), exp),
+			},
 
 			other => other,
 		}
@@ -144,9 +149,7 @@ impl Expr {
 		}
 
 		// Group all lone numbers into one
-		let sum = exprs
-			.extract_if(.., |e| e.is_number())
-			.fold(Expr::zero(), |a, b| a + b);
+		let sum = exprs.extract_if(.., |e| e.is_number()).fold(Expr::zero(), |a, b| a + b);
 
 		let mut multiset: Vec<(Expr, Rational)> = vec![];
 
@@ -160,9 +163,7 @@ impl Expr {
 			exp.normalize();
 
 			let (coeff, mut core) = match exp {
-				c @ (Add(_) | Inv(_) | Var(_) | Fun(..) | Poly(..) | Pow(..)) => {
-					(Rational::ONE.clone(), c)
-				}
+				c @ (Add(_) | Var(_) | Fun(..) | Poly(..) | Pow(..)) => (Rational::ONE.clone(), c),
 				Neg(exp) => (-Rational::ONE.clone(), *exp),
 				Mul(exprs) => {
 					let (x, y) = get_number(exprs);
@@ -213,9 +214,7 @@ impl Expr {
 		}
 		exprs.sort_by(Expr::cmp);
 
-		let prod = exprs
-			.extract_if(.., |e| e.is_number())
-			.fold(Expr::one(), |a, b| a * b);
+		let prod = exprs.extract_if(.., |e| e.is_number()).fold(Expr::one(), |a, b| a * b);
 
 		if prod.is_zero() {
 			return vec![];
@@ -235,7 +234,6 @@ impl Expr {
 
 			let (mut base, mut exponent) = match exp {
 				Pow(base, exp) => (*base, *exp),
-				Inv(base) => (*base, Number(-Rational::ONE.clone())),
 				other => (other, Number(Rational::ONE.clone())),
 			};
 
@@ -287,10 +285,7 @@ impl Expr {
 				p.sort_by(Expr::cmp);
 				q.sort_by(Expr::cmp);
 
-				let r = p
-					.into_iter()
-					.zip(q)
-					.find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal);
+				let r = p.into_iter().zip(q).find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal);
 
 				match r {
 					Some((a, b)) => Expr::cmp(&a, &b),
@@ -307,10 +302,7 @@ impl Expr {
 				p.sort_by(Expr::cmp);
 				q.sort_by(Expr::cmp);
 
-				let r = p
-					.into_iter()
-					.zip(q)
-					.find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal);
+				let r = p.into_iter().zip(q).find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal);
 
 				match r {
 					Some((a, b)) => Expr::cmp(&a, &b),
@@ -335,10 +327,6 @@ impl Expr {
 			(Pow(..), _) => Ordering::Greater,
 			(_, Pow(..)) => Ordering::Less,
 
-			(Inv(p), Inv(q)) => Expr::cmp(p, q),
-			(Inv(..), _) => Ordering::Greater,
-			(_, Inv(..)) => Ordering::Less,
-
 			(Number(p), Number(q)) => p.cmp(q),
 			(Number(..), _) => Ordering::Greater,
 			(_, Number(..)) => Ordering::Less,
@@ -350,11 +338,7 @@ impl Expr {
 			(Fun(r, p), Fun(s, q)) => {
 				let ord = Expr::cmp(p, q);
 
-				if ord == Ordering::Equal {
-					r.cmp(s)
-				} else {
-					ord
-				}
+				if ord == Ordering::Equal { r.cmp(s) } else { ord }
 			}
 			(Fun(..), _) => Ordering::Greater,
 			(_, Fun(..)) => Ordering::Less,
@@ -399,12 +383,10 @@ fn get_number(mut v: Vec<Expr>) -> (Option<Rational>, Vec<Expr>) {
 }
 
 fn find_num(v: &mut [Expr]) -> Option<&mut Rational> {
-	v.iter()
-		.position(|e| e.is_number())
-		.map(|p| match &mut v[p] {
-			Expr::Number(n) => n,
-			_ => unreachable!(),
-		})
+	v.iter().position(|e| e.is_number()).map(|p| match &mut v[p] {
+		Expr::Number(n) => n,
+		_ => unreachable!(),
+	})
 }
 
 use Expr::*;
@@ -450,7 +432,7 @@ impl ops::Neg for Expr {
 
 	fn neg(self) -> Self::Output {
 		match self {
-			e @ (Mul(_) | Inv(_) | Var(_) | Fun(..) | Pow(..)) => Neg(Box::new(e)),
+			e @ (Mul(_) | Var(_) | Fun(..) | Pow(..)) => Neg(Box::new(e)),
 			Add(exprs) => Add(exprs.into_iter().map(|e| -e).collect()),
 			Poly(sym, inner) => Poly(sym, -inner),
 			Neg(expr) => *expr,
@@ -484,14 +466,6 @@ impl ops::Mul for Expr {
 				}
 			}
 
-			// (2x / y) * y => 2x
-			(Mul(mut a), Inv(inv)) | (Inv(inv), Mul(mut a)) => {
-				if let Some(pos) = a.iter().position(|e| *e == *inv) {
-					a.remove(pos);
-				}
-
-				Expr::Mul(push(a, Inv(inv)))
-			}
 			(Mul(m), other) | (other, Mul(m)) => Mul(push(m, other)),
 			(Number(l), Number(r)) => Number(l * r),
 
@@ -510,7 +484,7 @@ impl ops::Div for Expr {
 }
 
 fn needs_parens(exp: &Expr) -> bool {
-	matches!(exp, Add(_) | Mul(_) | Inv(_) | Poly(..) | Pow(..))
+	matches!(exp, Add(_) | Mul(_) | Poly(..) | Pow(..))
 }
 
 impl Display for Expr {
@@ -528,12 +502,12 @@ impl Display for Expr {
 				})
 				.join("×"),
 			Neg(expr) => match &**expr {
-				Add(_) | Mul(_) | Inv(_) | Poly(..) => format!("-({expr})"),
+				Add(_) | Mul(_) | Poly(..) => format!("-({expr})"),
 				_ => format!("-{expr}"),
 			},
-			Inv(expr) => match &**expr {
-				Add(_) | Mul(_) | Poly(..) => format!("1/({expr})"),
-				_ => format!("1/{expr}"),
+			Pow(base, exp) if exp.is_neg_one() => match &**base {
+				Add(_) | Mul(_) | Poly(..) => format!("({base})^-1"),
+				_ => format!("{base}^-1"),
 			},
 			Number(rational) => format!("{rational}"),
 			Var(symbol) => format!("{symbol}"),
