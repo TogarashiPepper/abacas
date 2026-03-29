@@ -101,29 +101,27 @@ impl Expr {
 		}
 	}
 
-	// Normalize the representation
-	// At the moment:
-	// - turns Mul[x] -> x
-	// - turns Add[x] -> x
-	fn normalize(&mut self) {
-		match self {
-			Add(exprs) | Mul(exprs) if exprs.len() == 1 => *self = exprs.remove(0),
-			Pow(base, exp) if exp.is_one() => *self = *base.clone(),
-			Add(exprs) | Mul(exprs) => {
-				for exp in exprs.iter_mut() {
-					exp.normalize();
-				}
-				exprs.sort_by(Expr::cmp);
-			}
-			_ => {}
-		}
-	}
-
+	// TODO: make this return a Option so we can signal "remove this"
+	// i.e for the case of x^0 in a mul or 0*x in an Add
 	/// Simplify an expression (best-effort, may not fully simplify)
 	pub fn simplify(self) -> Self {
+		let is_add = matches!(self, Add(..));
+
 		match self {
-			Add(exprs) => Add(Self::simplify_add(exprs)),
-			Mul(exprs) => Mul(Self::simplify_mul(exprs)),
+			Add(mut exprs) | Mul(mut exprs) if exprs.len() == 1 => exprs.remove(0).simplify(),
+			Pow(base, exp) if exp.is_one() => *base,
+			Add(exprs) | Mul(exprs) => {
+				let mut simplified: Vec<Expr> = exprs.into_iter().map(Expr::simplify).collect();
+				simplified.sort_by(Expr::cmp);
+
+				if simplified.len() == 1 {
+					simplified.remove(0)
+				} else if is_add {
+					Add(Self::simplify_add(simplified))
+				} else {
+					Mul(Self::simplify_mul(simplified))
+				}
+			}
 			Neg(expr) => {
 				if let Neg(inner_expr) = *expr {
 					*inner_expr
@@ -144,24 +142,20 @@ impl Expr {
 	/// Simplify a sum. Currently handles:
 	/// - reducing 2 + 3 + x + 4 -> x + 9
 	fn simplify_add(mut exprs: Vec<Expr>) -> Vec<Expr> {
-		for exp in &mut exprs {
-			exp.normalize();
-		}
-
 		// Group all lone numbers into one
 		let sum = exprs.extract_if(.., |e| e.is_number()).fold(Expr::zero(), |a, b| a + b);
 
+		exprs = exprs
+			.into_iter()
+			.flat_map(|e| {
+				let e = e.simplify();
+				if let Add(inner) = e { inner } else { vec![e] }
+			})
+			.collect();
+
 		let mut multiset: Vec<(Expr, Rational)> = vec![];
 
-		for mut exp in exprs {
-			match exp {
-				Mul(es) => exp = Mul(Expr::simplify_mul(es)),
-				Add(es) => exp = Add(Expr::simplify_add(es)),
-				_ => {}
-			}
-
-			exp.normalize();
-
+		for exp in exprs {
 			let (coeff, mut core) = match exp {
 				c @ (Add(_) | Var(_) | Fun(..) | Poly(..) | Pow(..)) => (Rational::ONE.clone(), c),
 				Neg(exp) => (-Rational::ONE.clone(), *exp),
@@ -172,7 +166,7 @@ impl Expr {
 				Number(_) => unreachable!(),
 			};
 
-			core.normalize();
+			core = core.simplify();
 
 			match multiset.binary_search_by(|(e, _)| Expr::cmp(e, &core)) {
 				Ok(idx) => multiset[idx].1 += coeff,
@@ -193,15 +187,13 @@ impl Expr {
 					Some(Mul(vec![Number(coeff), exp]))
 				}
 			})
+			.map(Expr::simplify)
 			.collect();
 
 		if !sum.is_zero() {
 			end.push(sum);
 		}
 
-		for exp in &mut end {
-			exp.normalize();
-		}
 		end.sort_by(Expr::cmp);
 		end
 	}
@@ -209,12 +201,15 @@ impl Expr {
 	/// Simplify a product. Currently handles:
 	/// - reducing 2 * 4 * x * y * 3 -> x * y * 24
 	fn simplify_mul(mut exprs: Vec<Expr>) -> Vec<Expr> {
-		for exp in &mut exprs {
-			exp.normalize();
-		}
-		exprs.sort_by(Expr::cmp);
-
 		let prod = exprs.extract_if(.., |e| e.is_number()).fold(Expr::one(), |a, b| a * b);
+
+		exprs = exprs
+			.into_iter()
+			.flat_map(|e| {
+				let e = e.simplify();
+				if let Mul(inner) = e { inner } else { vec![e] }
+			})
+			.collect();
 
 		if prod.is_zero() {
 			return vec![];
@@ -223,22 +218,14 @@ impl Expr {
 		// .0 is base, .1 is exponent
 		let mut multiset: Vec<(Expr, Expr)> = vec![];
 
-		for mut exp in exprs {
-			match exp {
-				Mul(es) => exp = Mul(Expr::simplify_mul(es)),
-				Add(es) => exp = Add(Expr::simplify_add(es)),
-				_ => {}
-			}
-
-			exp.normalize();
-
+		for exp in exprs {
 			let (mut base, mut exponent) = match exp {
 				Pow(base, exp) => (*base, *exp),
 				other => (other, Number(Rational::ONE.clone())),
 			};
 
-			base.normalize();
-			exponent.normalize();
+			base = base.simplify();
+			exponent = exponent.simplify();
 
 			match multiset.binary_search_by(|(e, _)| Expr::cmp(e, &base)) {
 				// TODO: impl AddAssign for Expr
@@ -258,15 +245,13 @@ impl Expr {
 					Some(Pow(Box::new(base), Box::new(exp)))
 				}
 			})
+			.map(Expr::simplify)
 			.collect();
 
 		if !prod.is_one() {
 			end.push(prod);
 		}
 
-		for exp in &mut end {
-			exp.normalize();
-		}
 		end.sort_by(Expr::cmp);
 		end
 	}
