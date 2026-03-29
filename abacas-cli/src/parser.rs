@@ -1,7 +1,8 @@
 use std::iter::Peekable;
 
-use crate::token::Token::{self, *};
 use abacas::expr::{Expr, Symbol};
+
+use crate::token::Token::{self, *};
 
 pub struct Parser {}
 

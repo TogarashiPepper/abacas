@@ -1,6 +1,7 @@
 //! Module containing [`Expr`] and related structs, like [`Symbol`]
+use std::cmp::Ordering;
+use std::fmt::Display;
 use std::ops;
-use std::{cmp::Ordering, fmt::Display};
 
 use itertools::Itertools;
 use rug::{Complete, Rational};
@@ -272,6 +273,7 @@ impl Expr {
 		end
 	}
 
+	/// Raise self to the power of rhs
 	pub fn pow(self, rhs: Self) -> Self {
 		Pow(Box::new(self), Box::new(rhs))
 	}

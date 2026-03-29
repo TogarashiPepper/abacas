@@ -13,7 +13,6 @@ pub enum Token {
 	// Ident(String),
 	#[regex(r"[a-zA-Z]", |lex| lex.slice().to_owned())]
 	Ident(String),
-	
 
 	#[token("=")]
 	Eq,
