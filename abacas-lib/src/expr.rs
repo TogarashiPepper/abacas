@@ -108,7 +108,6 @@ impl Expr {
 		let is_add = matches!(self, Add(..));
 
 		match self {
-			Add(mut exprs) | Mul(mut exprs) if exprs.len() == 1 => exprs.remove(0).simplify(),
 			Pow(base, exp) if exp.is_one() => *base,
 			Add(exprs) | Mul(exprs) => {
 				let mut simplified: Vec<Expr> = exprs.into_iter().map(Expr::simplify).collect();
@@ -129,6 +128,7 @@ impl Expr {
 					Neg(expr)
 				}
 			}
+			// TODO: handle ^0 case and return None
 			Pow(base, exp) if exp.is_neg_one() => match *base {
 				Pow(inner_base, exp2) if exp2.is_neg_one() => *inner_base,
 
