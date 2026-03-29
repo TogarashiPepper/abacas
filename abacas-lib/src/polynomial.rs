@@ -1,8 +1,6 @@
 //! The polynomial structure and its related algorithms.
 
-use std::ops::{
-	Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign,
-};
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
 use std::slice::Iter;
 use std::{fmt, mem, str};
 
@@ -187,10 +185,7 @@ impl Polynomial {
 	/// assert_eq!(poly.to_string(), "4x^2 + 2x + 1");
 	/// ```
 	pub fn factor_mut(&mut self) -> Option<Rational> {
-		let factor = self
-			.monomials()
-			.map(|mono| &mono.coeff)
-			.fold(Rational::new(), gcd);
+		let factor = self.monomials().map(|mono| &mono.coeff).fold(Rational::new(), gcd);
 
 		if factor <= 1 {
 			return None;
@@ -468,8 +463,7 @@ impl<T: Into<Monomial>> DivAssign<T> for Polynomial {
 
 impl DivAssign for Polynomial {
 	fn div_assign(&mut self, rhs: Self) {
-		self.div_rem_mut(&rhs)
-			.expect("abacas: cannot divide by zero");
+		self.div_rem_mut(&rhs).expect("abacas: cannot divide by zero");
 	}
 }
 
@@ -536,9 +530,7 @@ where
 
 impl RemAssign for Polynomial {
 	fn rem_assign(&mut self, rhs: Self) {
-		*self = self
-			.div_rem_mut(&rhs)
-			.expect("abacas: cannot divide by zero");
+		*self = self.div_rem_mut(&rhs).expect("abacas: cannot divide by zero");
 	}
 }
 
