@@ -36,7 +36,7 @@ use crate::polynomial::Polynomial;
 /// let mul = Monomial::new(4, 10) * Monomial::linear(2);
 /// assert_eq!(mul.to_string(), "8x^11");
 /// ```
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Monomial {
 	/// The coefficient of the monomial
 	pub coeff: Rational,

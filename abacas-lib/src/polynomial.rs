@@ -52,7 +52,7 @@ fn gcd(a: Rational, b: &Rational) -> Rational {
 /// let mul = a.clone() * b.clone();
 /// assert_eq!(mul.to_string(), "8x^6 + 6x^5 - 20x^4 - 15x^3 + 2x^2 - 5");
 /// ```
-#[derive(Clone, Debug, Default, Eq, PartialEq)]
+#[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
 pub struct Polynomial(Vec<Monomial>);
 
 impl Polynomial {

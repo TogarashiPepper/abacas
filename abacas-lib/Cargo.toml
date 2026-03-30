@@ -9,6 +9,7 @@ harness = false
 
 [dependencies]
 rug.workspace = true
+itertools.workspace = true
 
 [dev-dependencies]
 divan.workspace = true
