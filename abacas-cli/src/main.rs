@@ -140,7 +140,9 @@ fn repl(cfg: CasConfig) {
 
 				let mut ast = Parser::parse_line(tokens);
 
-				ast = ast.simplify();
+				if !cfg.raw {
+					ast = ast.simplify();
+				}
 
 				println!("{ast}");
 			}
