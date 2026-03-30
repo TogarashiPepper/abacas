@@ -101,8 +101,6 @@ impl Expr {
 		}
 	}
 
-	// TODO: make this return a Option so we can signal "remove this"
-	// i.e for the case of x^0 in a mul or 0*x in an Add
 	/// Simplify an expression (best-effort, may not fully simplify)
 	pub fn simplify(self) -> Self {
 		let is_add = matches!(self, Add(..));
@@ -121,20 +119,33 @@ impl Expr {
 					Mul(Self::simplify_mul(simplified))
 				}
 			}
-			Neg(expr) => {
+			Neg(mut expr) => {
+				*expr = expr.simplify();
+
 				if let Neg(inner_expr) = *expr {
-					*inner_expr
+					inner_expr.simplify()
 				} else {
 					Neg(expr)
 				}
 			}
-			// TODO: handle ^0 case and return None
-			Pow(base, exp) if exp.is_neg_one() => match *base {
-				Pow(inner_base, exp2) if exp2.is_neg_one() => *inner_base,
+			Pow(base, exp) => {
+				let (mut base, mut exp) = if let Pow(base_inner, exp_inner) = *base {
+					(base_inner, *exp * *exp_inner)
+				} else {
+					(base, *exp)
+				};
 
-				base => Pow(Box::new(base), exp),
-			},
+				*base = base.simplify();
+				exp = exp.simplify();
 
+				if exp.is_zero() {
+					Number(Rational::ONE.clone())
+				} else if exp.is_one() {
+					*base
+				} else {
+					Pow(base, Box::new(exp))
+				}
+			}
 			other => other,
 		}
 	}

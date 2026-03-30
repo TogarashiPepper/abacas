@@ -77,7 +77,7 @@ pub fn infix_bp(op: Token) -> (u8, u8) {
 		Eq => (1, 2),
 		Sub | Add => (3, 4),
 		Mul | Div | Rem => (5, 6),
-		Pow => (7, 8),
+		Pow => (8, 7),
 
 		_ => unreachable!(),
 	}
