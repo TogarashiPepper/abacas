@@ -5,18 +5,10 @@ use std::slice::Iter;
 use std::{fmt, mem, str};
 
 use rug::ops::NegAssign;
-use rug::{Integer, Rational};
 
 use crate::error::ParseError;
 use crate::monomial::Monomial;
-
-/// Internal function that calculates the greatest common divisor.
-fn gcd(a: Rational, b: &Rational) -> Rational {
-	let (numer, denom) = a.into_numer_denom();
-
-	// See: https://math.stackexchange.com/a/199905
-	(numer.gcd(b.numer()), denom.lcm(b.denom())).into()
-}
+use crate::number::Number;
 
 /// A polynomial with its monomials sorted by `degree` in descending order.
 ///
@@ -74,7 +66,7 @@ impl Polynomial {
 	/// let poly: Polynomial = "4x^999 + 2x^3 + 1".parse().unwrap();
 	/// assert_eq!(poly.degree(), Some(&999.into()));
 	/// ```
-	pub fn degree(&self) -> Option<&Integer> {
+	pub fn degree(&self) -> Option<&Number> {
 		self.0.first().map(|mono| &mono.degree)
 	}
 
@@ -122,18 +114,18 @@ impl Polynomial {
 
 		while degree >= normalizer.degree {
 			let monomial = self.get_or_insert(&degree);
-			let coeff = monomial.coeff.clone() / &normalizer.coeff;
+			let coeff = monomial.coeff.clone() / normalizer.coeff.clone();
 
 			monomial.coeff = coeff.clone();
 
 			for term in terms {
-				let degree = degree.clone() + &term.degree - &normalizer.degree;
+				let degree = degree.clone() + term.degree.clone() - normalizer.degree.clone();
 				let monomial = self.get_or_insert(&degree);
 
-				monomial.coeff -= coeff.clone() * &term.coeff;
+				monomial.coeff -= coeff.clone() * term.coeff.clone();
 			}
 
-			degree -= 1;
+			degree -= Number::one();
 		}
 
 		self.clean();
@@ -146,7 +138,7 @@ impl Polynomial {
 		let remainder = Self::new(self.0.split_off(index));
 
 		for monomial in self.0.iter_mut() {
-			monomial.degree -= &normalizer.degree;
+			monomial.degree -= normalizer.degree.clone();
 		}
 
 		Some(remainder)
@@ -166,7 +158,7 @@ impl Polynomial {
 	/// assert_eq!(factor, 4);
 	/// assert_eq!(rest.to_string(), "4x^2 + 2x + 1");
 	/// ```
-	pub fn factor(mut self) -> Option<(Rational, Self)> {
+	pub fn factor(mut self) -> Option<(Number, Self)> {
 		self.factor_mut().map(|factor| (factor, self))
 	}
 
@@ -184,14 +176,19 @@ impl Polynomial {
 	/// assert_eq!(factor, 4);
 	/// assert_eq!(poly.to_string(), "4x^2 + 2x + 1");
 	/// ```
-	pub fn factor_mut(&mut self) -> Option<Rational> {
-		let factor = self.monomials().map(|mono| &mono.coeff).fold(Rational::new(), gcd);
+	pub fn factor_mut(&mut self) -> Option<Number> {
+		let factor = self
+			.monomials()
+			.map(|mono| &mono.coeff)
+			.fold(Number::zero(), |lhs: Number, rhs: &Number| {
+				Number::gcd(lhs, rhs.clone())
+			});
 
-		if factor <= 1 {
+		if factor <= Number::one() {
 			return None;
 		}
 
-		*self /= &factor;
+		*self /= factor.clone();
 
 		Some(factor)
 	}
@@ -271,7 +268,7 @@ impl Polynomial {
 	/// let poly: Polynomial = "4x^9 + 2x^3 + x^2 + 100".parse().unwrap();
 	/// assert_eq!(poly.get(&9.into()), Some(&Monomial::new(4, 9)));
 	/// ```
-	pub fn get(&self, degree: &Integer) -> Option<&Monomial> {
+	pub fn get(&self, degree: &Number) -> Option<&Monomial> {
 		self.0
 			.binary_search_by(|mono| degree.cmp(&mono.degree))
 			.ok()
@@ -279,7 +276,7 @@ impl Polynomial {
 	}
 
 	/// Internal method to get a monomial or insert it if it does not exist.
-	fn get_or_insert(&mut self, degree: &Integer) -> &mut Monomial {
+	fn get_or_insert(&mut self, degree: &Number) -> &mut Monomial {
 		let index = self
 			.0
 			.binary_search_by(|mono| degree.cmp(&mono.degree))
@@ -322,7 +319,7 @@ impl Polynomial {
 	/// assert_eq!(factor, 16);
 	/// assert_eq!(monic.to_string(), "x^9 + 0.25x^3 + 2");
 	/// ```
-	pub fn monic(mut self) -> Option<(Rational, Self)> {
+	pub fn monic(mut self) -> Option<(Number, Self)> {
 		self.monic_mut().map(|factor| (factor, self))
 	}
 
@@ -340,14 +337,14 @@ impl Polynomial {
 	/// assert_eq!(factor, 16);
 	/// assert_eq!(poly.to_string(), "x^9 + 0.25x^3 + 2");
 	/// ```
-	pub fn monic_mut(&mut self) -> Option<Rational> {
+	pub fn monic_mut(&mut self) -> Option<Number> {
 		let factor = self.0.first()?.coeff.clone();
 
-		if factor == 1 {
+		if factor.is_one() {
 			return None;
 		}
 
-		*self /= &factor;
+		*self /= factor.clone();
 
 		Some(factor)
 	}
@@ -382,7 +379,7 @@ impl Polynomial {
 	}
 }
 
-impl<T: Into<Rational>> From<T> for Polynomial {
+impl<T: Into<Number>> From<T> for Polynomial {
 	fn from(value: T) -> Self {
 		let value = value.into();
 

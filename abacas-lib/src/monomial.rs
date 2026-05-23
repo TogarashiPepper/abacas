@@ -4,9 +4,9 @@ use std::ops::{Add, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 use std::{fmt, str};
 
 use rug::ops::{NegAssign, Pow, PowAssign};
-use rug::{Integer, Rational};
 
 use crate::error::ParseError;
+use crate::number::Number;
 use crate::polynomial::Polynomial;
 
 /// A monomial `ax^b` consisting of coefficient `a` and degree `b`.
@@ -39,9 +39,9 @@ use crate::polynomial::Polynomial;
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
 pub struct Monomial {
 	/// The coefficient of the monomial
-	pub coeff: Rational,
+	pub coeff: Number,
 	/// The degree of the monomial
-	pub degree: Integer,
+	pub degree: Number,
 }
 
 impl Monomial {
@@ -55,7 +55,7 @@ impl Monomial {
 	/// let mono = Monomial::constant(4);
 	/// assert_eq!(mono.to_string(), "4");
 	/// ```
-	pub fn constant(coeff: impl Into<Rational>) -> Self {
+	pub fn constant(coeff: impl Into<Number>) -> Self {
 		Self::new(coeff, 0)
 	}
 
@@ -69,7 +69,7 @@ impl Monomial {
 	/// let mono = Monomial::linear(2);
 	/// assert_eq!(mono.to_string(), "2x");
 	/// ```
-	pub fn linear(coeff: impl Into<Rational>) -> Self {
+	pub fn linear(coeff: impl Into<Number>) -> Self {
 		Self::new(coeff, 1)
 	}
 
@@ -83,7 +83,7 @@ impl Monomial {
 	/// let mono = Monomial::new(4, 22);
 	/// assert_eq!(mono.to_string(), "4x^22");
 	/// ```
-	pub fn new(coeff: impl Into<Rational>, degree: impl Into<Integer>) -> Self {
+	pub fn new(coeff: impl Into<Number>, degree: impl Into<Number>) -> Self {
 		let coeff = coeff.into();
 		let degree = degree.into();
 
@@ -95,8 +95,8 @@ impl Monomial {
 	}
 }
 
-impl<T: Into<Rational>> From<T> for Monomial {
-	fn from(value: T) -> Self {
+impl From<Number> for Monomial {
+	fn from(value: Number) -> Self {
 		Self::constant(value)
 	}
 }
@@ -185,8 +185,8 @@ impl<T: Into<i32>> PowAssign<T> for Monomial {
 	fn pow_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
-		self.coeff.pow_assign(rhs);
-		self.degree *= rhs;
+		self.coeff.pow_assign(rhs.into());
+		self.degree *= rhs.into();
 	}
 }
 
@@ -203,20 +203,22 @@ where
 
 impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		if self.degree == 0 {
-			write!(f, "{}", self.coeff.to_f64())
-		} else if self.degree == 1 {
-			match self.coeff.to_f64() {
-				-1.0 => write!(f, "-x"),
-				1.0 => write!(f, "x"),
-				coeff => write!(f, "{coeff}x"),
+		if self.degree.is_zero() {
+			write!(f, "{}", self.coeff)
+		} else if self.degree.is_one() {
+			if self.coeff == -Number::one() {
+				write!(f, "-x")
+			} else if self.coeff == Number::one() {
+				write!(f, "x")
+			} else {
+				write!(f, "{}x", self.coeff)
 			}
+		} else if self.coeff == -Number::one() {
+			write!(f, "-x^{}", self.degree)
+		} else if self.coeff == Number::one() {
+			write!(f, "x^{}", self.degree)
 		} else {
-			match self.coeff.to_f64() {
-				-1.0 => write!(f, "-x^{}", self.degree),
-				1.0 => write!(f, "x^{}", self.degree),
-				coeff => write!(f, "{coeff}x^{}", self.degree),
-			}
+			write!(f, "{}x^{}", self.coeff, self.degree)
 		}
 	}
 }
@@ -243,7 +245,7 @@ impl str::FromStr for Monomial {
 			return Err(ParseError::InvalidValue(coeff));
 		}
 
-		let Some(coeff) = Rational::from_f64(coeff) else {
+		let Some(coeff) = Number::from_f64(coeff) else {
 			return Err(ParseError::InvalidValue(coeff));
 		};
 
