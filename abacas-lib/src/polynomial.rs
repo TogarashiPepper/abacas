@@ -180,9 +180,7 @@ impl Polynomial {
 		let factor = self
 			.monomials()
 			.map(|mono| &mono.coeff)
-			.fold(Number::zero(), |lhs: Number, rhs: &Number| {
-				Number::gcd(lhs, rhs.clone())
-			});
+			.fold(Number::zero(), Number::gcd);
 
 		if factor <= Number::one() {
 			return None;

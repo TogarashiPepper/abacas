@@ -95,8 +95,8 @@ impl Monomial {
 	}
 }
 
-impl From<Number> for Monomial {
-	fn from(value: Number) -> Self {
+impl<T: Into<Number>> From<T> for Monomial {
+	fn from(value: T) -> Self {
 		Self::constant(value)
 	}
 }
@@ -185,8 +185,8 @@ impl<T: Into<i32>> PowAssign<T> for Monomial {
 	fn pow_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
-		self.coeff.pow_assign(rhs.into());
-		self.degree *= rhs.into();
+		self.coeff.pow_assign(rhs);
+		self.degree *= rhs;
 	}
 }
 
@@ -206,19 +206,21 @@ impl fmt::Display for Monomial {
 		if self.degree.is_zero() {
 			write!(f, "{}", self.coeff)
 		} else if self.degree.is_one() {
-			if self.coeff == -Number::one() {
+			if self.coeff.is_neg_one() {
 				write!(f, "-x")
-			} else if self.coeff == Number::one() {
+			} else if self.coeff.is_one() {
 				write!(f, "x")
 			} else {
 				write!(f, "{}x", self.coeff)
 			}
-		} else if self.coeff == -Number::one() {
-			write!(f, "-x^{}", self.degree)
-		} else if self.coeff == Number::one() {
-			write!(f, "x^{}", self.degree)
 		} else {
-			write!(f, "{}x^{}", self.coeff, self.degree)
+			if self.coeff.is_neg_one() {
+				write!(f, "-x^{}", self.degree)
+			} else if self.coeff.is_one() {
+				write!(f, "x^{}", self.degree)
+			} else {
+				write!(f, "{}x^{}", self.coeff, self.degree)
+			}
 		}
 	}
 }
@@ -245,7 +247,7 @@ impl str::FromStr for Monomial {
 			return Err(ParseError::InvalidValue(coeff));
 		}
 
-		let Some(coeff) = Number::from_f64(coeff) else {
+		let Some(coeff) = Number::new_float(coeff) else {
 			return Err(ParseError::InvalidValue(coeff));
 		};
 

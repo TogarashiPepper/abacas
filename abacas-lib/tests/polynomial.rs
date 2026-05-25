@@ -1,12 +1,13 @@
 use abacas::monomial::Monomial;
+use abacas::number::Number;
 use abacas::polynomial::Polynomial;
 
 const A: fn() -> Monomial = || Monomial::new(1, 0);
-const B: fn() -> Monomial = || Monomial::new((5, 2), 0);
+const B: fn() -> Monomial = || Monomial::new(Number::new_ratio(5, 2), 0);
 const C: fn() -> Monomial = || Monomial::new(1, 1);
-const D: fn() -> Monomial = || Monomial::new((5, 2), 1);
+const D: fn() -> Monomial = || Monomial::new(Number::new_ratio(5, 2), 1);
 const E: fn() -> Monomial = || Monomial::new(1, 4);
-const F: fn() -> Monomial = || Monomial::new((5, 2), 4);
+const F: fn() -> Monomial = || Monomial::new(Number::new_ratio(5, 2), 4);
 
 /// Helper to construct a monomial without type inference required.
 fn m(input: &str) -> Monomial {
@@ -60,7 +61,7 @@ fn impls() {
 	let mono = m("5x^4").pow(3);
 	assert_eq!(mono.to_string(), "125x^12");
 
-	let poly = p("2x^2 + 5x + 3") * 4 - (11, 2);
+	let poly = p("2x^2 + 5x + 3") * 4 - Number::new_ratio(11, 2);
 	assert_eq!(poly.to_string(), "8x^2 + 20x + 6.5");
 }
 

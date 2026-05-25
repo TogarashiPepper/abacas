@@ -1,226 +1,493 @@
-//! The number enum and its related operations.
+//! The number structure and its related operations.
 
-use std::fmt::{self, Display};
-use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, Sub, SubAssign};
-use std::str;
+use std::borrow::Borrow;
+use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
+use std::{fmt, str};
 
-use rug::Rational;
-use rug::ops::{NegAssign, Pow, PowAssign};
-use rug::rational::ParseRationalError;
+use rug::ops::{DivRounding, DivRoundingAssign, NegAssign, Pow, PowAssign, RemRounding, RemRoundingAssign};
+use rug::{Integer, Rational};
 
-/// Represents a number of any supported set.
-#[derive(Clone, Debug, Hash, PartialEq, Eq, PartialOrd, Ord)]
+/// Sealed trait for primitive floats.
+trait PrimFloat: TryInto<Number> {}
+
+/// Sealed trait for primitive integers.
+trait PrimInt: Into<Integer> {}
+
+/// Represents a specific number. Currently uses [`Rational`] under the hood, however this should not be relied upon.
+#[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Number(Rational);
 
+// Constructors
 impl Number {
-	/// The number zero.
-	pub fn zero() -> Self {
-		Self::new(0u64, 1u64)
+	/// Creates a new number from a primitive integer.
+	#[expect(private_bounds)]
+	pub fn new(value: impl PrimInt) -> Self {
+		Self(value.into().into())
 	}
 
-	/// The number one.
-	pub fn one() -> Self {
-		Self::new(1u64, 1u64)
+	/// Creates a new number from a primitive float. Returns [`None`] if the float is not finite.
+	#[expect(private_bounds)]
+	pub fn new_float(value: impl PrimFloat) -> Option<Self> {
+		value.try_into().ok()
 	}
 
-	/// The number pi.
-	pub fn pi() -> Self {
-		Self::new(3141592653589793u64, 1000000000000000u64)
+	/// Creates a new number from numerator and denominator.
+	#[expect(private_bounds)]
+	pub fn new_ratio(numer: impl PrimInt, denom: impl PrimInt) -> Self {
+		Self((numer.into(), denom.into()).into())
 	}
+}
 
-	/// The eulers number.
+// Constants
+impl Number {
+	/// The number e, finitely represented as `2.718281828459045`.
 	pub fn e() -> Self {
-		Self::new(2718281828459045u64, 1000000000000000u64)
+		Self::new_ratio(2718281828459045u64, 1000000000000000u64)
 	}
 
-	/// Create a new Number from numerator and denominator.
-	pub fn new(num: u64, denom: u64) -> Self {
-		Self::from_rational(Rational::from(((num), (denom))))
+	/// The number negative one (`-1`).
+	pub fn neg_one() -> Self {
+		Self(Rational::NEG_ONE.clone())
 	}
 
-	/// Create a new Number from f64.
-	pub fn from_f64(coeff: f64) -> Option<Self> {
-		Some(Self::from_rational(Rational::from_f64(coeff)?))
+	/// The number one (`1`).
+	pub fn one() -> Self {
+		Self(Rational::ONE.clone())
 	}
 
-	/// Create a new Number from rug Rational type.
-	pub fn from_rational(number: Rational) -> Self {
-		Self(number)
+	/// The number pi, finitely represented as `3.141592653589793`.
+	pub fn pi() -> Self {
+		Self::new_ratio(3141592653589793u64, 1000000000000000u64)
 	}
 
-	/// Whether this Number is 0.
+	/// The number zero (`0`).
+	pub fn zero() -> Self {
+		Self(Rational::new())
+	}
+}
+
+// Guards
+impl Number {
+	/// Whether this number is an integer.
+	pub fn is_integer(&self) -> bool {
+		self.0.is_integer()
+	}
+
+	/// Whether this is the number negative one (`-1`).
+	pub fn is_neg_one(&self) -> bool {
+		self.0 == *Rational::NEG_ONE
+	}
+
+	/// Whether this number is less than zero.
+	pub fn is_negative(&self) -> bool {
+		self.0.is_negative()
+	}
+
+	/// Whether this is the number one (`1`).
+	pub fn is_one(&self) -> bool {
+		self.0 == *Rational::ONE
+	}
+
+	/// Whether this number is greater than zero.
+	pub fn is_positive(&self) -> bool {
+		self.0.is_positive()
+	}
+
+	/// Whether this is the number zero (`0`).
 	pub fn is_zero(&self) -> bool {
 		self.0.is_zero()
 	}
+}
 
-	/// Whether this Number is 1.
-	pub fn is_one(&self) -> bool {
-		self == &Self::one()
+// Operations
+impl Number {
+	/// Gets the denominator of this number.
+	pub fn denom(self) -> Number {
+		self.ratio().1
 	}
 
-	/// Whether this Number is Greater than 0.
-	pub fn is_positive(&self) -> bool {
-		self > &Self::zero()
+	/// Calculates the greatest common divisor.
+	pub fn gcd(mut self, rhs: &Self) -> Self {
+		self.gcd_mut(rhs);
+		self
 	}
 
-	/// Whether this Number is Lesser than 0.
-	pub fn is_negative(&self) -> bool {
-		self < &Self::zero()
+	/// Calculates the greatest common divisor in-place.
+	pub fn gcd_mut(&mut self, rhs: &Self) {
+		self.0.mutate_numer_denom(|numer, denom| {
+			numer.gcd_mut(rhs.0.numer());
+			denom.lcm_mut(rhs.0.denom());
+		});
 	}
 
-	/// Whether this Number is Greater than or Equal to 0.
-	pub fn is_non_negative(&self) -> bool {
-		self >= &Self::zero()
+	/// Gets the numerator of this number.
+	pub fn numer(self) -> Number {
+		self.ratio().0
 	}
 
-	/// Whether this Number is Lesser than or Equal to 0.
-	pub fn is_non_positive(&self) -> bool {
-		self <= &Self::zero()
+	/// Gets the numerator and denominator of this number as a tuple.
+	pub fn ratio(self) -> (Number, Number) {
+		let (numer, denom) = self.0.into_numer_denom();
+		(Self(numer.into()), Self(denom.into()))
 	}
 
-	/// Get the numerator of this Number.
-	pub fn numer(&self) -> Number {
-		Self::from_rational(self.0.numer().into())
+	/// Calculates the reciprocal of this number.
+	pub fn recip(mut self) -> Self {
+		self.recip_mut();
+		self
 	}
 
-	/// Get the denominator of this Number.
-	pub fn denom(&self) -> Number {
-		Self::from_rational(self.0.denom().into())
-	}
-
-	/// Get the numerator and denominator of this Number as a tuple.
-	pub fn numer_denom(&self) -> (Number, Number) {
-		(self.numer(), self.denom())
-	}
-
-	/// Function that calculates the greatest common divisor.
-	pub fn gcd(lhs: Self, rhs: Self) -> Self {
-		let (numer, denom) = lhs.0.into_numer_denom();
-
-		// See: https://math.stackexchange.com/a/199905
-		(numer.gcd(rhs.0.numer()), denom.lcm(rhs.0.denom())).into()
-	}
-
-	/// Reciprocal of this Number.
-	pub fn recip(&self) -> Self {
-		Self(self.0.clone().recip())
+	/// Calculates the reciprocal of this number in-place.
+	pub fn recip_mut(&mut self) {
+		self.0.recip_mut();
 	}
 }
 
-impl Default for Number {
-	fn default() -> Self {
-		Self::zero()
-	}
-}
-
-impl<T: Into<Rational>> From<T> for Number {
-	fn from(number: T) -> Self {
-		Self(number.into())
-	}
-}
-
-impl AddAssign for Number {
-	fn add_assign(&mut self, rhs: Self) {
-		self.0 = self.0.clone() + rhs.0;
-	}
-}
-
-impl Add for Number {
+impl<T> Add<T> for Number
+where
+	Self: AddAssign<T>,
+{
 	type Output = Self;
 
-	fn add(self, rhs: Self) -> Self::Output {
-		Self::from_rational(self.0 + rhs.0)
+	fn add(mut self, rhs: T) -> Self::Output {
+		self += rhs;
+		self
 	}
 }
 
-impl DivAssign for Number {
-	fn div_assign(&mut self, rhs: Self) {
-		self.0 = self.0.clone() / rhs.0;
+impl<T: Borrow<Self>> AddAssign<T> for Number {
+	fn add_assign(&mut self, rhs: T) {
+		self.0 += &rhs.borrow().0;
 	}
 }
 
-impl Div for Number {
+impl<T> Div<T> for Number
+where
+	Self: DivAssign<T>,
+{
 	type Output = Self;
 
-	fn div(self, rhs: Self) -> Self::Output {
-		Self::from_rational(self.0 / rhs.0)
+	fn div(mut self, rhs: T) -> Self::Output {
+		self /= rhs;
+		self
 	}
 }
 
-impl MulAssign for Number {
-	fn mul_assign(&mut self, rhs: Self) {
-		self.0 = self.0.clone() * rhs.0;
+impl<T: Borrow<Self>> DivAssign<T> for Number {
+	fn div_assign(&mut self, rhs: T) {
+		self.0 /= &rhs.borrow().0;
 	}
 }
 
-impl Mul for Number {
+impl<T> DivRounding<T> for Number
+where
+	Self: DivRoundingAssign<T>,
+{
 	type Output = Self;
 
-	fn mul(self, rhs: Self) -> Self::Output {
-		Self::from_rational(self.0 * rhs.0)
+	fn div_ceil(mut self, rhs: T) -> Self::Output {
+		self.div_ceil_assign(rhs);
+		self
+	}
+
+	fn div_euc(mut self, rhs: T) -> Self::Output {
+		self.div_euc_assign(rhs);
+		self
+	}
+
+	fn div_floor(mut self, rhs: T) -> Self::Output {
+		self.div_floor_assign(rhs);
+		self
+	}
+
+	fn div_trunc(mut self, rhs: T) -> Self::Output {
+		self.div_trunc_assign(rhs);
+		self
 	}
 }
 
-impl NegAssign for Number {
-	fn neg_assign(&mut self) {
-		self.0 = -self.0.clone()
+impl<T: Borrow<Self>> DivRoundingAssign<T> for Number {
+	fn div_ceil_assign(&mut self, rhs: T) {
+		self.0 /= &rhs.borrow().0;
+		self.0.ceil_mut();
+	}
+
+	fn div_euc_assign(&mut self, rhs: T) {
+		if rhs.borrow().is_positive() {
+			self.div_floor_assign(rhs);
+		} else {
+			self.div_ceil_assign(rhs);
+		}
+	}
+
+	fn div_floor_assign(&mut self, rhs: T) {
+		self.0 /= &rhs.borrow().0;
+		self.0.floor_mut();
+	}
+
+	fn div_trunc_assign(&mut self, rhs: T) {
+		self.0 /= &rhs.borrow().0;
+		self.0.trunc_mut();
+	}
+}
+
+impl<T> Mul<T> for Number
+where
+	Self: MulAssign<T>,
+{
+	type Output = Self;
+
+	fn mul(mut self, rhs: T) -> Self::Output {
+		self *= rhs;
+		self
+	}
+}
+
+impl<T: Borrow<Self>> MulAssign<T> for Number {
+	fn mul_assign(&mut self, rhs: T) {
+		self.0 *= &rhs.borrow().0;
 	}
 }
 
 impl Neg for Number {
 	type Output = Self;
 
-	fn neg(self) -> Self::Output {
-		Self::from_rational(-self.0)
+	fn neg(mut self) -> Self::Output {
+		self.neg_assign();
+		self
 	}
 }
 
-impl PowAssign<Number> for Number {
-	fn pow_assign(&mut self, rhs: Self) {
-		todo!()
+impl NegAssign for Number {
+	fn neg_assign(&mut self) {
+		self.0.neg_assign();
 	}
 }
 
-impl Pow<Number> for Number {
+impl<T> Pow<T> for Number
+where
+	Self: PowAssign<T>,
+{
 	type Output = Self;
 
-	fn pow(self, rhs: Self) -> Self::Output {
-		todo!()
+	fn pow(mut self, rhs: T) -> Self::Output {
+		self.pow_assign(rhs);
+		self
 	}
 }
 
-impl Rem for Number {
+impl<T: Borrow<Self>> PowAssign<T> for Number {
+	fn pow_assign(&mut self, _: T) {
+		todo!("abacas: pow not implemented yet")
+	}
+}
+
+impl<T> Rem<T> for Number
+where
+	Self: RemAssign<T>,
+{
 	type Output = Self;
 
-	fn rem(self, rhs: Self) -> Self::Output {
-		Self::from_rational(self.0.clone() - rhs.0.clone() * (self.0 / rhs.0).trunc())
+	fn rem(mut self, rhs: T) -> Self::Output {
+		self %= rhs;
+		self
 	}
 }
 
-impl SubAssign for Number {
-	fn sub_assign(&mut self, rhs: Self) {
-		self.0 = self.0.clone() - rhs.0;
+impl<T> RemAssign<T> for Number
+where
+	Self: RemRoundingAssign<T>,
+{
+	fn rem_assign(&mut self, rhs: T) {
+		self.rem_trunc_assign(rhs);
 	}
 }
 
-impl Sub for Number {
+impl<T> RemRounding<T> for Number
+where
+	Self: RemRoundingAssign<T>,
+{
 	type Output = Self;
 
-	fn sub(self, rhs: Self) -> Self::Output {
-		Self::from_rational(self.0 - rhs.0)
+	fn rem_ceil(mut self, rhs: T) -> Self::Output {
+		self.rem_ceil_assign(rhs);
+		self
+	}
+
+	fn rem_euc(mut self, rhs: T) -> Self::Output {
+		self.rem_euc_assign(rhs);
+		self
+	}
+
+	fn rem_floor(mut self, rhs: T) -> Self::Output {
+		self.rem_floor_assign(rhs);
+		self
+	}
+
+	fn rem_trunc(mut self, rhs: T) -> Self::Output {
+		self.rem_trunc_assign(rhs);
+		self
 	}
 }
 
-impl Display for Number {
+impl<T: Borrow<Self>> RemRoundingAssign<T> for Number {
+	fn rem_ceil_assign(&mut self, rhs: T) {
+		self.0 -= self.clone().div_ceil(rhs.borrow()).0 * &rhs.borrow().0;
+	}
+
+	fn rem_euc_assign(&mut self, rhs: T) {
+		self.0 -= self.clone().div_euc(rhs.borrow()).0 * &rhs.borrow().0;
+	}
+
+	fn rem_floor_assign(&mut self, rhs: T) {
+		self.0 -= self.clone().div_floor(rhs.borrow()).0 * &rhs.borrow().0;
+	}
+
+	fn rem_trunc_assign(&mut self, rhs: T) {
+		self.0 -= self.clone().div_trunc(rhs.borrow()).0 * &rhs.borrow().0;
+	}
+}
+
+impl<T> Sub<T> for Number
+where
+	Self: SubAssign<T>,
+{
+	type Output = Self;
+
+	fn sub(mut self, rhs: T) -> Self::Output {
+		self -= rhs;
+		self
+	}
+}
+
+impl<T: Borrow<Self>> SubAssign<T> for Number {
+	fn sub_assign(&mut self, rhs: T) {
+		self.0 -= &rhs.borrow().0;
+	}
+}
+
+impl fmt::Display for Number {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		self.0.fmt(f)
 	}
 }
 
 impl str::FromStr for Number {
-	type Err = ParseRationalError;
+	type Err = ();
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		Rational::from_str(s).map(Self::from_rational)
+		s.parse().map(Self).map_err(|_| ())
 	}
+}
+
+macro_rules! impl_float {
+	($($float:ty,)*) => {
+		$(
+			impl TryFrom<$float> for Number {
+				type Error = ();
+
+				fn try_from(value: $float) -> Result<Self, Self::Error> {
+					value.try_into().map(Self).map_err(|_| ())
+				}
+			}
+
+			impl PrimFloat for $float {}
+		)*
+	};
+}
+
+macro_rules! impl_int {
+	($($int:ty,)*) => {
+		$(
+			impl From<$int> for Number {
+				fn from(value: $int) -> Self {
+					Self(value.into())
+				}
+			}
+
+			impl AddAssign<$int> for Number {
+				fn add_assign(&mut self, rhs: $int) {
+					self.0 += rhs;
+				}
+			}
+
+			impl DivAssign<$int> for Number {
+				fn div_assign(&mut self, rhs: $int) {
+					self.0 /= rhs;
+				}
+			}
+
+			impl DivRoundingAssign<$int> for Number {
+				fn div_ceil_assign(&mut self, rhs: $int) {
+					self.0 /= rhs;
+					self.0.ceil_mut();
+				}
+
+				fn div_euc_assign(&mut self, rhs: $int) {
+					if rhs > 0 {
+						self.div_floor_assign(rhs);
+					} else {
+						self.div_ceil_assign(rhs);
+					}
+				}
+
+				fn div_floor_assign(&mut self, rhs: $int) {
+					self.0 /= rhs;
+					self.0.floor_mut();
+				}
+
+				fn div_trunc_assign(&mut self, rhs: $int) {
+					self.0 /= rhs;
+					self.0.trunc_mut();
+				}
+			}
+
+			impl MulAssign<$int> for Number {
+				fn mul_assign(&mut self, rhs: $int) {
+					self.0 *= rhs;
+				}
+			}
+
+			impl PowAssign<$int> for Number {
+				fn pow_assign(&mut self, _: $int) {
+					todo!("abacas: pow not implemented yet")
+				}
+			}
+
+			impl RemRoundingAssign<$int> for Number {
+				fn rem_ceil_assign(&mut self, rhs: $int) {
+					self.0 -= self.clone().div_ceil(rhs).0 * rhs;
+				}
+
+				fn rem_euc_assign(&mut self, rhs: $int) {
+					self.0 -= self.clone().div_euc(rhs).0 * rhs;
+				}
+
+				fn rem_floor_assign(&mut self, rhs: $int) {
+					self.0 -= self.clone().div_floor(rhs).0 * rhs;
+				}
+
+				fn rem_trunc_assign(&mut self, rhs: $int) {
+					self.0 -= self.clone().div_trunc(rhs).0 * rhs;
+				}
+			}
+
+			impl SubAssign<$int> for Number {
+				fn sub_assign(&mut self, rhs: $int) {
+					self.0 -= rhs;
+				}
+			}
+
+			impl PrimInt for $int {}
+		)*
+	};
+}
+
+impl_float! {
+	f32, f64,
+}
+
+impl_int! {
+	i8, i16, i32, i64, i128, isize,
+	u8, u16, u32, u64, u128, usize,
 }
