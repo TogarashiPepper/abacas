@@ -172,7 +172,7 @@ impl Expr {
 				Neg(exp) => (Number::neg_one(), *exp),
 				Mul(exprs) => {
 					let (x, y) = get_number(exprs);
-					(x.unwrap_or(Number::one()), Mul(y))
+					(x.unwrap_or_else(Number::one), Mul(y))
 				}
 				Number(_) => unreachable!(),
 			};

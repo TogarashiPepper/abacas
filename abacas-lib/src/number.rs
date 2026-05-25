@@ -70,7 +70,7 @@ impl Number {
 // Guards
 impl Number {
 	/// Whether this number is an integer.
-	pub fn is_integer(&self) -> bool {
+	pub const fn is_integer(&self) -> bool {
 		self.0.is_integer()
 	}
 
@@ -80,7 +80,7 @@ impl Number {
 	}
 
 	/// Whether this number is less than zero.
-	pub fn is_negative(&self) -> bool {
+	pub const fn is_negative(&self) -> bool {
 		self.0.is_negative()
 	}
 
@@ -90,12 +90,12 @@ impl Number {
 	}
 
 	/// Whether this number is greater than zero.
-	pub fn is_positive(&self) -> bool {
+	pub const fn is_positive(&self) -> bool {
 		self.0.is_positive()
 	}
 
 	/// Whether this is the number zero (`0`).
-	pub fn is_zero(&self) -> bool {
+	pub const fn is_zero(&self) -> bool {
 		self.0.is_zero()
 	}
 }
@@ -103,7 +103,7 @@ impl Number {
 // Operations
 impl Number {
 	/// Gets the denominator of this number.
-	pub fn denom(self) -> Number {
+	pub fn denom(self) -> Self {
 		self.ratio().1
 	}
 
@@ -122,12 +122,12 @@ impl Number {
 	}
 
 	/// Gets the numerator of this number.
-	pub fn numer(self) -> Number {
+	pub fn numer(self) -> Self {
 		self.ratio().0
 	}
 
 	/// Gets the numerator and denominator of this number as a tuple.
-	pub fn ratio(self) -> (Number, Number) {
+	pub fn ratio(self) -> (Self, Self) {
 		let (numer, denom) = self.0.into_numer_denom();
 		(Self(numer.into()), Self(denom.into()))
 	}
