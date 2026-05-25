@@ -1,6 +1,7 @@
 //! The number structure and its related operations.
 
 use std::borrow::Borrow;
+use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
 use std::{fmt, str};
 
@@ -447,6 +448,19 @@ macro_rules! impl_int {
 					self.0 *= rhs;
 				}
 			}
+
+			impl PartialEq<$int> for Number {
+				fn eq(&self, other: &$int) -> bool {
+					self.0 == *other
+				}
+			}
+
+			impl PartialOrd<$int> for Number {
+				fn partial_cmp(&self, other: &$int) -> Option<Ordering> {
+					self.0.partial_cmp(other)
+				}
+			}
+
 
 			impl PowAssign<$int> for Number {
 				fn pow_assign(&mut self, _: $int) {

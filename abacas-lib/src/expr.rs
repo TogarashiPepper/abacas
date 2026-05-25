@@ -70,7 +70,7 @@ impl Expr {
 
 	fn is_one(&self) -> bool {
 		match self {
-			Number(n) => n == &Number::one(),
+			Number(n) => n.is_one(),
 			_ => false,
 		}
 	}
@@ -84,14 +84,16 @@ impl Expr {
 
 	fn is_neg_one(&self) -> bool {
 		match self {
-			Number(n) => n == &-Number::one(),
+			Number(n) => n.is_neg_one(),
 			_ => false,
 		}
 	}
 
 	fn inv(self) -> Self {
 		match self {
-			a @ (Add(_) | Neg(_) | Var(_) | Fun(..) | Poly(..)) => Pow(Box::new(a), Box::new(Number(-Number::one()))),
+			a @ (Add(_) | Neg(_) | Var(_) | Fun(..) | Poly(..)) => {
+				Pow(Box::new(a), Box::new(Number(Number::neg_one())))
+			}
 			Mul(exprs) => Mul(exprs.into_iter().map(Self::inv).collect()),
 			Pow(base, expr) if expr.is_neg_one() => *base,
 			Pow(base, exp) => Pow(base, Box::new(-*exp)),
@@ -167,7 +169,7 @@ impl Expr {
 		for exp in exprs {
 			let (coeff, mut core) = match exp {
 				c @ (Add(_) | Var(_) | Fun(..) | Poly(..) | Pow(..)) => (Number::one(), c),
-				Neg(exp) => (-Number::one(), *exp),
+				Neg(exp) => (Number::neg_one(), *exp),
 				Mul(exprs) => {
 					let (x, y) = get_number(exprs);
 					(x.unwrap_or(Number::one()), Mul(y))
@@ -188,9 +190,9 @@ impl Expr {
 			.flat_map(|(exp, coeff)| {
 				if coeff.is_zero() {
 					None
-				} else if coeff == Number::one() {
+				} else if coeff.is_one() {
 					Some(exp)
-				} else if coeff == -Number::one() {
+				} else if coeff.is_neg_one() {
 					Some(Neg(Box::new(exp)))
 				} else {
 					Some(Mul(vec![Number(coeff), exp]))

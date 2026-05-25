@@ -114,18 +114,18 @@ impl Polynomial {
 
 		while degree >= normalizer.degree {
 			let monomial = self.get_or_insert(&degree);
-			let coeff = monomial.coeff.clone() / normalizer.coeff.clone();
+			let coeff = monomial.coeff.clone() / &normalizer.coeff;
 
 			monomial.coeff = coeff.clone();
 
 			for term in terms {
-				let degree = degree.clone() + term.degree.clone() - normalizer.degree.clone();
+				let degree = degree.clone() + &term.degree - &normalizer.degree;
 				let monomial = self.get_or_insert(&degree);
 
-				monomial.coeff -= coeff.clone() * term.coeff.clone();
+				monomial.coeff -= coeff.clone() * &term.coeff;
 			}
 
-			degree -= Number::one();
+			degree -= 1;
 		}
 
 		self.clean();
@@ -138,7 +138,7 @@ impl Polynomial {
 		let remainder = Self::new(self.0.split_off(index));
 
 		for monomial in self.0.iter_mut() {
-			monomial.degree -= normalizer.degree.clone();
+			monomial.degree -= &normalizer.degree;
 		}
 
 		Some(remainder)
@@ -182,7 +182,7 @@ impl Polynomial {
 			.map(|mono| &mono.coeff)
 			.fold(Number::zero(), Number::gcd);
 
-		if factor <= Number::one() {
+		if factor <= 1 {
 			return None;
 		}
 
