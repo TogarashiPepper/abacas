@@ -121,6 +121,20 @@ impl Number {
 		});
 	}
 
+	/// Calculates the least common multiple.
+	pub fn lcm(mut self, rhs: &Self) -> Self {
+		self.lcm_mut(rhs);
+		self
+	}
+
+	/// Calculates the least common multiple in-place.
+	pub fn lcm_mut(&mut self, rhs: &Self) {
+		self.0.mutate_numer_denom(|numer, denom| {
+			numer.lcm_mut(rhs.0.numer());
+			denom.gcd_mut(rhs.0.denom());
+		});
+	}
+
 	/// Gets the numerator of this number.
 	pub fn numer(self) -> Self {
 		self.ratio().0
