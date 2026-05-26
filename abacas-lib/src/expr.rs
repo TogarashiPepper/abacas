@@ -1,7 +1,7 @@
 //! Module containing [`Expr`] and related structs, like [`Symbol`]
 use std::cmp::Ordering;
 use std::fmt::Display;
-use std::ops;
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use itertools::Itertools;
 
@@ -387,7 +387,7 @@ fn find_num(v: &mut [Expr]) -> Option<&mut Number> {
 
 use Expr::*;
 
-impl ops::Add for Expr {
+impl Add for Expr {
 	type Output = Self;
 
 	fn add(self, rhs: Self) -> Self::Output {
@@ -423,29 +423,16 @@ impl ops::Add for Expr {
 	}
 }
 
-impl ops::Neg for Expr {
+impl Div for Expr {
 	type Output = Self;
 
-	fn neg(self) -> Self::Output {
-		match self {
-			e @ (Mul(_) | Var(_) | Fun(..) | Pow(..)) => Neg(Box::new(e)),
-			Add(exprs) => Add(exprs.into_iter().map(|e| -e).collect()),
-			Poly(sym, inner) => Poly(sym, -inner),
-			Neg(expr) => *expr,
-			Number(rational) => Number(-rational),
-		}
+	#[allow(clippy::suspicious_arithmetic_impl)]
+	fn div(self, rhs: Self) -> Self::Output {
+		self * rhs.inv()
 	}
 }
 
-impl ops::Sub for Expr {
-	type Output = Self;
-
-	fn sub(self, rhs: Self) -> Self::Output {
-		self + -rhs
-	}
-}
-
-impl ops::Mul for Expr {
+impl Mul for Expr {
 	type Output = Self;
 
 	fn mul(self, rhs: Self) -> Self::Output {
@@ -470,12 +457,25 @@ impl ops::Mul for Expr {
 	}
 }
 
-impl ops::Div for Expr {
+impl Neg for Expr {
 	type Output = Self;
 
-	#[allow(clippy::suspicious_arithmetic_impl)]
-	fn div(self, rhs: Self) -> Self::Output {
-		self * rhs.inv()
+	fn neg(self) -> Self::Output {
+		match self {
+			e @ (Mul(_) | Var(_) | Fun(..) | Pow(..)) => Neg(Box::new(e)),
+			Add(exprs) => Add(exprs.into_iter().map(|e| -e).collect()),
+			Poly(sym, inner) => Poly(sym, -inner),
+			Neg(expr) => *expr,
+			Number(rational) => Number(-rational),
+		}
+	}
+}
+
+impl Sub for Expr {
+	type Output = Self;
+
+	fn sub(self, rhs: Self) -> Self::Output {
+		self + -rhs
 	}
 }
 

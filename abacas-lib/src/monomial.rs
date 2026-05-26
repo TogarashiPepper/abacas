@@ -3,7 +3,7 @@
 use std::ops::{Add, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 use std::{fmt, str};
 
-use rug::ops::{NegAssign, Pow, PowAssign};
+use rug::ops::{NegAssign, Pow};
 
 use crate::error::ParseError;
 use crate::number::Number;
@@ -169,24 +169,15 @@ impl NegAssign for Monomial {
 	}
 }
 
-impl<T> Pow<T> for Monomial
-where
-	Self: PowAssign<T>,
-{
+impl<T: Into<i32>> Pow<T> for Monomial {
 	type Output = Self;
 
 	fn pow(mut self, rhs: T) -> Self::Output {
-		self.pow_assign(rhs);
-		self
-	}
-}
-
-impl<T: Into<i32>> PowAssign<T> for Monomial {
-	fn pow_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
-		self.coeff.pow_assign(rhs);
+		self.coeff = self.coeff.pow(rhs);
 		self.degree *= rhs;
+		self
 	}
 }
 
@@ -213,14 +204,12 @@ impl fmt::Display for Monomial {
 			} else {
 				write!(f, "{}x", self.coeff)
 			}
+		} else if self.coeff.is_neg_one() {
+			write!(f, "-x^{}", self.degree)
+		} else if self.coeff.is_one() {
+			write!(f, "x^{}", self.degree)
 		} else {
-			if self.coeff.is_neg_one() {
-				write!(f, "-x^{}", self.degree)
-			} else if self.coeff.is_one() {
-				write!(f, "x^{}", self.degree)
-			} else {
-				write!(f, "{}x^{}", self.coeff, self.degree)
-			}
+			write!(f, "{}x^{}", self.coeff, self.degree)
 		}
 	}
 }

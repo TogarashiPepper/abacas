@@ -5,7 +5,7 @@ use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
 use std::{fmt, str};
 
-use rug::ops::{DivRounding, DivRoundingAssign, NegAssign, Pow, PowAssign, RemRounding, RemRoundingAssign};
+use rug::ops::{DivRounding, DivRoundingAssign, NegAssign, Pow, RemRounding, RemRoundingAssign};
 use rug::{Integer, Rational};
 
 /// Sealed trait for primitive floats.
@@ -102,6 +102,11 @@ impl Number {
 
 // Operations
 impl Number {
+	/// Gets the absolute value of this number.
+	pub fn abs(self) -> Self {
+		Self(self.0.abs())
+	}
+
 	/// Gets the denominator of this number.
 	pub fn denom(self) -> Self {
 		self.ratio().1
@@ -281,19 +286,15 @@ impl NegAssign for Number {
 
 impl<T> Pow<T> for Number
 where
-	Self: PowAssign<T>,
+	T: Borrow<Self>,
 {
 	type Output = Self;
 
-	fn pow(mut self, rhs: T) -> Self::Output {
-		self.pow_assign(rhs);
-		self
-	}
-}
-
-impl<T: Borrow<Self>> PowAssign<T> for Number {
-	fn pow_assign(&mut self, _: T) {
-		todo!("abacas: pow not implemented yet")
+	fn pow(self, rhs: T) -> Self::Output {
+		if !rhs.borrow().is_integer() || rhs.borrow().0.numer().clone().abs() > i32::MAX {
+			panic!("exponent with power greater than 2^31-1 is not supported")
+		}
+		Self(Pow::<i32>::pow(self.0, rhs.borrow().0.numer().try_into().unwrap()))
 	}
 }
 
@@ -476,9 +477,20 @@ macro_rules! impl_int {
 			}
 
 
-			impl PowAssign<$int> for Number {
-				fn pow_assign(&mut self, _: $int) {
-					todo!("abacas: pow not implemented yet")
+			impl Pow<$int> for Number {
+
+				type Output = Self;
+
+				fn pow(self, rhs: $int) -> Self::Output {
+
+					if rhs > i32::MAX as $int {
+						panic!("exponent with power greater than 2^31-1 is not supported")
+					}
+
+					Self(Pow::<i32>::pow(
+						self.0,
+						rhs as i32,
+					))
 				}
 			}
 
