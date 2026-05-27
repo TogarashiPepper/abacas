@@ -22,7 +22,7 @@ fn p(input: &str) -> Polynomial {
 #[test]
 fn construction() {
 	let poly = Polynomial::new([A(), D(), F(), D(), A()]);
-	assert_eq!(poly.to_string(), "5/2x^4 + 5x + 2");
+	assert_eq!(poly.to_string(), "2.5x^4 + 5x + 2");
 
 	let zero = Polynomial::new([]);
 	assert_eq!(zero.to_string(), "0");
@@ -39,8 +39,8 @@ fn gcd() {
 	let a = p("2x - 1") * p("x + 6") * p("41x + 2");
 	let b = p("2x - 1") * p("x - 20") * p("99999x^2 + 7");
 
-	assert_eq!(a.clone().gcd(b.clone()), p("x - 1/2"));
-	assert_eq!(b.gcd(a), p("x - 1/2"));
+	assert_eq!(a.clone().gcd(b.clone()), p("x - 0.5"));
+	assert_eq!(b.gcd(a), p("x - 0.5"));
 }
 
 #[test]
@@ -62,22 +62,22 @@ fn impls() {
 	assert_eq!(mono.to_string(), "125x^12");
 
 	let poly = p("2x^2 + 5x + 3") * 4 - Number::new_ratio(11, 2);
-	assert_eq!(poly.to_string(), "8x^2 + 20x + 13/2");
+	assert_eq!(poly.to_string(), "8x^2 + 20x + 6.5");
 }
 
 #[test]
 fn operators() {
 	let addition = A() + B();
-	assert_eq!(addition.to_string(), "7/2");
+	assert_eq!(addition.to_string(), "3.5");
 
 	let subtraction = A() - C() + D() + (-F());
-	assert_eq!(subtraction.to_string(), "-5/2x^4 + 3/2x + 1");
+	assert_eq!(subtraction.to_string(), "-2.5x^4 + 1.5x + 1");
 
 	let multiplication = B() * D() + E() * F();
-	assert_eq!(multiplication.to_string(), "5/2x^8 + 25/4x");
+	assert_eq!(multiplication.to_string(), "2.5x^8 + 6.25x");
 
 	let division = (F() + E() + D() + C()) / F();
-	assert_eq!(division.to_string(), "7/5 + 7/5x^-3");
+	assert_eq!(division.to_string(), "1.4 + 1.4x^-3");
 
 	let zero = B() * D() - D() * B();
 	assert_eq!(zero.to_string(), "0");
@@ -87,10 +87,10 @@ fn operators() {
 fn parse() {
 	let expected = A() - D() - E() - E();
 
-	let mono = m("1") + m("-5/2x") + m("-2x^4");
+	let mono = m("1") + m("-2.5x") + m("-2x^4");
 	assert_eq!(mono, expected);
 
-	let poly = p("-2x^4 - 5/2x + 1");
+	let poly = p("-2x^4 - 2.5x + 1");
 	assert_eq!(poly, expected);
 
 	let same = p(expected.to_string().as_str());

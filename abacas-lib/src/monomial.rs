@@ -236,18 +236,14 @@ impl str::FromStr for Monomial {
 		};
 
 		let coeff = match init {
-			"" | "+" if degree != 0 => 1.0,
-			"-" if degree != 0 => -1.0,
+			"" | "+" if degree != 0 => Number::one(),
+			"-" if degree != 0 => Number::neg_one(),
 			_ => init.parse()?,
 		};
 
-		if coeff == 0.0 {
+		if coeff.is_zero() {
 			return Err(ParseError::InvalidValue(coeff));
 		}
-
-		let Some(coeff) = Number::new_float(coeff) else {
-			return Err(ParseError::InvalidValue(coeff));
-		};
 
 		Ok(Self::new(coeff, degree))
 	}

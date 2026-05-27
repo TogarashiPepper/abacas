@@ -6,6 +6,7 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssi
 use std::{fmt, str};
 
 use rug::ops::{DivRounding, DivRoundingAssign, NegAssign, Pow, PowAssign, RemRounding, RemRoundingAssign};
+use rug::rational::ParseRationalError;
 use rug::{Integer, Rational};
 
 /// Sealed trait for primitive floats.
@@ -392,15 +393,23 @@ impl<T: Borrow<Self>> SubAssign<T> for Number {
 
 impl fmt::Display for Number {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		self.0.fmt(f)
+		self.0.to_f64().fmt(f)
 	}
 }
 
 impl str::FromStr for Number {
-	type Err = ();
+	type Err = ParseRationalError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		s.parse().map(Self).map_err(|_| ())
+		let (dec, int) = s.split_once(".").unwrap_or((s, ""));
+
+		let formatted = if !int.is_empty() {
+			format!("{} / 1{}", dec.to_owned() + int, "0".repeat(int.len()))
+		} else {
+			dec.to_owned()
+		};
+
+		formatted.parse().map(Self)
 	}
 }
 

@@ -592,7 +592,7 @@ impl str::FromStr for Polynomial {
 			for (index, part) in full.split(" - ").enumerate() {
 				let monomial: Monomial = match part.parse() {
 					Ok(monomial) => monomial,
-					Err(ParseError::InvalidValue(0.0)) => continue,
+					Err(ParseError::InvalidValue(t)) if t == Number::zero() => continue,
 					Err(error) => return Err(error),
 				};
 
