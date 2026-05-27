@@ -1,4 +1,5 @@
 use abacas::monomial::Monomial;
+use abacas::number::Number;
 use abacas::polynomial::Polynomial;
 
 /// Helper to construct a random polynomial with the given degree.
@@ -9,7 +10,7 @@ fn random_poly(degree: usize) -> Polynomial {
 		let numer = fastrand::u16(1..);
 		let denom = fastrand::u16(1..);
 
-		poly.push(Monomial::new((numer, denom), degree));
+		poly.push(Monomial::new(Number::new_ratio(numer, denom), degree));
 	}
 
 	Polynomial::new(poly)

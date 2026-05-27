@@ -1,6 +1,7 @@
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use abacas::monomial::Monomial;
+use abacas::number::Number;
 use abacas::polynomial::Polynomial;
 use divan::Bencher;
 use fastrand::Rng;
@@ -21,7 +22,7 @@ fn random_poly(degree: usize) -> Polynomial {
 		let numer = rng.u16(1..);
 		let denom = rng.u16(1..);
 
-		poly.push(Monomial::new((numer, denom), degree));
+		poly.push(Monomial::new(Number::new_ratio(numer, denom), degree));
 	}
 
 	Polynomial::new(poly)

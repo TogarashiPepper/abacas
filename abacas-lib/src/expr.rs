@@ -1,11 +1,11 @@
 //! Module containing [`Expr`] and related structs, like [`Symbol`]
 use std::cmp::Ordering;
 use std::fmt::Display;
-use std::ops;
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use itertools::Itertools;
-use rug::{Complete, Rational};
 
+use crate::number::Number;
 use crate::polynomial::Polynomial;
 
 /// Struct representing a Symbol, i.e. `x`, `π`, or even something like `T_area`.
@@ -42,7 +42,7 @@ pub enum Expr {
 	/// Represents the additive inverse of an [`Expr`]
 	Neg(Box<Expr>),
 	/// A constant number
-	Number(Rational),
+	Number(Number),
 	/// A variable
 	Var(Symbol),
 	/// A function call
@@ -61,16 +61,16 @@ impl Expr {
 	}
 
 	fn zero() -> Expr {
-		Expr::Number(Rational::ZERO.clone())
+		Expr::Number(Number::zero())
 	}
 
 	fn one() -> Expr {
-		Expr::Number(Rational::ONE.clone())
+		Expr::Number(Number::one())
 	}
 
 	fn is_one(&self) -> bool {
 		match self {
-			Number(n) => n == Rational::ONE,
+			Number(n) => n.is_one(),
 			_ => false,
 		}
 	}
@@ -84,7 +84,7 @@ impl Expr {
 
 	fn is_neg_one(&self) -> bool {
 		match self {
-			Number(n) => n == &-Rational::ONE.clone(),
+			Number(n) => n.is_neg_one(),
 			_ => false,
 		}
 	}
@@ -92,7 +92,7 @@ impl Expr {
 	fn inv(self) -> Self {
 		match self {
 			a @ (Add(_) | Neg(_) | Var(_) | Fun(..) | Poly(..)) => {
-				Pow(Box::new(a), Box::new(Number(-Rational::ONE.clone())))
+				Pow(Box::new(a), Box::new(Number(Number::neg_one())))
 			}
 			Mul(exprs) => Mul(exprs.into_iter().map(Self::inv).collect()),
 			Pow(base, expr) if expr.is_neg_one() => *base,
@@ -139,7 +139,7 @@ impl Expr {
 				exp = exp.simplify();
 
 				if exp.is_zero() {
-					Number(Rational::ONE.clone())
+					Number(Number::one())
 				} else if exp.is_one() {
 					*base
 				} else {
@@ -164,15 +164,15 @@ impl Expr {
 			})
 			.collect();
 
-		let mut multiset: Vec<(Expr, Rational)> = vec![];
+		let mut multiset: Vec<(Expr, Number)> = vec![];
 
 		for exp in exprs {
 			let (coeff, mut core) = match exp {
-				c @ (Add(_) | Var(_) | Fun(..) | Poly(..) | Pow(..)) => (Rational::ONE.clone(), c),
-				Neg(exp) => (-Rational::ONE.clone(), *exp),
+				c @ (Add(_) | Var(_) | Fun(..) | Poly(..) | Pow(..)) => (Number::one(), c),
+				Neg(exp) => (Number::neg_one(), *exp),
 				Mul(exprs) => {
 					let (x, y) = get_number(exprs);
-					(x.unwrap_or_else(|| Rational::ONE.clone()), Mul(y))
+					(x.unwrap_or_else(Number::one), Mul(y))
 				}
 				Number(_) => unreachable!(),
 			};
@@ -190,9 +190,9 @@ impl Expr {
 			.flat_map(|(exp, coeff)| {
 				if coeff.is_zero() {
 					None
-				} else if &coeff == Rational::ONE {
+				} else if coeff.is_one() {
 					Some(exp)
-				} else if coeff == (-Rational::ONE).complete() {
+				} else if coeff.is_neg_one() {
 					Some(Neg(Box::new(exp)))
 				} else {
 					Some(Mul(vec![Number(coeff), exp]))
@@ -232,7 +232,7 @@ impl Expr {
 		for exp in exprs {
 			let (mut base, mut exponent) = match exp {
 				Pow(base, exp) => (*base, *exp),
-				other => (other, Number(Rational::ONE.clone())),
+				other => (other, Number(Number::one())),
 			};
 
 			base = base.simplify();
@@ -363,7 +363,7 @@ fn push(mut l: Vec<Expr>, r: Expr) -> Vec<Expr> {
 	l
 }
 
-fn get_number(mut v: Vec<Expr>) -> (Option<Rational>, Vec<Expr>) {
+fn get_number(mut v: Vec<Expr>) -> (Option<Number>, Vec<Expr>) {
 	let idx = v.iter().position(|e| matches!(e, Number(..)));
 	match idx {
 		Some(idx) => {
@@ -378,7 +378,7 @@ fn get_number(mut v: Vec<Expr>) -> (Option<Rational>, Vec<Expr>) {
 	}
 }
 
-fn find_num(v: &mut [Expr]) -> Option<&mut Rational> {
+fn find_num(v: &mut [Expr]) -> Option<&mut Number> {
 	v.iter().position(|e| e.is_number()).map(|p| match &mut v[p] {
 		Expr::Number(n) => n,
 		_ => unreachable!(),
@@ -387,7 +387,7 @@ fn find_num(v: &mut [Expr]) -> Option<&mut Rational> {
 
 use Expr::*;
 
-impl ops::Add for Expr {
+impl Add for Expr {
 	type Output = Self;
 
 	fn add(self, rhs: Self) -> Self::Output {
@@ -423,29 +423,16 @@ impl ops::Add for Expr {
 	}
 }
 
-impl ops::Neg for Expr {
+impl Div for Expr {
 	type Output = Self;
 
-	fn neg(self) -> Self::Output {
-		match self {
-			e @ (Mul(_) | Var(_) | Fun(..) | Pow(..)) => Neg(Box::new(e)),
-			Add(exprs) => Add(exprs.into_iter().map(|e| -e).collect()),
-			Poly(sym, inner) => Poly(sym, -inner),
-			Neg(expr) => *expr,
-			Number(rational) => Number(-rational),
-		}
+	#[allow(clippy::suspicious_arithmetic_impl)]
+	fn div(self, rhs: Self) -> Self::Output {
+		self * rhs.inv()
 	}
 }
 
-impl ops::Sub for Expr {
-	type Output = Self;
-
-	fn sub(self, rhs: Self) -> Self::Output {
-		self + -rhs
-	}
-}
-
-impl ops::Mul for Expr {
+impl Mul for Expr {
 	type Output = Self;
 
 	fn mul(self, rhs: Self) -> Self::Output {
@@ -470,12 +457,25 @@ impl ops::Mul for Expr {
 	}
 }
 
-impl ops::Div for Expr {
+impl Neg for Expr {
 	type Output = Self;
 
-	#[allow(clippy::suspicious_arithmetic_impl)]
-	fn div(self, rhs: Self) -> Self::Output {
-		self * rhs.inv()
+	fn neg(self) -> Self::Output {
+		match self {
+			e @ (Mul(_) | Var(_) | Fun(..) | Pow(..)) => Neg(Box::new(e)),
+			Add(exprs) => Add(exprs.into_iter().map(|e| -e).collect()),
+			Poly(sym, inner) => Poly(sym, -inner),
+			Neg(expr) => *expr,
+			Number(rational) => Number(-rational),
+		}
+	}
+}
+
+impl Sub for Expr {
+	type Output = Self;
+
+	fn sub(self, rhs: Self) -> Self::Output {
+		self + -rhs
 	}
 }
 
