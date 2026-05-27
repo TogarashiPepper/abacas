@@ -6,8 +6,9 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssi
 use std::{fmt, str};
 
 use rug::ops::{DivRounding, DivRoundingAssign, NegAssign, Pow, PowAssign, RemRounding, RemRoundingAssign};
-use rug::rational::ParseRationalError;
 use rug::{Integer, Rational};
+
+use crate::error::{NumberErrorKind, ParseNumberError};
 
 /// Sealed trait for primitive floats.
 trait PrimFloat: TryInto<Number> {}
@@ -398,7 +399,7 @@ impl fmt::Display for Number {
 }
 
 impl str::FromStr for Number {
-	type Err = ParseRationalError;
+	type Err = ParseNumberError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		let (dec, int) = s.split_once(".").unwrap_or((s, ""));
@@ -409,7 +410,9 @@ impl str::FromStr for Number {
 			dec.to_owned()
 		};
 
-		formatted.parse().map(Self)
+		formatted.parse().map(Self).map_err(|_| ParseNumberError {
+			kind: NumberErrorKind::Invalid,
+		})
 	}
 }
 
