@@ -22,7 +22,58 @@ impl Parser {
 		let mut lhs = match tokens.next() {
 			Some(Sub) => -Self::expr_bp(prefix_bp(Sub), tokens),
 			Some(Number(num)) => Expr::Num(num),
-			Some(Ident(name)) => Expr::Poly(Symbol::new(name).unwrap(), Monomial::linear(1).into()),
+			Some(Ident(name)) => {
+				if tokens.peek().is_some_and(|x| *x == LParen) {
+					let mut depth = 0;
+					let mut params = vec![];
+					let mut expression = vec![];
+
+					loop {
+						let token = tokens.next();
+
+						if token.is_none() {
+							break;
+						}
+
+						let token = token.unwrap();
+
+						if token == RParen {
+							if depth == 0 {
+								break;
+							}
+							depth -= 1;
+						}
+
+						if token == LParen {
+							depth += 1;
+						}
+
+						if token == Comma && depth == 0 {
+							let mut it = expression.into_iter().peekable();
+							let data = Self::expr_bp(0, &mut it);
+
+							params.push(data);
+							expression.clear();
+
+							continue;
+						}
+
+						expression.push(token);
+					}
+
+					if !expression.is_empty() {
+						let mut it = expression.into_iter().peekable();
+						let data = Self::expr_bp(0, &mut it);
+
+						params.push(data);
+						expression.clear();
+					}
+
+					Expr::Fun(Symbol::new(name), params)
+				} else {
+					Expr::Var(Symbol::new(name))
+				}
+			}
 			Some(LParen) => {
 				let lhs = Self::expr_bp(0, tokens);
 				assert_eq!(tokens.next(), Some(RParen));
@@ -66,6 +117,7 @@ impl Parser {
 
 					lhs = lhs * rhs;
 				}
+				Some(Comma) => unreachable!(),
 				None | Some(RParen) => break,
 			}
 		}

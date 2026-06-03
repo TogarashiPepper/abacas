@@ -33,6 +33,8 @@ pub enum Token {
 	LParen,
 	#[token(")")]
 	RParen,
+	#[token(",")]
+	Comma,
 }
 
 impl Display for Token {
@@ -49,6 +51,7 @@ impl Display for Token {
 			Token::Rem => write!(f, "%"),
 			Token::LParen => write!(f, "("),
 			Token::RParen => write!(f, ")"),
+			Token::Comma => write!(f, ","),
 		}
 	}
 }

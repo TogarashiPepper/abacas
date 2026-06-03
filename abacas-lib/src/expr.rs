@@ -16,7 +16,12 @@ use crate::polynomial::Polynomial;
 pub struct Symbol(String);
 
 impl Symbol {
-	/// Gets the name of this symbol.
+	/// Initialize a symbol with the given name
+	pub fn new(name: impl Into<String>) -> Self {
+		Self(name.into())
+	}
+
+	/// Gets the name of the symbol
 	pub fn name(&self) -> &str {
 		&self.0
 	}
