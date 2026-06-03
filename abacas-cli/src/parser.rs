@@ -49,7 +49,7 @@ impl Parser {
 						}
 
 						if token == Comma && depth == 0 {
-							let mut it = expression.into_iter().peekable();
+							let mut it = expression.clone().into_iter().peekable();
 							let data = Self::expr_bp(0, &mut it);
 
 							params.push(data);
@@ -62,7 +62,7 @@ impl Parser {
 					}
 
 					if !expression.is_empty() {
-						let mut it = expression.into_iter().peekable();
+						let mut it = expression.clone().into_iter().peekable();
 						let data = Self::expr_bp(0, &mut it);
 
 						params.push(data);
