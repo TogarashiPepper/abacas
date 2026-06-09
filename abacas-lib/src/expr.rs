@@ -8,6 +8,7 @@ use itertools::Itertools;
 use rug::ops::Pow;
 
 use crate::error::SimplifyError;
+use crate::context::Context;
 use crate::number::Number;
 use crate::polynomial::Polynomial;
 
@@ -323,7 +324,6 @@ impl Expr {
 				lhs_base.cmp(rhs_base).then_with(|| lhs_exp.cmp(rhs_exp))
 			}
 
-<<<<<<< HEAD
 			// Otherwise, compare the discriminants
 			(Self::Add(_), _) => Ordering::Less,
 			(_, Self::Add(_)) => Ordering::Greater,
@@ -335,44 +335,6 @@ impl Expr {
 			(_, Self::Num(_)) => Ordering::Greater,
 			(Self::Poly(_, _), _) => Ordering::Less,
 			(_, Self::Poly(_, _)) => Ordering::Greater,
-=======
-			(Number(p), Number(q)) => p.cmp(q),
-			(Number(..), _) => Ordering::Greater,
-			(_, Number(..)) => Ordering::Less,
-
-			(Var(p), Var(q)) => p.cmp(q),
-			(Var(..), _) => Ordering::Greater,
-			(_, Var(..)) => Ordering::Less,
-
-			(Fun(r, p), Fun(s, q)) => {
-				let mut p = p.clone();
-				let mut q = q.clone();
-
-				p.sort_by(Expr::cmp);
-				q.sort_by(Expr::cmp);
-
-				let result = p.into_iter().zip(q).find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal);
-
-				let ord = match result {
-					Some((a, b)) => Expr::cmp(&a, &b),
-					None => Ordering::Equal,
-				};
-
-				if ord == Ordering::Equal { r.cmp(s) } else { ord }
-			}
-			(Fun(..), _) => Ordering::Greater,
-			(_, Fun(..)) => Ordering::Less,
-
-			(Poly(r, p), Poly(s, q)) => {
-				let mut ord = r.cmp(s);
-
-				if ord == Ordering::Equal {
-					ord = p.degree().cmp(&q.degree());
-				}
-
-				ord
-			}
->>>>>>> 14c4bbe (fix: errors)
 		}
 	}
 
@@ -494,7 +456,6 @@ impl Sub<Self> for Expr {
 	}
 }
 
-<<<<<<< HEAD
 impl fmt::Display for Expr {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
@@ -505,48 +466,5 @@ impl fmt::Display for Expr {
 			Self::Poly(sym, poly) => poly.write(f, false, sym.name()),
 			Self::Pow(base, exp) => write!(f, "{}^{}", base.with_parens(), exp.with_parens()),
 		}
-=======
-fn needs_parens(exp: &Expr) -> bool {
-	matches!(exp, Add(_) | Mul(_) | Poly(..) | Pow(..))
-}
-
-impl Display for Expr {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let st = match self {
-			Add(exprs) => exprs.iter().map(|e| format!("{e}")).join(" + "),
-			Mul(exprs) => exprs
-				.iter()
-				.map(|e| {
-					if matches!(e, Add(..) | Poly(..)) {
-						format!("({e})")
-					} else {
-						format!("{e}")
-					}
-				})
-				.join("×"),
-			Neg(expr) => match &**expr {
-				Add(_) | Mul(_) | Poly(..) => format!("-({expr})"),
-				_ => format!("-{expr}"),
-			},
-			Pow(base, exp) if exp.is_neg_one() => match &**base {
-				Add(_) | Mul(_) | Poly(..) => format!("({base})^-1"),
-				_ => format!("{base}^-1"),
-			},
-			Number(rational) => format!("{rational}"),
-			Var(symbol) => format!("{symbol}"),
-			Fun(symbol, exprs) => format!("{symbol}({})", exprs.iter().map(|e| format!("{e}")).join(", ")),
-			Poly(symbol, polynomial) => format!("{polynomial}").replace("x", &symbol.0),
-			Pow(base, exp) => match (needs_parens(base), needs_parens(exp)) {
-				(false, false) => format!("{base}^{exp}"),
-				(true, true) => format!("(){base})^({exp})"),
-				(true, false) => format!("({base})^{exp}"),
-				(false, true) => format!("{base}^({exp})"),
-			},
-		};
-
-		write!(f, "{st}")?;
-
-		Ok(())
->>>>>>> 14c4bbe (fix: errors)
 	}
 }

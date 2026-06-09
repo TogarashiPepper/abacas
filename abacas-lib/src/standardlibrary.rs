@@ -3,7 +3,9 @@ use std::collections::HashMap;
 use crate::expr::{Expr, Symbol};
 
 #[derive(Clone, Debug)]
-pub struct StandardLibrary(HashMap<Symbol, StandardLibraryFunction>);
+pub struct StandardLibrary {
+	pub functions: HashMap<Symbol, StandardLibraryFunction>,
+}
 
 impl StandardLibrary {
 	pub fn new() -> Self {
@@ -17,7 +19,7 @@ impl StandardLibrary {
 			},
 		);
 
-		Self(functions)
+		Self { functions }
 	}
 }
 

@@ -1,4 +1,5 @@
 use abacas::VERSION;
+use abacas::context::Context;
 use argh::FromArgs;
 use dark_light::{Mode, detect};
 use logos::Logos;
@@ -44,10 +45,11 @@ fn main() {
 	let exp = cfg.expr.unwrap();
 	let tokens = Token::lexer(&exp).collect::<Result<Vec<Token>, ()>>().unwrap();
 
+	let mut ctx = Context::new();
 	let mut ast = Parser::parse_line(tokens);
 
 	if !cfg.raw {
-		ast = ast.simplify().unwrap();
+		ast = ast.simplify(&mut ctx);
 	}
 
 	println!("{ast}");
@@ -123,6 +125,8 @@ fn repl(cfg: CasConfig) {
 	let mut rl = Editor::with_config(config).unwrap();
 	rl.set_helper(Some(h));
 
+	let mut ctx = Context::new();
+
 	loop {
 		"\x1b[1m\x1b[32m[In]:\x1b[0m ".clone_into(&mut rl.helper_mut().expect("No helper").colored_prompt);
 
@@ -141,7 +145,11 @@ fn repl(cfg: CasConfig) {
 				let mut ast = Parser::parse_line(tokens);
 
 				if !cfg.raw {
+<<<<<<< HEAD
 					ast = ast.simplify().unwrap();
+=======
+					ast = ast.simplify(&mut ctx);
+>>>>>>> 5ba25d8 (feat: context)
 				}
 
 				println!("{ast}");

@@ -96,7 +96,13 @@ impl Parser {
 					let rhs = Self::expr_bp(r_bp, tokens);
 
 					match op {
-						Eq => todo!(),
+						Eq => {
+							if let Expr::Var(name) = lhs {
+								lhs = Expr::Assignment(name, Box::new(rhs));
+							} else {
+								unimplemented!()
+							}
+						}
 						Add => lhs = lhs + rhs,
 						Sub => lhs = lhs - rhs,
 						Mul => lhs = lhs * rhs,

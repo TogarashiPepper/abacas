@@ -1,6 +1,7 @@
 #![doc = include_str!("../../README.md")]
 #![warn(missing_docs)]
 
+pub mod context;
 pub mod error;
 pub mod expr;
 pub mod function;
