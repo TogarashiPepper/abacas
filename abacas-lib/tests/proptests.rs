@@ -10,7 +10,7 @@ fn random_poly(degree: usize) -> Polynomial {
 		let numer = fastrand::u16(1..);
 		let denom = fastrand::u16(1..);
 
-		poly.push(Monomial::new(Number::new_ratio(numer, denom), degree));
+		poly.push(Monomial::new(Number::from(numer) / denom, degree));
 	}
 
 	Polynomial::new(poly)
@@ -32,7 +32,7 @@ fn muldiv() {
 		let a = random_poly(20);
 		let b = random_poly(20);
 
-		assert_eq!(a.clone() * b.clone() / b, a);
+		assert_eq!(a.clone() * &b / &b, a);
 	}
 }
 
@@ -45,6 +45,6 @@ fn polydiv() {
 		let (quotient, remainder) = a.clone().div_rem(&b).unwrap();
 
 		assert!(remainder.degree() < b.degree());
-		assert_eq!(quotient * b + remainder, a);
+		assert_eq!(quotient * &b + remainder, a);
 	}
 }

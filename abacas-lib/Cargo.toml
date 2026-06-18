@@ -8,8 +8,8 @@ name = "polynomial"
 harness = false
 
 [dependencies]
-rug.workspace = true
 itertools.workspace = true
+rug.workspace = true
 
 [dev-dependencies]
 divan.workspace = true

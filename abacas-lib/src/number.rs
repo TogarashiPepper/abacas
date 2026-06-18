@@ -1,51 +1,23 @@
 //! The number structure and its related operations.
 
-use std::borrow::Borrow;
 use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
 use std::{fmt, str};
 
+use rug::Rational;
 use rug::ops::{DivRounding, DivRoundingAssign, NegAssign, Pow, PowAssign, RemRounding, RemRoundingAssign};
-use rug::{Integer, Rational};
 
-use crate::error::{NumberErrorKind, ParseNumberError};
-
-/// Sealed trait for primitive floats.
-trait PrimFloat: TryInto<Number> {}
-
-/// Sealed trait for primitive integers.
-trait PrimInt: Into<Integer> {}
+use crate::error::ParseError;
 
 /// Represents a specific number. Currently uses [`Rational`] under the hood, however this should not be relied upon.
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Number(Rational);
 
-// Constructors
-impl Number {
-	/// Creates a new number from a primitive integer.
-	#[expect(private_bounds)]
-	pub fn new(value: impl PrimInt) -> Self {
-		Self(value.into().into())
-	}
-
-	/// Creates a new number from a primitive float. Returns [`None`] if the float is not finite.
-	#[expect(private_bounds)]
-	pub fn new_float(value: impl PrimFloat) -> Option<Self> {
-		value.try_into().ok()
-	}
-
-	/// Creates a new number from numerator and denominator.
-	#[expect(private_bounds)]
-	pub fn new_ratio(numer: impl PrimInt, denom: impl PrimInt) -> Self {
-		Self((numer.into(), denom.into()).into())
-	}
-}
-
 // Constants
 impl Number {
 	/// The number e, finitely represented as `2.718281828459045`.
 	pub fn e() -> Self {
-		Self::new_ratio(2718281828459045u64, 1000000000000000u64)
+		Self::from(2718281828459045u64) / 1000000000000000u64
 	}
 
 	/// The number negative one (`-1`).
@@ -60,7 +32,7 @@ impl Number {
 
 	/// The number pi, finitely represented as `3.141592653589793`.
 	pub fn pi() -> Self {
-		Self::new_ratio(3141592653589793u64, 1000000000000000u64)
+		Self::from(3141592653589793u64) / 1000000000000000u64
 	}
 
 	/// The number zero (`0`).
@@ -104,23 +76,18 @@ impl Number {
 
 // Operations
 impl Number {
-	/// Gets the absolute value of this number.
-	pub fn abs(self) -> Self {
-		Self(self.0.abs())
-	}
-
 	/// Gets the denominator of this number.
 	pub fn denom(self) -> Self {
-		self.ratio().1
+		Self(self.0.into_numer_denom().1.into())
 	}
 
-	/// Calculates the greatest common divisor.
+	/// Gets the greatest common divisor.
 	pub fn gcd(mut self, rhs: &Self) -> Self {
 		self.gcd_mut(rhs);
 		self
 	}
 
-	/// Calculates the greatest common divisor in-place.
+	/// Gets the greatest common divisor and assigns it in-place.
 	pub fn gcd_mut(&mut self, rhs: &Self) {
 		self.0.mutate_numer_denom(|numer, denom| {
 			numer.gcd_mut(rhs.0.numer());
@@ -128,13 +95,13 @@ impl Number {
 		});
 	}
 
-	/// Calculates the least common multiple.
+	/// Gets the least common multiple.
 	pub fn lcm(mut self, rhs: &Self) -> Self {
 		self.lcm_mut(rhs);
 		self
 	}
 
-	/// Calculates the least common multiple in-place.
+	/// Gets the least common multiple and assigns it in-place.
 	pub fn lcm_mut(&mut self, rhs: &Self) {
 		self.0.mutate_numer_denom(|numer, denom| {
 			numer.lcm_mut(rhs.0.numer());
@@ -144,24 +111,13 @@ impl Number {
 
 	/// Gets the numerator of this number.
 	pub fn numer(self) -> Self {
-		self.ratio().0
+		Self(self.0.into_numer_denom().0.into())
 	}
 
 	/// Gets the numerator and denominator of this number as a tuple.
 	pub fn ratio(self) -> (Self, Self) {
 		let (numer, denom) = self.0.into_numer_denom();
 		(Self(numer.into()), Self(denom.into()))
-	}
-
-	/// Calculates the reciprocal of this number.
-	pub fn recip(mut self) -> Self {
-		self.recip_mut();
-		self
-	}
-
-	/// Calculates the reciprocal of this number in-place.
-	pub fn recip_mut(&mut self) {
-		self.0.recip_mut();
 	}
 }
 
@@ -177,9 +133,9 @@ where
 	}
 }
 
-impl<T: Borrow<Self>> AddAssign<T> for Number {
-	fn add_assign(&mut self, rhs: T) {
-		self.0 += &rhs.borrow().0;
+impl AddAssign<&Self> for Number {
+	fn add_assign(&mut self, rhs: &Self) {
+		self.0 += &rhs.0;
 	}
 }
 
@@ -195,9 +151,9 @@ where
 	}
 }
 
-impl<T: Borrow<Self>> DivAssign<T> for Number {
-	fn div_assign(&mut self, rhs: T) {
-		self.0 /= &rhs.borrow().0;
+impl DivAssign<&Self> for Number {
+	fn div_assign(&mut self, rhs: &Self) {
+		self.0 /= &rhs.0;
 	}
 }
 
@@ -228,27 +184,27 @@ where
 	}
 }
 
-impl<T: Borrow<Self>> DivRoundingAssign<T> for Number {
-	fn div_ceil_assign(&mut self, rhs: T) {
-		self.0 /= &rhs.borrow().0;
+impl DivRoundingAssign<&Self> for Number {
+	fn div_ceil_assign(&mut self, rhs: &Self) {
+		self.0 /= &rhs.0;
 		self.0.ceil_mut();
 	}
 
-	fn div_euc_assign(&mut self, rhs: T) {
-		if rhs.borrow().is_positive() {
+	fn div_euc_assign(&mut self, rhs: &Self) {
+		if rhs.is_positive() {
 			self.div_floor_assign(rhs);
 		} else {
 			self.div_ceil_assign(rhs);
 		}
 	}
 
-	fn div_floor_assign(&mut self, rhs: T) {
-		self.0 /= &rhs.borrow().0;
+	fn div_floor_assign(&mut self, rhs: &Self) {
+		self.0 /= &rhs.0;
 		self.0.floor_mut();
 	}
 
-	fn div_trunc_assign(&mut self, rhs: T) {
-		self.0 /= &rhs.borrow().0;
+	fn div_trunc_assign(&mut self, rhs: &Self) {
+		self.0 /= &rhs.0;
 		self.0.trunc_mut();
 	}
 }
@@ -265,9 +221,9 @@ where
 	}
 }
 
-impl<T: Borrow<Self>> MulAssign<T> for Number {
-	fn mul_assign(&mut self, rhs: T) {
-		self.0 *= &rhs.borrow().0;
+impl MulAssign<&Self> for Number {
+	fn mul_assign(&mut self, rhs: &Self) {
+		self.0 *= &rhs.0;
 	}
 }
 
@@ -298,13 +254,21 @@ where
 	}
 }
 
-impl<T: Borrow<Self>> PowAssign<T> for Number {
-	fn pow_assign(&mut self, rhs: T) {
-		if !rhs.borrow().is_integer() || rhs.borrow().0.numer().clone().abs() > i32::MAX {
-			panic!("exponent with power greater than 2^31-1 is not supported")
+impl PowAssign<&Self> for Number {
+	fn pow_assign(&mut self, rhs: &Self) {
+		if !rhs.is_integer() {
+			panic!("abacas: exponent must be an integer");
 		}
 
-		self.0 = Pow::<i32>::pow(&self.0, rhs.borrow().0.numer().try_into().unwrap()).into()
+		let Some(exponent) = rhs.0.numer().as_abs().to_u32() else {
+			panic!("abacas: exponent must be less than 2^32");
+		};
+
+		self.0.pow_assign(exponent);
+
+		if rhs.is_negative() {
+			self.0.recip_mut();
+		}
 	}
 }
 
@@ -356,21 +320,21 @@ where
 	}
 }
 
-impl<T: Borrow<Self>> RemRoundingAssign<T> for Number {
-	fn rem_ceil_assign(&mut self, rhs: T) {
-		self.0 -= self.clone().div_ceil(rhs.borrow()).0 * &rhs.borrow().0;
+impl RemRoundingAssign<&Self> for Number {
+	fn rem_ceil_assign(&mut self, rhs: &Self) {
+		self.0 -= self.clone().div_ceil(rhs).0 * &rhs.0;
 	}
 
-	fn rem_euc_assign(&mut self, rhs: T) {
-		self.0 -= self.clone().div_euc(rhs.borrow()).0 * &rhs.borrow().0;
+	fn rem_euc_assign(&mut self, rhs: &Self) {
+		self.0 -= self.clone().div_euc(rhs).0 * &rhs.0;
 	}
 
-	fn rem_floor_assign(&mut self, rhs: T) {
-		self.0 -= self.clone().div_floor(rhs.borrow()).0 * &rhs.borrow().0;
+	fn rem_floor_assign(&mut self, rhs: &Self) {
+		self.0 -= self.clone().div_floor(rhs).0 * &rhs.0;
 	}
 
-	fn rem_trunc_assign(&mut self, rhs: T) {
-		self.0 -= self.clone().div_trunc(rhs.borrow()).0 * &rhs.borrow().0;
+	fn rem_trunc_assign(&mut self, rhs: &Self) {
+		self.0 -= self.clone().div_trunc(rhs).0 * &rhs.0;
 	}
 }
 
@@ -386,9 +350,9 @@ where
 	}
 }
 
-impl<T: Borrow<Self>> SubAssign<T> for Number {
-	fn sub_assign(&mut self, rhs: T) {
-		self.0 -= &rhs.borrow().0;
+impl SubAssign<&Self> for Number {
+	fn sub_assign(&mut self, rhs: &Self) {
+		self.0 -= &rhs.0;
 	}
 }
 
@@ -399,20 +363,15 @@ impl fmt::Display for Number {
 }
 
 impl str::FromStr for Number {
-	type Err = ParseNumberError;
+	type Err = ParseError;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
-		let (dec, int) = s.split_once(".").unwrap_or((s, ""));
-
-		let formatted = if !int.is_empty() {
-			format!("{} / 1{}", dec.to_owned() + int, "0".repeat(int.len()))
-		} else {
-			dec.to_owned()
+		let full = match s.split_once('.') {
+			Some((int, fract)) => format!("{}{}/1{}", int, fract, "0".repeat(fract.len())),
+			None => s.into(),
 		};
 
-		formatted.parse().map(Self).map_err(|_| ParseNumberError {
-			kind: NumberErrorKind::Invalid,
-		})
+		full.parse().map(Self).map_err(|_| ParseError::InvalidString(full))
 	}
 }
 
@@ -420,14 +379,12 @@ macro_rules! impl_float {
 	($($float:ty,)*) => {
 		$(
 			impl TryFrom<$float> for Number {
-				type Error = ();
+				type Error = $float;
 
 				fn try_from(value: $float) -> Result<Self, Self::Error> {
-					value.try_into().map(Self).map_err(|_| ())
+					value.try_into().map(Self).map_err(|_| value)
 				}
 			}
-
-			impl PrimFloat for $float {}
 		)*
 	};
 }
@@ -498,17 +455,9 @@ macro_rules! impl_int {
 
 
 			impl PowAssign<$int> for Number {
-
 				fn pow_assign(&mut self, rhs: $int) {
-
-					if rhs > i32::MAX as $int {
-						panic!("exponent with power greater than 2^31-1 is not supported")
-					}
-
-					self.0 = (Pow::<i32>::pow(
-						&self.0,
-						rhs as i32,
-					)).into();
+					// TODO: Find a good way to remove this allocation
+					self.pow_assign(&Self::from(rhs));
 				}
 			}
 
@@ -535,9 +484,25 @@ macro_rules! impl_int {
 					self.0 -= rhs;
 				}
 			}
-
-			impl PrimInt for $int {}
 		)*
+	};
+}
+
+macro_rules! impl_rational {
+	($($name:ident, $name_mut:ident, $doc:literal;)*) => {
+		impl Number {
+			$(
+				#[doc = concat!("Gets the ", $doc, " of this number.")]
+				pub fn $name(self) -> Self {
+					Self(self.0.$name())
+				}
+
+				#[doc = concat!("Gets the ", $doc, " of this number and assigns it in-place.")]
+				pub fn $name_mut(&mut self) {
+					self.0.$name_mut();
+				}
+			)*
+		}
 	};
 }
 
@@ -548,4 +513,15 @@ impl_float! {
 impl_int! {
 	i8, i16, i32, i64, i128, isize,
 	u8, u16, u32, u64, u128, usize,
+}
+
+impl_rational! {
+	abs, abs_mut, "absolute value";
+	ceil, ceil_mut, "ceiled integer";
+	floor, floor_mut, "floored integer";
+	recip, recip_mut, "reciprocal value";
+	round, round_mut, "rounded integer";
+	signum, signum_mut, "sign";
+	square, square_mut, "squared value";
+	trunc, trunc_mut, "truncated integer";
 }
