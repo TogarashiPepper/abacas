@@ -2,6 +2,7 @@
 
 A modern CAS library. This is still a work in progress.
 
-## Documentation
+## References
 
-You can read the documentation here: <https://togarashipepper.github.io/abacas>
+- Documentation: <https://togarashipepper.github.io/abacas>
+- Repository: <https://github.com/TogarashiPepper/abacas>
