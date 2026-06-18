@@ -61,7 +61,7 @@ fn impls() {
 	let mono = m("5x^4").pow(3);
 	assert_eq!(mono.to_string(), "125x^12");
 
-	let poly = p("2x^2 + 5x + 3") * 4 - Number::from(11) / 2;
+	let poly = p("2x^2 + 5x + 2") * 4 + 4 - Number::from(11) / 2;
 	assert_eq!(poly.to_string(), "8x^2 + 20x + 6.5");
 }
 
@@ -120,7 +120,7 @@ fn polydiv() {
 
 #[test]
 fn zeros() {
-	let from = Polynomial::from(0);
+	let from = Polynomial::from(0) + 0 - 0;
 	assert!(from.is_zero());
 
 	let parse = p("0x^2 + 2x - 2x + 0");

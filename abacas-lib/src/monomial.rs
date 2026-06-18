@@ -245,19 +245,19 @@ impl str::FromStr for Monomial {
 		let (init, degree) = if let Some((init, tail)) = s.split_once("x^") {
 			(init, tail.parse()?)
 		} else if let Some(init) = s.strip_suffix('x') {
-			(init, 1)
+			(init, Number::one())
 		} else {
-			(s, 0)
+			(s, Number::zero())
 		};
 
 		let coeff = match init {
-			"" | "+" if degree != 0 => Number::one(),
-			"-" if degree != 0 => Number::neg_one(),
+			"" | "+" if !degree.is_zero() => Number::one(),
+			"-" if !degree.is_zero() => Number::neg_one(),
 			_ => init.parse()?,
 		};
 
 		if coeff.is_zero() {
-			return Err(ParseError::InvalidValue(coeff));
+			return Err(ParseError::InvalidNumber(coeff));
 		}
 
 		Ok(Self::new(coeff, degree))

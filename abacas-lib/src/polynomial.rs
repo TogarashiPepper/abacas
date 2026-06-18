@@ -395,12 +395,6 @@ impl From<Monomial> for Polynomial {
 	}
 }
 
-impl FromIterator<Monomial> for Polynomial {
-	fn from_iter<T: IntoIterator<Item = Monomial>>(iter: T) -> Self {
-		Self::new(iter)
-	}
-}
-
 impl<T> Add<T> for Polynomial
 where
 	Self: AddAssign<T>,
@@ -413,10 +407,25 @@ where
 	}
 }
 
-impl<T: Into<Monomial>> AddAssign<T> for Polynomial {
+impl<T: Into<Number>> AddAssign<T> for Polynomial {
 	fn add_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
+		if rhs.is_zero() {
+			return;
+		}
+
+		match self.0.binary_search_by(|mono| Number::zero().cmp(&mono.degree)) {
+			Ok(index) => self.0[index].coeff += &rhs,
+			Err(index) => self.0.insert(index, rhs.into()),
+		}
+
+		self.clean();
+	}
+}
+
+impl AddAssign<Monomial> for Polynomial {
+	fn add_assign(&mut self, rhs: Monomial) {
 		match self.0.binary_search_by(|mono| rhs.degree.cmp(&mono.degree)) {
 			Ok(index) => self.0[index].coeff += &rhs.coeff,
 			Err(index) => self.0.insert(index, rhs),
@@ -543,10 +552,25 @@ where
 	}
 }
 
-impl<T: Into<Monomial>> SubAssign<T> for Polynomial {
+impl<T: Into<Number>> SubAssign<T> for Polynomial {
 	fn sub_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
+		if rhs.is_zero() {
+			return;
+		}
+
+		match self.0.binary_search_by(|mono| Number::zero().cmp(&mono.degree)) {
+			Ok(index) => self.0[index].coeff -= &rhs,
+			Err(index) => self.0.insert(index, rhs.into()),
+		}
+
+		self.clean();
+	}
+}
+
+impl SubAssign<Monomial> for Polynomial {
+	fn sub_assign(&mut self, rhs: Monomial) {
 		match self.0.binary_search_by(|mono| rhs.degree.cmp(&mono.degree)) {
 			Ok(index) => self.0[index].coeff -= &rhs.coeff,
 			Err(index) => self.0.insert(index, -rhs),
@@ -594,7 +618,7 @@ impl str::FromStr for Polynomial {
 			for (index, part) in full.split(" - ").enumerate() {
 				let monomial: Monomial = match part.parse() {
 					Ok(monomial) => monomial,
-					Err(ParseError::InvalidValue(t)) if t == Number::zero() => continue,
+					Err(ParseError::InvalidNumber(number)) if number.is_zero() => continue,
 					Err(error) => return Err(error),
 				};
 
