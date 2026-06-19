@@ -180,7 +180,7 @@ impl Expr {
 			core = core.simplify();
 
 			match multiset.binary_search_by(|(e, _)| Expr::cmp(e, &core)) {
-				Ok(idx) => multiset[idx].1 += coeff,
+				Ok(idx) => multiset[idx].1 += &coeff,
 				Err(idx) => multiset.insert(idx, (core, coeff)),
 			}
 		}
@@ -396,7 +396,7 @@ impl Add for Expr {
 
 			(Add(mut a), Number(num)) | (Number(num), Add(mut a)) => {
 				if let Some(existing_num) = find_num(&mut a) {
-					*existing_num += num;
+					*existing_num += &num;
 
 					Expr::Add(a)
 				} else {
@@ -414,7 +414,7 @@ impl Add for Expr {
 			}
 			(Add(a), other) | (other, Add(a)) => Add(push(a, other)),
 
-			(Number(l), Number(r)) => Number(l + r),
+			(Number(l), Number(r)) => Number(l + &r),
 
 			(Poly(s1, p1), Poly(s2, p2)) if s1 == s2 => Poly(s1, p1 + p2),
 
@@ -441,7 +441,7 @@ impl Mul for Expr {
 
 			(Mul(mut a), Number(num)) | (Number(num), Mul(mut a)) => {
 				if let Some(existing_num) = find_num(&mut a) {
-					*existing_num *= num;
+					*existing_num *= &num;
 
 					Expr::Mul(a)
 				} else {
@@ -450,7 +450,7 @@ impl Mul for Expr {
 			}
 
 			(Mul(m), other) | (other, Mul(m)) => Mul(push(m, other)),
-			(Number(l), Number(r)) => Number(l * r),
+			(Number(l), Number(r)) => Number(l * &r),
 
 			(l, r) => Mul(vec![l, r]),
 		}

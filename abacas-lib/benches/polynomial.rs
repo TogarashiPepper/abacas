@@ -22,7 +22,7 @@ fn random_poly(degree: usize) -> Polynomial {
 		let numer = rng.u16(1..);
 		let denom = rng.u16(1..);
 
-		poly.push(Monomial::new(Number::new_ratio(numer, denom), degree));
+		poly.push(Monomial::new(Number::from(numer) / denom, degree));
 	}
 
 	Polynomial::new(poly)
@@ -39,7 +39,7 @@ fn add(bencher: Bencher) {
 fn div(bencher: Bencher) {
 	bencher
 		.with_inputs(|| (random_poly(100), random_poly(50)))
-		.bench_values(|(a, b)| a / b);
+		.bench_values(|(a, b)| a / &b);
 }
 
 #[divan::bench]
@@ -60,7 +60,7 @@ fn gcd_ext(bencher: Bencher) {
 fn mul(bencher: Bencher) {
 	bencher
 		.with_inputs(|| (random_poly(100), random_poly(50)))
-		.bench_values(|(a, b)| a * b);
+		.bench_values(|(a, b)| a * &b);
 }
 
 #[divan::bench]

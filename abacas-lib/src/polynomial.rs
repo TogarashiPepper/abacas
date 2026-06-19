@@ -41,7 +41,7 @@ use crate::number::Number;
 /// let sub = a.clone() - b.clone() * 2;
 /// assert_eq!(sub.to_string(), "4x^4 + 3x^3 - 4x^2 + 11");
 ///
-/// let mul = a.clone() * b.clone();
+/// let mul = a.clone() * &b;
 /// assert_eq!(mul.to_string(), "8x^6 + 6x^5 - 20x^4 - 15x^3 + 2x^2 - 5");
 /// ```
 #[derive(Clone, Debug, Default, Eq, PartialEq, Hash)]
@@ -84,7 +84,7 @@ impl Polynomial {
 	///
 	/// assert_eq!(quotient.to_string(), "3x^3 + 1.5x + 2.5");
 	/// assert_eq!(remainder.to_string(), "1.5x - 4.5");
-	/// assert_eq!(quotient * divisor + remainder, dividend);
+	/// assert_eq!(quotient * &divisor + remainder, dividend);
 	/// ```
 	pub fn div_rem(mut self, divisor: &Self) -> Option<(Self, Self)> {
 		self.div_rem_mut(divisor).map(|remainder| (self, remainder))
@@ -122,7 +122,7 @@ impl Polynomial {
 				let degree = degree.clone() + &term.degree - &normalizer.degree;
 				let monomial = self.get_or_insert(&degree);
 
-				monomial.coeff -= coeff.clone() * &term.coeff;
+				monomial.coeff -= &(coeff.clone() * &term.coeff);
 			}
 
 			degree -= 1;
@@ -186,7 +186,7 @@ impl Polynomial {
 			return None;
 		}
 
-		*self /= factor.clone();
+		*self /= &factor;
 
 		Some(factor)
 	}
@@ -199,8 +199,8 @@ impl Polynomial {
 	/// use abacas::polynomial::Polynomial;
 	///
 	/// let coeff = "x - 1".parse::<Polynomial>().unwrap();
-	/// let a = coeff.clone() * "x - 21".parse::<Polynomial>().unwrap();
-	/// let b = coeff.clone() * "4x - 9".parse::<Polynomial>().unwrap();
+	/// let a = coeff.clone() * &"x - 21".parse::<Polynomial>().unwrap();
+	/// let b = coeff.clone() * &"4x - 9".parse::<Polynomial>().unwrap();
 	///
 	/// assert_eq!(a.gcd(b), coeff);
 	/// ```
@@ -222,11 +222,11 @@ impl Polynomial {
 	/// use abacas::polynomial::Polynomial;
 	///
 	/// let coeff = "x - 1".parse::<Polynomial>().unwrap();
-	/// let a = coeff.clone() * "x - 21".parse::<Polynomial>().unwrap();
-	/// let b = coeff.clone() * "4x - 9".parse::<Polynomial>().unwrap();
+	/// let a = coeff.clone() * &"x - 21".parse::<Polynomial>().unwrap();
+	/// let b = coeff.clone() * &"4x - 9".parse::<Polynomial>().unwrap();
 	///
 	/// let (s, t, gcd) = a.clone().gcd_ext(b.clone());
-	/// let bezout = s * a + t * b;
+	/// let bezout = s * &a + t * &b;
 	///
 	/// assert_eq!(bezout, gcd);
 	/// assert_eq!(coeff, gcd);
@@ -239,17 +239,17 @@ impl Polynomial {
 			let quotient = old_r;
 
 			(old_r, r) = (r, remainder);
-			(old_s, s) = (s.clone(), old_s - quotient * s);
+			(old_s, s) = (s.clone(), old_s - quotient * &s);
 		}
 
 		if let Some(factor) = old_r.monic_mut() {
-			old_s /= factor;
+			old_s /= &factor;
 		}
 
 		let old_t = if other.is_zero() {
 			Self::ZERO
 		} else {
-			(old_r.clone() - self * old_s.clone()) / other
+			(old_r.clone() - self * &old_s) / &other
 		};
 
 		(old_s, old_t, old_r)
@@ -342,7 +342,7 @@ impl Polynomial {
 			return None;
 		}
 
-		*self /= factor.clone();
+		*self /= &factor;
 
 		Some(factor)
 	}
@@ -395,12 +395,6 @@ impl From<Monomial> for Polynomial {
 	}
 }
 
-impl FromIterator<Monomial> for Polynomial {
-	fn from_iter<T: IntoIterator<Item = Monomial>>(iter: T) -> Self {
-		Self::new(iter)
-	}
-}
-
 impl<T> Add<T> for Polynomial
 where
 	Self: AddAssign<T>,
@@ -413,12 +407,27 @@ where
 	}
 }
 
-impl<T: Into<Monomial>> AddAssign<T> for Polynomial {
+impl<T: Into<Number>> AddAssign<T> for Polynomial {
 	fn add_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
+		if rhs.is_zero() {
+			return;
+		}
+
+		match self.0.binary_search_by(|mono| Number::zero().cmp(&mono.degree)) {
+			Ok(index) => self.0[index].coeff += &rhs,
+			Err(index) => self.0.insert(index, rhs.into()),
+		}
+
+		self.clean();
+	}
+}
+
+impl AddAssign<Monomial> for Polynomial {
+	fn add_assign(&mut self, rhs: Monomial) {
 		match self.0.binary_search_by(|mono| rhs.degree.cmp(&mono.degree)) {
-			Ok(index) => self.0[index].coeff += rhs.coeff,
+			Ok(index) => self.0[index].coeff += &rhs.coeff,
 			Err(index) => self.0.insert(index, rhs),
 		}
 
@@ -446,19 +455,20 @@ where
 	}
 }
 
-impl<T: Into<Monomial>> DivAssign<T> for Polynomial {
+impl<T: Copy> DivAssign<T> for Polynomial
+where
+	Monomial: DivAssign<T>,
+{
 	fn div_assign(&mut self, rhs: T) {
-		let rhs = rhs.into();
-
 		for monomial in self.0.iter_mut() {
-			*monomial /= rhs.clone();
+			*monomial /= rhs;
 		}
 	}
 }
 
-impl DivAssign for Polynomial {
-	fn div_assign(&mut self, rhs: Self) {
-		self.div_rem_mut(&rhs).expect("abacas: cannot divide by zero");
+impl DivAssign<&Self> for Polynomial {
+	fn div_assign(&mut self, rhs: &Self) {
+		self.div_rem_mut(rhs).expect("abacas: cannot divide by zero");
 	}
 }
 
@@ -474,21 +484,22 @@ where
 	}
 }
 
-impl<T: Into<Monomial>> MulAssign<T> for Polynomial {
+impl<T: Copy> MulAssign<T> for Polynomial
+where
+	Monomial: MulAssign<T>,
+{
 	fn mul_assign(&mut self, rhs: T) {
-		let rhs = rhs.into();
-
 		for monomial in self.0.iter_mut() {
-			*monomial *= rhs.clone();
+			*monomial *= rhs;
 		}
 	}
 }
 
-impl MulAssign for Polynomial {
-	fn mul_assign(&mut self, rhs: Self) {
+impl MulAssign<&Self> for Polynomial {
+	fn mul_assign(&mut self, rhs: &Self) {
 		let old = mem::take(self);
 
-		for monomial in rhs.0 {
+		for monomial in rhs.0.iter() {
 			*self += old.clone() * monomial;
 		}
 	}
@@ -523,9 +534,9 @@ where
 	}
 }
 
-impl RemAssign for Polynomial {
-	fn rem_assign(&mut self, rhs: Self) {
-		*self = self.div_rem_mut(&rhs).expect("abacas: cannot divide by zero");
+impl RemAssign<&Self> for Polynomial {
+	fn rem_assign(&mut self, rhs: &Self) {
+		*self = self.div_rem_mut(rhs).expect("abacas: cannot divide by zero");
 	}
 }
 
@@ -541,12 +552,27 @@ where
 	}
 }
 
-impl<T: Into<Monomial>> SubAssign<T> for Polynomial {
+impl<T: Into<Number>> SubAssign<T> for Polynomial {
 	fn sub_assign(&mut self, rhs: T) {
 		let rhs = rhs.into();
 
+		if rhs.is_zero() {
+			return;
+		}
+
+		match self.0.binary_search_by(|mono| Number::zero().cmp(&mono.degree)) {
+			Ok(index) => self.0[index].coeff -= &rhs,
+			Err(index) => self.0.insert(index, rhs.into()),
+		}
+
+		self.clean();
+	}
+}
+
+impl SubAssign<Monomial> for Polynomial {
+	fn sub_assign(&mut self, rhs: Monomial) {
 		match self.0.binary_search_by(|mono| rhs.degree.cmp(&mono.degree)) {
-			Ok(index) => self.0[index].coeff -= rhs.coeff,
+			Ok(index) => self.0[index].coeff -= &rhs.coeff,
 			Err(index) => self.0.insert(index, -rhs),
 		}
 
@@ -592,7 +618,7 @@ impl str::FromStr for Polynomial {
 			for (index, part) in full.split(" - ").enumerate() {
 				let monomial: Monomial = match part.parse() {
 					Ok(monomial) => monomial,
-					Err(ParseError::InvalidValue(t)) if t == Number::zero() => continue,
+					Err(ParseError::InvalidNumber(number)) if number.is_zero() => continue,
 					Err(error) => return Err(error),
 				};
 

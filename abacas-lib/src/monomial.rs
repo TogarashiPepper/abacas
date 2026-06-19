@@ -33,7 +33,7 @@ use crate::polynomial::Polynomial;
 /// let add = Monomial::new(4, 10) + Monomial::new(1, 20);
 /// assert_eq!(add.to_string(), "x^20 + 4x^10");
 ///
-/// let mul = Monomial::new(4, 10) * Monomial::linear(2);
+/// let mul = Monomial::new(4, 10) * &Monomial::linear(2);
 /// assert_eq!(mul.to_string(), "8x^11");
 /// ```
 #[derive(Clone, Debug, Eq, PartialEq, Hash)]
@@ -124,12 +124,19 @@ where
 	}
 }
 
-impl<T: Into<Self>> DivAssign<T> for Monomial {
+impl<T> DivAssign<T> for Monomial
+where
+	Number: DivAssign<T>,
+{
 	fn div_assign(&mut self, rhs: T) {
-		let rhs = rhs.into();
+		self.coeff /= rhs;
+	}
+}
 
-		self.coeff /= rhs.coeff;
-		self.degree -= rhs.degree;
+impl DivAssign<&Self> for Monomial {
+	fn div_assign(&mut self, rhs: &Self) {
+		self.coeff /= &rhs.coeff;
+		self.degree -= &rhs.degree;
 	}
 }
 
@@ -145,12 +152,19 @@ where
 	}
 }
 
-impl<T: Into<Self>> MulAssign<T> for Monomial {
+impl<T> MulAssign<T> for Monomial
+where
+	Number: MulAssign<T>,
+{
 	fn mul_assign(&mut self, rhs: T) {
-		let rhs = rhs.into();
+		self.coeff *= rhs;
+	}
+}
 
-		self.coeff *= rhs.coeff;
-		self.degree += rhs.degree;
+impl MulAssign<&Self> for Monomial {
+	fn mul_assign(&mut self, rhs: &Self) {
+		self.coeff *= &rhs.coeff;
+		self.degree += &rhs.degree;
 	}
 }
 
@@ -181,10 +195,11 @@ where
 	}
 }
 
-impl<T: Into<i32>> PowAssign<T> for Monomial {
+impl<T: Copy> PowAssign<T> for Monomial
+where
+	Number: MulAssign<T> + PowAssign<T>,
+{
 	fn pow_assign(&mut self, rhs: T) {
-		let rhs = rhs.into();
-
 		self.coeff.pow_assign(rhs);
 		self.degree *= rhs;
 	}
@@ -230,19 +245,19 @@ impl str::FromStr for Monomial {
 		let (init, degree) = if let Some((init, tail)) = s.split_once("x^") {
 			(init, tail.parse()?)
 		} else if let Some(init) = s.strip_suffix('x') {
-			(init, 1)
+			(init, Number::one())
 		} else {
-			(s, 0)
+			(s, Number::zero())
 		};
 
 		let coeff = match init {
-			"" | "+" if degree != 0 => Number::one(),
-			"-" if degree != 0 => Number::neg_one(),
+			"" | "+" if !degree.is_zero() => Number::one(),
+			"-" if !degree.is_zero() => Number::neg_one(),
 			_ => init.parse()?,
 		};
 
 		if coeff.is_zero() {
-			return Err(ParseError::InvalidValue(coeff));
+			return Err(ParseError::InvalidNumber(coeff));
 		}
 
 		Ok(Self::new(coeff, degree))
