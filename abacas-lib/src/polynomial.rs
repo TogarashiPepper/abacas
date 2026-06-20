@@ -297,8 +297,11 @@ impl Polynomial {
 	/// use abacas::monomial::Monomial;
 	/// use abacas::polynomial::Polynomial;
 	///
-	/// assert_eq!(Polynomial::from(Monomial::constant(3)).into_constant(), Some(3.into()));
+	/// assert_eq!(Polynomial::ZERO.into_constant(), Some(0.into()));
+	/// assert_eq!(Polynomial::from(5).into_constant(), Some(5.into()));
+	///
 	/// assert_eq!(Polynomial::from(Monomial::linear(3)).into_constant(), None);
+	/// assert_eq!(Polynomial::from(Monomial::linear(3) + 5).into_constant(), None);
 	/// ```
 	pub fn into_constant(self) -> Option<Number> {
 		if self.is_zero() {
@@ -318,8 +321,11 @@ impl Polynomial {
 	/// use abacas::monomial::Monomial;
 	/// use abacas::polynomial::Polynomial;
 	///
-	/// assert!(Polynomial::from(Monomial::constant(3)).is_constant());
+	/// assert!(Polynomial::ZERO.is_constant());
+	/// assert!(Polynomial::from(5).is_constant());
+	///
 	/// assert!(!Polynomial::from(Monomial::linear(3)).is_constant());
+	/// assert!(!Polynomial::from(Monomial::linear(3) + 5).is_constant());
 	/// ```
 	pub fn is_constant(&self) -> bool {
 		self.0.len() <= 1 && self.monomials().next().is_none_or(|mono| mono.degree.is_zero())
