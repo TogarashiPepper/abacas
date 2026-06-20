@@ -7,10 +7,11 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 use itertools::Itertools;
 use rug::ops::Pow;
 
+use crate::monomial::Monomial;
 use crate::number::Number;
 use crate::polynomial::Polynomial;
 
-/// Represents a symbol like `x` or `pi`.
+/// Represents a symbol like `cos` or `pi`.
 #[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Symbol(String);
 
@@ -27,6 +28,11 @@ impl Symbol {
 		} else {
 			Some(Self(name))
 		}
+	}
+
+	/// The symbol `x`. This is the default for monomials and polynomials.
+	pub fn x() -> Self {
+		Self("x".into())
 	}
 }
 
@@ -119,7 +125,7 @@ impl Expr {
 		}
 	}
 
-	/// Simplifies an expression on a best-effort basis.
+	/// Simplifies this expression on a best-effort basis.
 	pub fn simplify(self) -> Self {
 		match self {
 			Self::Add(exprs) => Self::simplify_add(exprs),
@@ -278,7 +284,7 @@ impl Expr {
 		Self::Pow(base.into(), exp.into())
 	}
 
-	/// Compares two expressions for a consistent ordering.
+	/// Compares this expression with another for a consistent ordering.
 	fn cmp(&self, other: &Self) -> Ordering {
 		match (self, other) {
 			// If both are sums, compare the vecs
@@ -367,6 +373,30 @@ impl Expr {
 		}
 
 		WithParens(self)
+	}
+}
+
+impl<T: Into<Number>> From<T> for Expr {
+	fn from(value: T) -> Self {
+		Self::Num(value.into()).simplify()
+	}
+}
+
+impl From<Monomial> for Expr {
+	fn from(value: Monomial) -> Self {
+		Self::Poly(Symbol::x(), value.into()).simplify()
+	}
+}
+
+impl From<Polynomial> for Expr {
+	fn from(value: Polynomial) -> Self {
+		Self::Poly(Symbol::x(), value).simplify()
+	}
+}
+
+impl From<Symbol> for Expr {
+	fn from(value: Symbol) -> Self {
+		Self::Var(value).simplify()
 	}
 }
 
