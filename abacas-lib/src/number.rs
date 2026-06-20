@@ -15,11 +15,6 @@ pub struct Number(Rational);
 
 // Constants
 impl Number {
-	/// The number e, finitely represented as `2.718281828459045`.
-	pub fn e() -> Self {
-		Self::from(2718281828459045u64) / 1000000000000000u64
-	}
-
 	/// The number negative one (`-1`).
 	pub fn neg_one() -> Self {
 		Self(Rational::NEG_ONE.clone())
@@ -28,11 +23,6 @@ impl Number {
 	/// The number one (`1`).
 	pub fn one() -> Self {
 		Self(Rational::ONE.clone())
-	}
-
-	/// The number pi, finitely represented as `3.141592653589793`.
-	pub fn pi() -> Self {
-		Self::from(3141592653589793u64) / 1000000000000000u64
 	}
 
 	/// The number zero (`0`).
