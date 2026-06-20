@@ -304,10 +304,8 @@ impl Polynomial {
 	/// assert_eq!(Polynomial::from(Monomial::linear(3) + 5).into_constant(), None);
 	/// ```
 	pub fn into_constant(self) -> Option<Number> {
-		if self.is_zero() {
-			Some(Number::zero())
-		} else if self.is_constant() {
-			Some(self.0.into_iter().next().unwrap().coeff)
+		if self.is_constant() {
+			Some(self.0.into_iter().next().map_or_default(|mono| mono.coeff))
 		} else {
 			None
 		}
