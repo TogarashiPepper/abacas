@@ -311,7 +311,7 @@ impl Polynomial {
 		}
 	}
 
-	/// Returns whether this is a constant polynomial.
+	/// Whether this polynomial can be represented as a constant [`Number`].
 	///
 	/// # Examples
 	///
