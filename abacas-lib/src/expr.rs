@@ -20,7 +20,7 @@ impl Symbol {
 		&self.0
 	}
 
-	/// Creates a new symbol with the given name, if it matches the symbol criteria.
+	/// Creates a new symbol with the given name. Symbols must not be empty and contain no whitespace.
 	pub fn new(name: String) -> Option<Self> {
 		if name.is_empty() || name.chars().any(char::is_whitespace) {
 			None

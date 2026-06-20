@@ -305,7 +305,7 @@ impl Polynomial {
 	/// ```
 	pub fn into_constant(self) -> Option<Number> {
 		if self.is_constant() {
-			Some(self.0.into_iter().next().map_or_default(|mono| mono.coeff))
+			Some(self.0.into_iter().next().map(|mono| mono.coeff).unwrap_or_default())
 		} else {
 			None
 		}
@@ -326,7 +326,7 @@ impl Polynomial {
 	/// assert!(!Polynomial::from(Monomial::linear(3) + 5).is_constant());
 	/// ```
 	pub fn is_constant(&self) -> bool {
-		self.0.len() <= 1 && self.monomials().next().is_none_or(|mono| mono.degree.is_zero())
+		self.0.len() <= 1 && self.0.first().is_none_or(|mono| mono.degree.is_zero())
 	}
 
 	/// Returns whether this is the zero polynomial.
