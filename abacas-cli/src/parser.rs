@@ -1,6 +1,7 @@
 use std::iter::Peekable;
 
 use abacas::expr::{Expr, Symbol};
+use rug::ops::Pow;
 
 use crate::token::Token::{self, *};
 
@@ -18,9 +19,9 @@ impl Parser {
 		T: Iterator<Item = Token>,
 	{
 		let mut lhs = match tokens.next() {
-			Some(Sub) => Expr::Neg(Box::new(Self::expr_bp(prefix_bp(Sub), tokens))),
-			Some(Number(num)) => Expr::Number(num),
-			Some(Ident(name)) => Expr::Var(Symbol::new(name)),
+			Some(Sub) => -Self::expr_bp(prefix_bp(Sub), tokens),
+			Some(Number(num)) => Expr::Num(num),
+			Some(Ident(name)) => Expr::Var(Symbol::new(name).unwrap()),
 			Some(LParen) => {
 				let lhs = Self::expr_bp(0, tokens);
 				assert_eq!(tokens.next(), Some(RParen));

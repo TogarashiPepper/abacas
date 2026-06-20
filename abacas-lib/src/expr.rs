@@ -1,459 +1,396 @@
-//! Module containing [`Expr`] and related structs, like [`Symbol`]
+//! The expression structure and its related items.
+
 use std::cmp::Ordering;
-use std::fmt::Display;
+use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use itertools::Itertools;
+use rug::ops::Pow;
 
 use crate::number::Number;
 use crate::polynomial::Polynomial;
 
-/// Struct representing a Symbol, i.e. `x`, `π`, or even something like `T_area`.
-#[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash)]
+/// Represents a symbol like `x` or `pi`.
+#[derive(Clone, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct Symbol(String);
 
 impl Symbol {
-	/// Initialize a symbol with the given name
-	pub fn new(name: String) -> Self {
-		Self(name)
-	}
-
-	/// Gets the name of the symbol
+	/// Gets the name of this symbol.
 	pub fn name(&self) -> &str {
 		&self.0
 	}
-}
 
-impl Display for Symbol {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		write!(f, "{}", self.0)
+	/// Creates a new symbol with the given name, if it matches the symbol criteria.
+	pub fn new(name: String) -> Option<Self> {
+		if name.is_empty() || name.chars().any(char::is_whitespace) {
+			None
+		} else {
+			Some(Self(name))
+		}
 	}
 }
 
-/// Represents a general expression
-#[derive(PartialEq, Debug, Eq, Hash, Clone)]
+impl fmt::Display for Symbol {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		self.0.fmt(f)
+	}
+}
+
+/// Represents a general expression.
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum Expr {
-	/// Represents .0 to the power of .1
-	Pow(Box<Expr>, Box<Expr>),
-	/// Represents the sum of some [`Expr`]s
-	Add(Vec<Expr>),
-	/// Represents the product of some [`Expr`]s
-	Mul(Vec<Expr>),
-	/// Represents the additive inverse of an [`Expr`]
-	Neg(Box<Expr>),
-	/// A constant number
-	Number(Number),
-	/// A variable
-	Var(Symbol),
-	/// A function call
-	Fun(Symbol, Box<Expr>),
-	/// Special form of [`Expr`] that permits extra operations
+	/// Represents the sum of multiple expressions.
+	Add(Vec<Self>),
+	/// Represents a function call.
+	Fun(Symbol, Vec<Self>),
+	/// Represents the product of multiple expressions.
+	Mul(Vec<Self>),
+	/// Represents a constant number.
+	Num(Number),
+	/// Represents a polynomial.
 	Poly(Symbol, Polynomial),
+	/// Represents the power of two expressions.
+	Pow(Box<Self>, Box<Self>),
+	/// Represents a variable number.
+	Var(Symbol),
 }
 
+// Constants
 impl Expr {
-	/// Returns `true` if the expr is [`Number`].
-	///
-	/// [`Number`]: Expr::Number
-	#[must_use]
-	fn is_number(&self) -> bool {
-		matches!(self, Self::Number(..))
+	/// The number negative one (`-1`).
+	pub fn neg_one() -> Self {
+		Self::Num(Number::neg_one())
 	}
 
-	fn zero() -> Expr {
-		Expr::Number(Number::zero())
+	/// The number one (`1`).
+	pub fn one() -> Self {
+		Self::Num(Number::one())
 	}
 
-	fn one() -> Expr {
-		Expr::Number(Number::one())
+	/// The number zero (`0`).
+	pub fn zero() -> Self {
+		Self::Num(Number::zero())
+	}
+}
+
+// Guards
+impl Expr {
+	/// Whether this is the number negative one (`-1`).
+	pub fn is_neg_one(&self) -> bool {
+		matches!(self, Self::Num(num) if num.is_neg_one())
 	}
 
-	fn is_one(&self) -> bool {
+	/// Whether this is a constant number.
+	pub const fn is_num(&self) -> bool {
+		matches!(self, Self::Num(_))
+	}
+
+	/// Whether this is the number one (`1`).
+	pub fn is_one(&self) -> bool {
+		matches!(self, Self::Num(num) if num.is_one())
+	}
+
+	/// Whether this is a polynomial.
+	pub const fn is_poly(&self) -> bool {
+		matches!(self, Self::Poly(_, _))
+	}
+
+	/// Whether this is the number zero (`0`).
+	pub const fn is_zero(&self) -> bool {
+		matches!(self, Self::Num(num) if num.is_zero())
+	}
+}
+
+// Operations
+impl Expr {
+	/// Returns the inner value if this expression is [`Self::Num`], otherwise returns [`None`].
+	pub fn into_num(self) -> Option<Number> {
 		match self {
-			Number(n) => n.is_one(),
-			_ => false,
+			Self::Num(num) => Some(num),
+			_ => None,
 		}
 	}
 
-	fn is_zero(&self) -> bool {
+	/// Returns the inner value if this expression is [`Self::Poly`], otherwise returns [`None`].
+	pub fn into_poly(self) -> Option<(Symbol, Polynomial)> {
 		match self {
-			Number(n) => n.is_zero(),
-			_ => false,
+			Self::Poly(sym, poly) => Some((sym, poly)),
+			_ => None,
 		}
 	}
 
-	fn is_neg_one(&self) -> bool {
-		match self {
-			Number(n) => n.is_neg_one(),
-			_ => false,
-		}
-	}
-
-	fn inv(self) -> Self {
-		match self {
-			a @ (Add(_) | Neg(_) | Var(_) | Fun(..) | Poly(..)) => {
-				Pow(Box::new(a), Box::new(Number(Number::neg_one())))
-			}
-			Mul(exprs) => Mul(exprs.into_iter().map(Self::inv).collect()),
-			Pow(base, expr) if expr.is_neg_one() => *base,
-			Pow(base, exp) => Pow(base, Box::new(-*exp)),
-			Number(rational) => Number(rational.recip()),
-		}
-	}
-
-	/// Simplify an expression (best-effort, may not fully simplify)
+	/// Simplifies an expression on a best-effort basis.
 	pub fn simplify(self) -> Self {
-		let is_add = matches!(self, Add(..));
-
 		match self {
-			Pow(base, exp) if exp.is_one() => *base,
-			Add(exprs) | Mul(exprs) => {
-				let mut simplified: Vec<Expr> = exprs.into_iter().map(Expr::simplify).collect();
-				simplified.sort_by(Expr::cmp);
-
-				if simplified.len() == 1 {
-					simplified.remove(0)
-				} else if is_add {
-					Add(Self::simplify_add(simplified))
-				} else {
-					Mul(Self::simplify_mul(simplified))
-				}
-			}
-			Neg(mut expr) => {
-				*expr = expr.simplify();
-
-				if let Neg(inner_expr) = *expr {
-					inner_expr.simplify()
-				} else {
-					Neg(expr)
-				}
-			}
-			Pow(base, exp) => {
-				let (mut base, mut exp) = if let Pow(base_inner, exp_inner) = *base {
-					(base_inner, *exp * *exp_inner)
-				} else {
-					(base, *exp)
-				};
-
-				*base = base.simplify();
-				exp = exp.simplify();
-
-				if exp.is_zero() {
-					Number(Number::one())
-				} else if exp.is_one() {
-					*base
-				} else {
-					Pow(base, Box::new(exp))
-				}
-			}
-			other => other,
+			Self::Add(exprs) => Self::simplify_add(exprs),
+			Self::Fun(sym, args) => Self::simplify_fun(sym, args),
+			Self::Mul(exprs) => Self::simplify_mul(exprs),
+			Self::Num(_) => self,
+			Self::Poly(sym, poly) => Self::simplify_poly(sym, poly),
+			Self::Pow(base, exp) => Self::simplify_pow(*base, *exp),
+			Self::Var(_) => self,
 		}
 	}
 
-	/// Simplify a sum. Currently handles:
-	/// - reducing 2 + 3 + x + 4 -> x + 9
-	fn simplify_add(mut exprs: Vec<Expr>) -> Vec<Expr> {
-		// Group all lone numbers into one
-		let sum = exprs.extract_if(.., |e| e.is_number()).fold(Expr::zero(), |a, b| a + b);
-
+	/// Simplifies a [`Self::Add`] expression.
+	fn simplify_add(mut exprs: Vec<Self>) -> Self {
+		// Simplify all elements individually and flatten inner sums
 		exprs = exprs
 			.into_iter()
-			.flat_map(|e| {
-				let e = e.simplify();
-				if let Add(inner) = e { inner } else { vec![e] }
+			.flat_map(|expr| match expr.simplify() {
+				Self::Add(exprs) => exprs,
+				expr => vec![expr],
 			})
 			.collect();
 
-		let mut multiset: Vec<(Expr, Number)> = vec![];
+		// Add all polynomials into one per symbol
+		let mut polys = exprs
+			.extract_if(.., |expr| expr.is_poly())
+			.map(|expr| expr.into_poly().unwrap())
+			.into_grouping_map()
+			.reduce(|lhs, _, rhs| lhs + rhs);
 
-		for exp in exprs {
-			let (coeff, mut core) = match exp {
-				c @ (Add(_) | Var(_) | Fun(..) | Poly(..) | Pow(..)) => (Number::one(), c),
-				Neg(exp) => (Number::neg_one(), *exp),
-				Mul(exprs) => {
-					let (x, y) = get_number(exprs);
-					(x.unwrap_or_else(Number::one), Mul(y))
-				}
-				Number(_) => unreachable!(),
-			};
+		// Extract constant polynomials from the map
+		let constants = polys
+			.extract_if(|_, poly| poly.is_constant())
+			.map(|(_, poly)| poly.into_constant().unwrap());
 
-			core = core.simplify();
+		// Add all numbers into one
+		let num = exprs
+			.extract_if(.., |expr| expr.is_num())
+			.map(|expr| expr.into_num().unwrap())
+			.chain(constants)
+			.reduce(|lhs, rhs| lhs + &rhs);
 
-			match multiset.binary_search_by(|(e, _)| Expr::cmp(e, &core)) {
-				Ok(idx) => multiset[idx].1 += &coeff,
-				Err(idx) => multiset.insert(idx, (core, coeff)),
-			}
-		}
+		// For every other expression, count how often it appears
+		let counts = exprs.into_iter().counts();
 
-		let mut end: Vec<Expr> = multiset
+		// Convert into vec of muls and add extracted number and polynomials
+		let mut result: Vec<_> = counts
 			.into_iter()
-			.flat_map(|(exp, coeff)| {
-				if coeff.is_zero() {
-					None
-				} else if coeff.is_one() {
-					Some(exp)
-				} else if coeff.is_neg_one() {
-					Some(Neg(Box::new(exp)))
-				} else {
-					Some(Mul(vec![Number(coeff), exp]))
-				}
-			})
-			.map(Expr::simplify)
+			.map(|(expr, count)| expr * Self::Num(count.into()))
+			.chain(num.filter(|num| !num.is_zero()).map(Self::Num))
+			.chain(polys.into_iter().map(|(symbol, poly)| Self::Poly(symbol, poly)))
 			.collect();
 
-		if !sum.is_zero() {
-			end.push(sum);
-		}
+		// Sort the resulting array
+		result.sort_by(Self::cmp);
 
-		end.sort_by(Expr::cmp);
-		end
+		// Return the result as a new sum
+		Self::Add(result)
 	}
 
-	/// Simplify a product. Currently handles:
-	/// - reducing 2 * 4 * x * y * 3 -> x * y * 24
-	fn simplify_mul(mut exprs: Vec<Expr>) -> Vec<Expr> {
-		let prod = exprs.extract_if(.., |e| e.is_number()).fold(Expr::one(), |a, b| a * b);
+	/// Simplifies a [`Self::Fun`] expression.
+	fn simplify_fun(sym: Symbol, mut args: Vec<Self>) -> Self {
+		// Simplify the inner arguments
+		args = args.into_iter().map(Self::simplify).collect();
 
+		// Return the result as a new function call
+		Self::Fun(sym, args)
+	}
+
+	/// Simplifies a [`Self::Mul`] expression.
+	fn simplify_mul(mut exprs: Vec<Self>) -> Self {
+		// Simplify all elements individually and flatten inner products
 		exprs = exprs
 			.into_iter()
-			.flat_map(|e| {
-				let e = e.simplify();
-				if let Mul(inner) = e { inner } else { vec![e] }
+			.flat_map(|expr| match expr.simplify() {
+				Self::Mul(exprs) => exprs,
+				expr => vec![expr],
 			})
 			.collect();
 
-		if prod.is_zero() {
-			return vec![];
+		// Multiply all polynomials into one per symbol
+		let mut polys = exprs
+			.extract_if(.., |expr| expr.is_poly())
+			.map(|expr| expr.into_poly().unwrap())
+			.into_grouping_map()
+			.reduce(|lhs, _, rhs| lhs * &rhs);
+
+		// Extract constant polynomials from the map
+		let constants = polys
+			.extract_if(|_, poly| poly.is_constant())
+			.map(|(_, poly)| poly.into_constant().unwrap());
+
+		// Multiply all numbers into one
+		let num = exprs
+			.extract_if(.., |expr| expr.is_num())
+			.map(|expr| expr.into_num().unwrap())
+			.chain(constants)
+			.reduce(|lhs, rhs| lhs * &rhs);
+
+		// If the number is zero, the product will be zero
+		if num.as_ref().is_some_and(Number::is_zero) {
+			return Self::zero();
 		}
 
-		// .0 is base, .1 is exponent
-		let mut multiset: Vec<(Expr, Expr)> = vec![];
+		// For every other expression, count how often it appears
+		let counts = exprs.into_iter().counts();
 
-		for exp in exprs {
-			let (mut base, mut exponent) = match exp {
-				Pow(base, exp) => (*base, *exp),
-				other => (other, Number(Number::one())),
-			};
-
-			base = base.simplify();
-			exponent = exponent.simplify();
-
-			match multiset.binary_search_by(|(e, _)| Expr::cmp(e, &base)) {
-				// TODO: impl AddAssign for Expr
-				Ok(idx) => multiset[idx].1 = multiset[idx].1.clone() + exponent,
-				Err(idx) => multiset.insert(idx, (base, exponent)),
-			}
-		}
-
-		let mut end: Vec<Expr> = multiset
+		// Convert into vec of pows and multiply extracted number and polynomials
+		let mut result: Vec<_> = counts
 			.into_iter()
-			.flat_map(|(base, exp)| {
-				if exp.is_one() {
-					Some(base)
-				} else if exp.is_zero() {
-					None
-				} else {
-					Some(Pow(Box::new(base), Box::new(exp)))
-				}
-			})
-			.map(Expr::simplify)
+			.map(|(expr, count)| expr.pow(Self::Num(count.into())))
+			.chain(num.filter(|num| !num.is_one()).map(Self::Num))
+			.chain(polys.into_iter().map(|(symbol, poly)| Self::Poly(symbol, poly)))
 			.collect();
 
-		if !prod.is_one() {
-			end.push(prod);
+		// Sort the resulting array
+		result.sort_by(Self::cmp);
+
+		// Return the result as a new product
+		Self::Mul(result)
+	}
+
+	/// Simplifies a [`Self::Poly`] expression.
+	fn simplify_poly(sym: Symbol, poly: Polynomial) -> Self {
+		// If the polynomial is constant, return it as a number
+		if poly.is_constant() {
+			return Self::Num(poly.into_constant().unwrap());
 		}
 
-		end.sort_by(Expr::cmp);
-		end
+		// Return the result as a new polynomial
+		Self::Poly(sym, poly)
 	}
 
-	/// Raise self to the power of rhs
-	pub fn pow(self, rhs: Self) -> Self {
-		Pow(Box::new(self), Box::new(rhs))
+	/// Simplifies a [`Self::Pow`] expression.
+	fn simplify_pow(mut base: Self, mut exp: Self) -> Self {
+		// First simplify the base and exponent separately
+		base = base.simplify();
+		exp = exp.simplify();
+
+		// If exponent is zero, return one
+		if exp.is_zero() {
+			return Self::one();
+		}
+
+		// If exponent is one, return the base
+		if exp.is_one() {
+			return base;
+		}
+
+		// If base is another pow, multiply the exponents
+		if let Self::Pow(base_base, base_exp) = base {
+			return Self::Pow(base_base, Self::Mul(vec![*base_exp, exp]).into()).simplify();
+		}
+
+		// Return the result as a new power
+		Self::Pow(base.into(), exp.into())
 	}
 
-	fn cmp(a: &Expr, b: &Expr) -> Ordering {
-		match (a, b) {
-			(Add(p), Add(q)) => {
-				let mut p = p.clone();
-				let mut q = q.clone();
+	/// Compares two expressions for a consistent ordering.
+	fn cmp(&self, other: &Self) -> Ordering {
+		match (self, other) {
+			// If both are sums, compare the vecs
+			(Self::Add(lhs), Self::Add(rhs)) => Self::cmp_vecs(lhs, rhs),
 
-				p.sort_by(Expr::cmp);
-				q.sort_by(Expr::cmp);
-
-				let r = p.into_iter().zip(q).find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal);
-
-				match r {
-					Some((a, b)) => Expr::cmp(&a, &b),
-					None => Ordering::Equal,
-				}
+			// If both are function calls, compare symbol first, then arguments
+			(Self::Fun(lhs_sym, lhs_args), Self::Fun(rhs_sym, rhs_args)) => {
+				lhs_sym.cmp(rhs_sym).then_with(|| Self::cmp_vecs(lhs_args, rhs_args))
 			}
-			(Add(..), _) => Ordering::Greater,
-			(_, Add(..)) => Ordering::Less,
 
-			(Mul(p), Mul(q)) => {
-				let mut p = p.clone();
-				let mut q = q.clone();
+			// If both are products, compare the vecs
+			(Self::Mul(lhs), Self::Mul(rhs)) => Self::cmp_vecs(lhs, rhs),
 
-				p.sort_by(Expr::cmp);
-				q.sort_by(Expr::cmp);
+			// If both are numbers, compare them directly
+			(Self::Num(lhs), Self::Num(rhs)) => lhs.cmp(rhs),
 
-				let r = p.into_iter().zip(q).find(|(x, y)| Expr::cmp(x, y) != Ordering::Equal);
-
-				match r {
-					Some((a, b)) => Expr::cmp(&a, &b),
-					None => Ordering::Equal,
-				}
+			// If both are polynomials, compare symbol first, then monomials
+			(Self::Poly(lhs_sym, lhs_poly), Self::Poly(rhs_sym, rhs_poly)) => {
+				lhs_sym.cmp(rhs_sym).then_with(|| Self::cmp_polys(lhs_poly, rhs_poly))
 			}
-			(Mul(..), _) => Ordering::Greater,
-			(_, Mul(..)) => Ordering::Less,
 
-			(Neg(p), Neg(q)) => Expr::cmp(p, q),
-			(Neg(..), _) => Ordering::Greater,
-			(_, Neg(..)) => Ordering::Less,
-
-			(Pow(b1, e1), Pow(b2, e2)) => {
-				let cmp_base = Expr::cmp(b1, b2);
-
-				match cmp_base {
-					Ordering::Less | Ordering::Greater => cmp_base,
-					Ordering::Equal => Expr::cmp(e1, e2),
-				}
+			// If both are powers, compare base first, then exponent
+			(Self::Pow(lhs_base, lhs_exp), Self::Pow(rhs_base, rhs_exp)) => {
+				lhs_base.cmp(rhs_base).then_with(|| lhs_exp.cmp(rhs_exp))
 			}
-			(Pow(..), _) => Ordering::Greater,
-			(_, Pow(..)) => Ordering::Less,
 
-			(Number(p), Number(q)) => p.cmp(q),
-			(Number(..), _) => Ordering::Greater,
-			(_, Number(..)) => Ordering::Less,
+			// If both are variables, compare them directly
+			(Self::Var(lhs), Self::Var(rhs)) => lhs.cmp(rhs),
 
-			(Var(p), Var(q)) => p.cmp(q),
-			(Var(..), _) => Ordering::Greater,
-			(_, Var(..)) => Ordering::Less,
-
-			(Fun(r, p), Fun(s, q)) => {
-				let ord = Expr::cmp(p, q);
-
-				if ord == Ordering::Equal { r.cmp(s) } else { ord }
-			}
-			(Fun(..), _) => Ordering::Greater,
-			(_, Fun(..)) => Ordering::Less,
-
-			(Poly(r, p), Poly(s, q)) => {
-				let mut ord = r.cmp(s);
-
-				if ord == Ordering::Equal {
-					ord = p.degree().cmp(&q.degree());
-				}
-
-				ord
-			}
+			// Otherwise, compare the discriminants
+			(Self::Add(_), _) => Ordering::Less,
+			(_, Self::Add(_)) => Ordering::Greater,
+			(Self::Fun(_, _), _) => Ordering::Less,
+			(_, Self::Fun(_, _)) => Ordering::Greater,
+			(Self::Mul(_), _) => Ordering::Less,
+			(_, Self::Mul(_)) => Ordering::Greater,
+			(Self::Num(_), _) => Ordering::Less,
+			(_, Self::Num(_)) => Ordering::Greater,
+			(Self::Poly(_, _), _) => Ordering::Less,
+			(_, Self::Poly(_, _)) => Ordering::Greater,
+			(Self::Pow(_, _), _) => Ordering::Less,
+			(_, Self::Pow(_, _)) => Ordering::Greater,
 		}
 	}
-}
 
-fn concat(mut l: Vec<Expr>, r: Vec<Expr>) -> Vec<Expr> {
-	l.extend(r);
-	l
-}
+	/// Compares two polynomials for a consistent ordering.
+	fn cmp_polys(lhs: &Polynomial, rhs: &Polynomial) -> Ordering {
+		lhs.monomials()
+			.zip(rhs.monomials())
+			.map(|(lhs, rhs)| lhs.coeff.cmp(&rhs.coeff).then_with(|| lhs.degree.cmp(&rhs.degree)))
+			.find(|ord| ord.is_ne())
+			.unwrap_or_else(|| lhs.monomials().len().cmp(&rhs.monomials().len()))
+	}
 
-fn push(mut l: Vec<Expr>, r: Expr) -> Vec<Expr> {
-	let (Ok(idx) | Err(idx)) = l.binary_search_by(|x| Expr::cmp(x, &r));
-	l.insert(idx, r);
-	l
-}
+	/// Compares two expression vecs for a consistent ordering.
+	fn cmp_vecs(lhs: &[Self], rhs: &[Self]) -> Ordering {
+		lhs.iter()
+			.zip(rhs)
+			.map(|(lhs, rhs)| lhs.cmp(rhs))
+			.find(|ord| ord.is_ne())
+			.unwrap_or_else(|| lhs.len().cmp(&rhs.len()))
+	}
 
-fn get_number(mut v: Vec<Expr>) -> (Option<Number>, Vec<Expr>) {
-	let idx = v.iter().position(|e| matches!(e, Number(..)));
-	match idx {
-		Some(idx) => {
-			let num = match v.remove(idx) {
-				Number(n) => n,
-				_ => unreachable!(),
-			};
+	/// Formats this expression with parentheses if necessary.
+	fn with_parens(&self) -> impl fmt::Display {
+		struct WithParens<'a>(&'a Expr);
 
-			(Some(num), v)
+		impl fmt::Display for WithParens<'_> {
+			fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+				match self.0 {
+					// If the expr has more than one term, use parentheses
+					Expr::Add(exprs) if exprs.len() > 1 => write!(f, "({})", self.0),
+					Expr::Mul(exprs) if exprs.len() > 1 => write!(f, "({})", self.0),
+					Expr::Poly(_, poly) if poly.monomials().len() > 1 => write!(f, "({})", self.0),
+
+					// No wildcard so new variants do not get silenced
+					Expr::Add(_) => write!(f, "{}", self.0),
+					Expr::Fun(_, _) => write!(f, "{}", self.0),
+					Expr::Mul(_) => write!(f, "{}", self.0),
+					Expr::Num(_) => write!(f, "{}", self.0),
+					Expr::Poly(_, _) => write!(f, "{}", self.0),
+					Expr::Pow(_, _) => write!(f, "{}", self.0),
+					Expr::Var(_) => write!(f, "{}", self.0),
+				}
+			}
 		}
-		None => (None, v),
+
+		WithParens(self)
 	}
 }
 
-fn find_num(v: &mut [Expr]) -> Option<&mut Number> {
-	v.iter().position(|e| e.is_number()).map(|p| match &mut v[p] {
-		Expr::Number(n) => n,
-		_ => unreachable!(),
-	})
-}
-
-use Expr::*;
-
-impl Add for Expr {
+impl Add<Self> for Expr {
 	type Output = Self;
 
 	fn add(self, rhs: Self) -> Self::Output {
-		match (self, rhs) {
-			(Add(l), Add(r)) => Add(concat(l, r)),
-
-			(Add(mut a), Number(num)) | (Number(num), Add(mut a)) => {
-				if let Some(existing_num) = find_num(&mut a) {
-					*existing_num += &num;
-
-					Expr::Add(a)
-				} else {
-					Expr::Add(push(a, Expr::Number(num)))
-				}
-			}
-
-			// y + 2x - y => 2x
-			(Add(mut a), Neg(neg)) | (Neg(neg), Add(mut a)) => {
-				if let Some(pos) = a.iter().position(|e| *e == *neg) {
-					a.remove(pos);
-				}
-
-				Expr::Add(push(a, Neg(neg)))
-			}
-			(Add(a), other) | (other, Add(a)) => Add(push(a, other)),
-
-			(Number(l), Number(r)) => Number(l + &r),
-
-			(Poly(s1, p1), Poly(s2, p2)) if s1 == s2 => Poly(s1, p1 + p2),
-
-			(l, r) => Add(vec![l, r]),
-		}
+		Self::Add(vec![self, rhs]).simplify()
 	}
 }
 
-impl Div for Expr {
+impl Div<Self> for Expr {
 	type Output = Self;
 
-	#[allow(clippy::suspicious_arithmetic_impl)]
 	fn div(self, rhs: Self) -> Self::Output {
-		self * rhs.inv()
+		Self::Mul(vec![self, Self::Pow(rhs.into(), Self::neg_one().into())]).simplify()
 	}
 }
 
-impl Mul for Expr {
+impl Mul<Self> for Expr {
 	type Output = Self;
 
 	fn mul(self, rhs: Self) -> Self::Output {
-		match (self, rhs) {
-			(Mul(l), Mul(r)) => Mul(concat(l, r)),
-
-			(Mul(mut a), Number(num)) | (Number(num), Mul(mut a)) => {
-				if let Some(existing_num) = find_num(&mut a) {
-					*existing_num *= &num;
-
-					Expr::Mul(a)
-				} else {
-					Expr::Mul(push(a, Expr::Number(num)))
-				}
-			}
-
-			(Mul(m), other) | (other, Mul(m)) => Mul(push(m, other)),
-			(Number(l), Number(r)) => Number(l * &r),
-
-			(l, r) => Mul(vec![l, r]),
-		}
+		Self::Mul(vec![self, rhs]).simplify()
 	}
 }
 
@@ -461,64 +398,36 @@ impl Neg for Expr {
 	type Output = Self;
 
 	fn neg(self) -> Self::Output {
-		match self {
-			e @ (Mul(_) | Var(_) | Fun(..) | Pow(..)) => Neg(Box::new(e)),
-			Add(exprs) => Add(exprs.into_iter().map(|e| -e).collect()),
-			Poly(sym, inner) => Poly(sym, -inner),
-			Neg(expr) => *expr,
-			Number(rational) => Number(-rational),
-		}
+		Self::Mul(vec![self, Self::neg_one()]).simplify()
 	}
 }
 
-impl Sub for Expr {
+impl Pow<Self> for Expr {
+	type Output = Self;
+
+	fn pow(self, rhs: Self) -> Self::Output {
+		Self::Pow(self.into(), rhs.into()).simplify()
+	}
+}
+
+impl Sub<Self> for Expr {
 	type Output = Self;
 
 	fn sub(self, rhs: Self) -> Self::Output {
-		self + -rhs
+		Self::Add(vec![self, Self::Mul(vec![rhs, Self::neg_one()])]).simplify()
 	}
 }
 
-fn needs_parens(exp: &Expr) -> bool {
-	matches!(exp, Add(_) | Mul(_) | Poly(..) | Pow(..))
-}
-
-impl Display for Expr {
-	fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-		let st = match self {
-			Add(exprs) => exprs.iter().map(|e| format!("{e}")).join(" + "),
-			Mul(exprs) => exprs
-				.iter()
-				.map(|e| {
-					if matches!(e, Add(..) | Poly(..)) {
-						format!("({e})")
-					} else {
-						format!("{e}")
-					}
-				})
-				.join("×"),
-			Neg(expr) => match &**expr {
-				Add(_) | Mul(_) | Poly(..) => format!("-({expr})"),
-				_ => format!("-{expr}"),
-			},
-			Pow(base, exp) if exp.is_neg_one() => match &**base {
-				Add(_) | Mul(_) | Poly(..) => format!("({base})^-1"),
-				_ => format!("{base}^-1"),
-			},
-			Number(rational) => format!("{rational}"),
-			Var(symbol) => format!("{symbol}"),
-			Fun(symbol, expr) => format!("{symbol}({expr})"),
-			Poly(symbol, polynomial) => format!("{polynomial}").replace("x", &symbol.0),
-			Pow(base, exp) => match (needs_parens(base), needs_parens(exp)) {
-				(false, false) => format!("{base}^{exp}"),
-				(true, true) => format!("(){base})^({exp})"),
-				(true, false) => format!("({base})^{exp}"),
-				(false, true) => format!("{base}^({exp})"),
-			},
-		};
-
-		write!(f, "{st}")?;
-
-		Ok(())
+impl fmt::Display for Expr {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			Self::Add(exprs) => write!(f, "{}", exprs.iter().format(" + ")),
+			Self::Fun(sym, args) => write!(f, "{sym}({})", args.iter().format(", ")),
+			Self::Mul(exprs) => write!(f, "{}", exprs.iter().map(Self::with_parens).format(" * ")),
+			Self::Num(num) => write!(f, "{num}"),
+			Self::Poly(sym, poly) => write!(f, "{}", poly.to_string().replace('x', sym.name())),
+			Self::Pow(base, exp) => write!(f, "{}^{}", base.with_parens(), exp.with_parens()),
+			Self::Var(sym) => write!(f, "{sym}"),
+		}
 	}
 }

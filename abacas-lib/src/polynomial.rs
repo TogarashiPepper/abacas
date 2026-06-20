@@ -137,7 +137,7 @@ impl Polynomial {
 
 		let remainder = Self::new(self.0.split_off(index));
 
-		for monomial in self.0.iter_mut() {
+		for monomial in &mut self.0 {
 			monomial.degree -= &normalizer.degree;
 		}
 
@@ -289,6 +289,42 @@ impl Polynomial {
 		&mut self.0[index]
 	}
 
+	/// Returns the inner [`Number`] if this is a constant polynomial, otherwise returns [`None`].
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::monomial::Monomial;
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// assert_eq!(Polynomial::from(Monomial::constant(3)).into_constant(), Some(3.into()));
+	/// assert_eq!(Polynomial::from(Monomial::linear(3)).into_constant(), None);
+	/// ```
+	pub fn into_constant(self) -> Option<Number> {
+		if self.is_zero() {
+			Some(Number::zero())
+		} else if self.is_constant() {
+			Some(self.0.into_iter().next().unwrap().coeff)
+		} else {
+			None
+		}
+	}
+
+	/// Returns whether this is a constant polynomial.
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::monomial::Monomial;
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// assert!(Polynomial::from(Monomial::constant(3)).is_constant());
+	/// assert!(!Polynomial::from(Monomial::linear(3)).is_constant());
+	/// ```
+	pub fn is_constant(&self) -> bool {
+		self.0.len() <= 1 && self.monomials().next().is_none_or(|mono| mono.degree.is_zero())
+	}
+
 	/// Returns whether this is the zero polynomial.
 	///
 	/// # Examples
@@ -435,7 +471,7 @@ impl AddAssign<Monomial> for Polynomial {
 	}
 }
 
-impl AddAssign for Polynomial {
+impl AddAssign<Self> for Polynomial {
 	fn add_assign(&mut self, rhs: Self) {
 		for monomial in rhs.0 {
 			*self += monomial;
@@ -460,7 +496,7 @@ where
 	Monomial: DivAssign<T>,
 {
 	fn div_assign(&mut self, rhs: T) {
-		for monomial in self.0.iter_mut() {
+		for monomial in &mut self.0 {
 			*monomial /= rhs;
 		}
 	}
@@ -489,7 +525,7 @@ where
 	Monomial: MulAssign<T>,
 {
 	fn mul_assign(&mut self, rhs: T) {
-		for monomial in self.0.iter_mut() {
+		for monomial in &mut self.0 {
 			*monomial *= rhs;
 		}
 	}
@@ -499,7 +535,7 @@ impl MulAssign<&Self> for Polynomial {
 	fn mul_assign(&mut self, rhs: &Self) {
 		let old = mem::take(self);
 
-		for monomial in rhs.0.iter() {
+		for monomial in &rhs.0 {
 			*self += old.clone() * monomial;
 		}
 	}
@@ -516,7 +552,7 @@ impl Neg for Polynomial {
 
 impl NegAssign for Polynomial {
 	fn neg_assign(&mut self) {
-		for monomial in self.0.iter_mut() {
+		for monomial in &mut self.0 {
 			monomial.neg_assign();
 		}
 	}
@@ -580,7 +616,7 @@ impl SubAssign<Monomial> for Polynomial {
 	}
 }
 
-impl SubAssign for Polynomial {
+impl SubAssign<Self> for Polynomial {
 	fn sub_assign(&mut self, rhs: Self) {
 		for monomial in rhs.0 {
 			*self -= monomial;
