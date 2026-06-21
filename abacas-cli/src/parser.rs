@@ -1,5 +1,6 @@
 use std::iter::Peekable;
 
+use abacas::context::Context;
 use abacas::expr::{Expr, Symbol};
 use abacas::monomial::Monomial;
 use rug::ops::Pow;
@@ -9,13 +10,13 @@ use crate::token::Token::{self, *};
 pub struct Parser {}
 
 impl Parser {
-	pub fn parse_line(line: Vec<Token>) -> Expr {
+	pub fn parse_line(ctx: &mut Context, line: Vec<Token>) -> Expr {
 		let mut it = line.into_iter().peekable();
 
-		Self::expr_bp(0, &mut it)
+		Self::expr_bp(ctx, 0, &mut it)
 	}
 
-	fn expr_bp<T>(min_bp: u8, tokens: &mut Peekable<T>) -> Expr
+	fn expr_bp<T>(ctx: &mut Context, min_bp: u8, tokens: &mut Peekable<T>) -> Expr
 	where
 		T: Iterator<Item = Token>,
 	{
@@ -50,7 +51,7 @@ impl Parser {
 
 						if token == Comma && depth == 0 {
 							let mut it = expression.clone().into_iter().peekable();
-							let data = Self::expr_bp(0, &mut it);
+							let data = Self::expr_bp(ctx, 0, &mut it);
 
 							params.push(data);
 							expression.clear();
@@ -63,7 +64,7 @@ impl Parser {
 
 					if !expression.is_empty() {
 						let mut it = expression.clone().into_iter().peekable();
-						let data = Self::expr_bp(0, &mut it);
+						let data = Self::expr_bp(ctx, 0, &mut it);
 
 						params.push(data);
 						expression.clear();
@@ -75,7 +76,7 @@ impl Parser {
 				}
 			}
 			Some(LParen) => {
-				let lhs = Self::expr_bp(0, tokens);
+				let lhs = Self::expr_bp(ctx, 0, tokens);
 				assert_eq!(tokens.next(), Some(RParen));
 
 				lhs
@@ -93,12 +94,13 @@ impl Parser {
 					}
 
 					let op = tokens.next().unwrap();
-					let rhs = Self::expr_bp(r_bp, tokens);
+					let rhs = Self::expr_bp(ctx, r_bp, tokens);
 
 					match op {
 						Eq => {
 							if let Expr::Var(name) = lhs {
-								lhs = Expr::Assignment(name, Box::new(rhs));
+								ctx.variables.insert(name, rhs.clone());
+								lhs = rhs;
 							} else {
 								unimplemented!()
 							}
@@ -119,7 +121,7 @@ impl Parser {
 						break;
 					}
 
-					let rhs = Self::expr_bp(r_bp, tokens);
+					let rhs = Self::expr_bp(ctx, r_bp, tokens);
 
 					lhs = lhs * rhs;
 				}

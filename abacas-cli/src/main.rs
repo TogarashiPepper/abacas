@@ -46,7 +46,7 @@ fn main() {
 	let tokens = Token::lexer(&exp).collect::<Result<Vec<Token>, ()>>().unwrap();
 
 	let mut ctx = Context::new();
-	let mut ast = Parser::parse_line(tokens);
+	let mut ast = Parser::parse_line(&mut ctx, tokens);
 
 	if !cfg.raw {
 		ast = ast.simplify(&mut ctx);
@@ -142,7 +142,7 @@ fn repl(cfg: CasConfig) {
 
 				let tokens = Token::lexer(&line).collect::<Result<Vec<Token>, ()>>().unwrap();
 
-				let mut ast = Parser::parse_line(tokens);
+				let mut ast = Parser::parse_line(&mut ctx, tokens);
 
 				if !cfg.raw {
 <<<<<<< HEAD

@@ -3,7 +3,6 @@ use std::collections::HashMap;
 
 use crate::expr::{Expr, Symbol};
 use crate::function::Function;
-use crate::standardlibrary::StandardLibrary;
 
 /// Context struct owns and manages the core "global" data
 #[derive(Debug)]
@@ -12,8 +11,6 @@ pub struct Context {
 	pub variables: HashMap<Symbol, Expr>,
 	/// Functions declared in this context
 	pub functions: HashMap<Symbol, Function>,
-	/// Reference to the standard library
-	pub std: StandardLibrary,
 }
 
 impl Default for Context {
@@ -28,7 +25,6 @@ impl Context {
 		Self {
 			variables: HashMap::new(),
 			functions: HashMap::new(),
-			std: StandardLibrary::new(),
 		}
 	}
 }
