@@ -7,6 +7,7 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 use itertools::Itertools;
 use rug::ops::Pow;
 
+use crate::error::SimplifyError;
 use crate::monomial::Monomial;
 use crate::number::Number;
 use crate::polynomial::Polynomial;
@@ -121,28 +122,29 @@ impl Expr {
 	}
 
 	/// Simplifies this expression on a best-effort basis.
-	pub fn simplify(self) -> Self {
+	pub fn simplify(self) -> Result<Self, SimplifyError> {
 		match self {
 			Self::Add(exprs) => Self::simplify_add(exprs),
 			Self::Fun(name, args) => Self::simplify_fun(name, args),
 			Self::Mul(exprs) => Self::simplify_mul(exprs),
-			Self::Num(_) => self,
+			Self::Num(_) => Ok(self),
 			Self::Poly(sym, poly) => Self::simplify_poly(sym, poly),
 			Self::Pow(base, exp) => Self::simplify_pow(base, exp),
-			Self::Var(_) => self,
+			Self::Var(_) => Ok(self),
 		}
 	}
 
 	/// Simplifies a [`Self::Add`] expression.
-	fn simplify_add(mut exprs: Vec<Self>) -> Self {
+	fn simplify_add(mut exprs: Vec<Self>) -> Result<Self, SimplifyError> {
 		// Simplify all elements individually and flatten inner sums
 		exprs = exprs
 			.into_iter()
-			.flat_map(|expr| match expr.simplify() {
-				Self::Add(exprs) => exprs,
-				expr => vec![expr],
+			.map(|expr| match expr.simplify()? {
+				Self::Add(exprs) => Ok(exprs),
+				expr => Ok(vec![expr]),
 			})
-			.collect();
+			.flatten_ok()
+			.try_collect()?;
 
 		// Add all polynomials into one per symbol
 		let mut polys = exprs
@@ -175,7 +177,7 @@ impl Expr {
 
 		// If at most one element is left, return it separately
 		let mut result = match iter.at_most_one() {
-			Ok(expr) => return expr.unwrap_or_else(Self::zero),
+			Ok(expr) => return Ok(expr.unwrap_or_else(Self::zero)),
 			Err(iter) => iter.collect_vec(),
 		};
 
@@ -183,28 +185,29 @@ impl Expr {
 		result.sort_by(Self::cmp);
 
 		// Return the result as a new sum
-		Self::Add(result)
+		Ok(Self::Add(result))
 	}
 
 	/// Simplifies a [`Self::Fun`] expression.
-	fn simplify_fun(name: Symbol, mut args: Vec<Self>) -> Self {
+	fn simplify_fun(name: Symbol, mut args: Vec<Self>) -> Result<Self, SimplifyError> {
 		// Simplify the inner arguments
-		args = args.into_iter().map(Self::simplify).collect();
+		args = args.into_iter().map(Self::simplify).try_collect()?;
 
 		// Return the result as a new function call
-		Self::Fun(name, args)
+		Ok(Self::Fun(name, args))
 	}
 
 	/// Simplifies a [`Self::Mul`] expression.
-	fn simplify_mul(mut exprs: Vec<Self>) -> Self {
+	fn simplify_mul(mut exprs: Vec<Self>) -> Result<Self, SimplifyError> {
 		// Simplify all elements individually and flatten inner products
 		exprs = exprs
 			.into_iter()
-			.flat_map(|expr| match expr.simplify() {
-				Self::Mul(exprs) => exprs,
-				expr => vec![expr],
+			.map(|expr| match expr.simplify()? {
+				Self::Mul(exprs) => Ok(exprs),
+				expr => Ok(vec![expr]),
 			})
-			.collect();
+			.flatten_ok()
+			.try_collect()?;
 
 		// Multiply all polynomials into one per symbol
 		let mut polys = exprs
@@ -227,7 +230,7 @@ impl Expr {
 
 		// If the number is zero, the product will be zero
 		if num.as_ref().is_some_and(Number::is_zero) {
-			return Self::zero();
+			return Ok(Self::zero());
 		}
 
 		// For every other expression, count how often it appears
@@ -242,7 +245,7 @@ impl Expr {
 
 		// If at most one element is left, return it separately
 		let mut result = match iter.at_most_one() {
-			Ok(expr) => return expr.unwrap_or_else(Self::one),
+			Ok(expr) => return Ok(expr.unwrap_or_else(Self::one)),
 			Err(iter) => iter.collect_vec(),
 		};
 
@@ -250,43 +253,53 @@ impl Expr {
 		result.sort_by(Self::cmp);
 
 		// Return the result as a new product
-		Self::Mul(result)
+		Ok(Self::Mul(result))
 	}
 
 	/// Simplifies a [`Self::Poly`] expression.
-	fn simplify_poly(sym: Symbol, poly: Polynomial) -> Self {
+	fn simplify_poly(sym: Symbol, poly: Polynomial) -> Result<Self, SimplifyError> {
 		// If the polynomial is constant, return it as a number
 		if poly.is_constant() {
-			return Self::Num(poly.into_constant().unwrap());
+			return Ok(Self::Num(poly.into_constant().unwrap()));
 		}
 
 		// Return the result as a new polynomial
-		Self::Poly(sym, poly)
+		Ok(Self::Poly(sym, poly))
 	}
 
 	/// Simplifies a [`Self::Pow`] expression.
-	fn simplify_pow(mut base: Box<Self>, mut exp: Box<Self>) -> Self {
+	fn simplify_pow(mut base: Box<Self>, mut exp: Box<Self>) -> Result<Self, SimplifyError> {
 		// First simplify the base and exponent separately
-		*base = base.simplify();
-		*exp = exp.simplify();
+		*base = base.simplify()?;
+		*exp = exp.simplify()?;
+
+		// If base is zero and exponent is negative, return zero division error
+		if base.is_num_and(Number::is_zero) && exp.is_num_and(Number::is_negative) {
+			return Err(SimplifyError::DivisionByZero);
+		}
 
 		// If base is one or exponent is zero, return one
 		if base.is_num_and(Number::is_one) || exp.is_num_and(Number::is_zero) {
-			return Self::one();
+			return Ok(Self::one());
 		}
 
 		// If base is zero or exponent is one, return the base
 		if base.is_num_and(Number::is_zero) || exp.is_num_and(Number::is_one) {
-			return *base;
+			return Ok(*base);
 		}
 
 		// If base is another power, multiply the exponents
 		if let Self::Pow(base_base, base_exp) = *base {
-			return base_base.pow(Self::Mul(vec![*base_exp, *exp]));
+			return Ok(base_base.pow(Self::Mul(vec![*base_exp, *exp])));
 		}
 
 		// Return the result as a new power
-		Self::Pow(base, exp)
+		Ok(Self::Pow(base, exp))
+	}
+
+	/// Simplifies this expression and unwraps it with a consistent error message.
+	fn unwrap_simplify(self) -> Self {
+		self.simplify().expect("simplification failed")
 	}
 
 	/// Compares this expression with another for a consistent ordering.
@@ -383,25 +396,25 @@ impl Expr {
 
 impl<T: Into<Number>> From<T> for Expr {
 	fn from(value: T) -> Self {
-		Self::Num(value.into()).simplify()
+		Self::Num(value.into()).unwrap_simplify()
 	}
 }
 
 impl From<Monomial> for Expr {
 	fn from(value: Monomial) -> Self {
-		Self::Poly(Symbol::x(), value.into()).simplify()
+		Self::Poly(Symbol::x(), value.into()).unwrap_simplify()
 	}
 }
 
 impl From<Polynomial> for Expr {
 	fn from(value: Polynomial) -> Self {
-		Self::Poly(Symbol::x(), value).simplify()
+		Self::Poly(Symbol::x(), value).unwrap_simplify()
 	}
 }
 
 impl From<Symbol> for Expr {
 	fn from(value: Symbol) -> Self {
-		Self::Var(value).simplify()
+		Self::Var(value).unwrap_simplify()
 	}
 }
 
@@ -409,7 +422,7 @@ impl Add<Self> for Expr {
 	type Output = Self;
 
 	fn add(self, rhs: Self) -> Self::Output {
-		Self::Add(vec![self, rhs]).simplify()
+		Self::Add(vec![self, rhs]).unwrap_simplify()
 	}
 }
 
@@ -426,7 +439,7 @@ impl Mul<Self> for Expr {
 	type Output = Self;
 
 	fn mul(self, rhs: Self) -> Self::Output {
-		Self::Mul(vec![self, rhs]).simplify()
+		Self::Mul(vec![self, rhs]).unwrap_simplify()
 	}
 }
 
@@ -442,7 +455,7 @@ impl Pow<Self> for Expr {
 	type Output = Self;
 
 	fn pow(self, rhs: Self) -> Self::Output {
-		Self::Pow(self.into(), rhs.into()).simplify()
+		Self::Pow(self.into(), rhs.into()).unwrap_simplify()
 	}
 }
 

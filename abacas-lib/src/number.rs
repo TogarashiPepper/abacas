@@ -247,11 +247,11 @@ where
 impl PowAssign<&Self> for Number {
 	fn pow_assign(&mut self, rhs: &Self) {
 		if !rhs.is_integer() {
-			panic!("abacas: exponent must be an integer");
+			panic!("exponent must be an integer");
 		}
 
 		let Some(exponent) = rhs.0.numer().as_abs().to_u32() else {
-			panic!("abacas: exponent must be less than 2^32");
+			panic!("exponent must be less than 2^32");
 		};
 
 		self.0.pow_assign(exponent);

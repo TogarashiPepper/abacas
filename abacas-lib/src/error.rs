@@ -5,7 +5,7 @@ use std::{error, fmt};
 use crate::number::Number;
 
 /// An error that can occur while parsing.
-#[derive(Clone, Debug)]
+#[derive(Debug)]
 pub enum ParseError {
 	/// The parser encountered an invalid number.
 	InvalidNumber(Number),
@@ -23,3 +23,20 @@ impl fmt::Display for ParseError {
 }
 
 impl error::Error for ParseError {}
+
+/// An error that can occur while simplifying an expression.
+#[derive(Debug)]
+pub enum SimplifyError {
+	/// The expression tried to divide by zero.
+	DivisionByZero,
+}
+
+impl fmt::Display for SimplifyError {
+	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		match self {
+			Self::DivisionByZero => write!(f, "division by zero"),
+		}
+	}
+}
+
+impl error::Error for SimplifyError {}

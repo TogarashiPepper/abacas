@@ -47,7 +47,7 @@ fn main() {
 	let mut ast = Parser::parse_line(tokens);
 
 	if !cfg.raw {
-		ast = ast.simplify();
+		ast = ast.simplify().unwrap();
 	}
 
 	println!("{ast}");
@@ -141,7 +141,7 @@ fn repl(cfg: CasConfig) {
 				let mut ast = Parser::parse_line(tokens);
 
 				if !cfg.raw {
-					ast = ast.simplify();
+					ast = ast.simplify().unwrap();
 				}
 
 				println!("{ast}");
