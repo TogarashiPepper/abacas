@@ -8,9 +8,9 @@ name = "polynomial"
 harness = false
 
 [dependencies]
-itertools.workspace = true
-rug.workspace = true
+itertools = { workspace = true }
+rug = { workspace = true }
 
 [dev-dependencies]
-divan.workspace = true
-fastrand.workspace = true
+divan = { workspace = true }
+fastrand = { workspace = true }
