@@ -1,5 +1,7 @@
 use abacas::VERSION;
 use abacas::context::Context;
+use abacas::expr::Expr;
+use abacas::stdlib::{ceil, exp, floor, identity, round};
 use argh::FromArgs;
 use dark_light::{Mode, detect};
 use logos::Logos;
@@ -151,6 +153,19 @@ fn repl(cfg: CasConfig) {
 					ast = ast.simplify(&mut ctx);
 >>>>>>> 5ba25d8 (feat: context)
 				}
+
+				ast = if let Expr::Fun(name, args) = ast {
+					match name.to_string().as_str() {
+						"ceil" => ceil(args, &mut ctx),
+						"exp" => exp(args, &mut ctx),
+						"floor" => floor(args, &mut ctx),
+						"identity" => identity(args).unwrap(),
+						"round" => round(args, &mut ctx),
+						_ => unreachable!(),
+					}
+				} else {
+					ast
+				};
 
 				println!("{ast}");
 			}

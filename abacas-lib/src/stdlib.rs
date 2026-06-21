@@ -63,14 +63,18 @@ pub fn exp(args: Vec<Expr>, ctx: &mut Context) -> Expr {
 	Expr::Number(Number::e().pow(&n))
 }
 
-// pub fn ln(args: Vec<Expr>) -> Expr {
-// 	let x = a.to_real();
-// 	let y = a.to_img();
+pub fn ln(args: Vec<Expr>, ctx: &mut Context) -> Expr {
+	if args.len() != 1 {
+		panic!("expected one argument")
+	}
 
-// 	let t = atan2(&Data::new_real(x), &Data::new_real(y)).to_real();
+	let Expr::Number(n) = args.into_iter().next().unwrap().simplify(ctx) else {
+		unimplemented!()
+	};
 
-// 	Data::Number((x * x + y * y).sqrt().unwrap().ln(), t)
-// }
+	// Expr::Number(n.ln())
+	todo!()
+}
 
 // pub fn log10(args: Vec<Expr>) -> Expr {
 // 	match a {

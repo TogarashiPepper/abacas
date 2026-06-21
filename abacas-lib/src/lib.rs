@@ -8,7 +8,7 @@ pub mod function;
 pub mod monomial;
 pub mod number;
 pub mod polynomial;
-pub mod standardlibrary;
+pub mod stdlib;
 
 /// The library version currently in use.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");
