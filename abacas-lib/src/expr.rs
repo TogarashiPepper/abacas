@@ -171,15 +171,20 @@ impl Expr {
 		// For every other expression, count how often it appears
 		let counts = exprs.into_iter().counts();
 
-		// Convert into vec of muls and add extracted number and polynomials
-		let mut result: Vec<_> = counts
+		// Convert into iterator of products and chain extracted number and polynomials
+		let iter = counts
 			.into_iter()
 			.map(|(expr, count)| expr * Self::Num(count.into()))
 			.chain(num.filter(|num| !num.is_zero()).map(Self::Num))
-			.chain(polys.into_iter().map(|(symbol, poly)| Self::Poly(symbol, poly)))
-			.collect();
+			.chain(polys.into_iter().map(|(symbol, poly)| Self::Poly(symbol, poly)));
 
-		// Sort the resulting array
+		// If at most one element is left, return it separately
+		let mut result: Vec<_> = match iter.at_most_one() {
+			Ok(expr) => return expr.unwrap_or_else(Self::zero),
+			Err(iter) => iter.collect(),
+		};
+
+		// Sort the resulting vec
 		result.sort_by(Self::cmp);
 
 		// Return the result as a new sum
@@ -233,15 +238,20 @@ impl Expr {
 		// For every other expression, count how often it appears
 		let counts = exprs.into_iter().counts();
 
-		// Convert into vec of pows and multiply extracted number and polynomials
-		let mut result: Vec<_> = counts
+		// Convert into iterator of powers and chain extracted number and polynomials
+		let iter = counts
 			.into_iter()
 			.map(|(expr, count)| expr.pow(Self::Num(count.into())))
 			.chain(num.filter(|num| !num.is_one()).map(Self::Num))
-			.chain(polys.into_iter().map(|(symbol, poly)| Self::Poly(symbol, poly)))
-			.collect();
+			.chain(polys.into_iter().map(|(symbol, poly)| Self::Poly(symbol, poly)));
 
-		// Sort the resulting array
+		// If at most one element is left, return it separately
+		let mut result: Vec<_> = match iter.at_most_one() {
+			Ok(expr) => return expr.unwrap_or_else(Self::one),
+			Err(iter) => iter.collect(),
+		};
+
+		// Sort the resulting vec
 		result.sort_by(Self::cmp);
 
 		// Return the result as a new product
