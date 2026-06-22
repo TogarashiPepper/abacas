@@ -89,6 +89,7 @@
 								cargo-watch
 								cargo-show-asm
 								bacon
+								gnum4
 							];
 
 							env.RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
