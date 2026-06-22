@@ -58,7 +58,12 @@
       };
 
       checks = forAllSystems (
-        { pkgs }: {
+        {
+          pkgs,
+          buildInputs,
+          nativeBuildInputs,
+        }:
+        {
           pre-commit-check = hooks.lib.${pkgs.system}.run {
             src = ./.;
             hooks = {
@@ -98,7 +103,11 @@
       );
 
       devShells = forAllSystems (
-        { pkgs }:
+        {
+          pkgs,
+          buildInputs,
+          nativeBuildInputs,
+        }:
         let
           check = self.checks.${pkgs.system}.pre-commit-check;
         in
