@@ -23,13 +23,17 @@
 		systems = ["aarch64-linux" "x86_64-linux"];
 		forAllSystems = f:
 			nixpkgs.lib.genAttrs systems (system:
-					f {
+					f rec {
 						pkgs =
 							import nixpkgs {
 								inherit system;
 								overlays = [self.overlays.default];
 							};
-					});
+							
+            buildInputs = [ ];
+            nativeBuildInputs = [ pkgs.gnum4 ];
+						}
+				);
 	in {
 		overlays.default = final: prev: {
 			rustToolchain = with fenix.packages.${prev.stdenv.hostPlatform.system};
@@ -58,12 +62,13 @@
 				});
 
 		packages =
-			forAllSystems ({pkgs}: {
+			forAllSystems ({pkgs, buildInputs, nativeBuildInputs}: {
 					default =
 						(pkgs.makeRustPlatform {
 								cargo = pkgs.rustToolchain;
 								rustc = pkgs.rustToolchain;
 							}).buildRustPackage {
+              inherit buildInputs nativeBuildInputs;
 							pname = "abacas";
 							version = "0.1.0";
 							src = ./.;
