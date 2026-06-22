@@ -1,98 +1,136 @@
 {
-	description = "A Computer Algebra System";
+  description = "A Computer Algebra System";
 
-	inputs = {
-		nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
-		hooks = {
-			url = "github:cachix/git-hooks.nix";
-			inputs.nixpkgs.follows = "nixpkgs";
-		};
-		fenix = {
-			url = "github:nix-community/fenix";
-			inputs.nixpkgs.follows = "nixpkgs";
-		};
-	};
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-25.05";
+    hooks = {
+      url = "github:cachix/git-hooks.nix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+    fenix = {
+      url = "github:nix-community/fenix";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
 
-	outputs = {
-		self,
-		hooks,
-		fenix,
-		nixpkgs,
-		...
-	}: let
-		systems = ["aarch64-linux" "x86_64-linux"];
-		forAllSystems = f:
-			nixpkgs.lib.genAttrs systems (system:
-					f {
-						pkgs =
-							import nixpkgs {
-								inherit system;
-								overlays = [self.overlays.default];
-							};
-					});
-	in {
-		overlays.default = final: prev: {
-			rustToolchain = with fenix.packages.${prev.stdenv.hostPlatform.system};
-				combine (
-					(with stable; [clippy rustc cargo rust-src rust-analyzer])
-					++ [default.rustfmt]
-				);
-		};
+  outputs =
+    {
+      self,
+      hooks,
+      fenix,
+      nixpkgs,
+      ...
+    }:
+    let
+      systems = [
+        "aarch64-linux"
+        "x86_64-linux"
+      ];
+      forAllSystems =
+        f:
+        nixpkgs.lib.genAttrs systems (
+          system:
+          f rec {
+            pkgs = import nixpkgs {
+              inherit system;
+              overlays = [ self.overlays.default ];
+            };
 
-		checks =
-			forAllSystems ({pkgs}: {
-					pre-commit-check =
-						hooks.lib.${pkgs.system}.run {
-							src = ./.;
-							hooks = {
-								clippy = {
-									enable = true;
-									package = fenix.packages.${pkgs.system}.stable.clippy;
-								};
-								rustfmt = {
-									enable = true;
-									package = fenix.packages.${pkgs.system}.default.rustfmt;
-								};
-							};
-						};
-				});
+            buildInputs = [ ];
+            nativeBuildInputs = [ pkgs.gnum4 ];
+          }
+        );
+    in
+    {
+      overlays.default = final: prev: {
+        rustToolchain =
+          with fenix.packages.${prev.stdenv.hostPlatform.system};
+          combine (
+            (with stable; [
+              clippy
+              rustc
+              cargo
+              rust-src
+              rust-analyzer
+            ])
+            ++ [ default.rustfmt ]
+          );
+      };
 
-		packages =
-			forAllSystems ({pkgs}: {
-					default =
-						(pkgs.makeRustPlatform {
-								cargo = pkgs.rustToolchain;
-								rustc = pkgs.rustToolchain;
-							}).buildRustPackage {
-							pname = "abacas";
-							version = "0.1.0";
-							src = ./.;
-							cargoLock.lockFile = ./Cargo.lock;
-						};
-				});
+      checks = forAllSystems (
+        {
+          pkgs,
+          buildInputs,
+          nativeBuildInputs,
+        }:
+        {
+          pre-commit-check = hooks.lib.${pkgs.system}.run {
+            src = ./.;
+            hooks = {
+              clippy = {
+                enable = true;
+                package = fenix.packages.${pkgs.system}.stable.clippy;
+              };
+              rustfmt = {
+                enable = true;
+                package = fenix.packages.${pkgs.system}.default.rustfmt;
+              };
+            };
+          };
+        }
+      );
 
-		devShells =
-			forAllSystems ({pkgs}: let
-					check = self.checks.${pkgs.system}.pre-commit-check;
-				in {
-					default =
-						pkgs.mkShell {
-							inherit (check) shellHook;
-							buildInputs = check.enabledPackages;
+      packages = forAllSystems (
+        {
+          pkgs,
+          buildInputs,
+          nativeBuildInputs,
+        }:
+        {
+          default =
+            (pkgs.makeRustPlatform {
+              cargo = pkgs.rustToolchain;
+              rustc = pkgs.rustToolchain;
+            }).buildRustPackage
+              {
+                inherit buildInputs nativeBuildInputs;
+                pname = "abacas";
+                version = "0.1.0";
+                src = ./.;
+                cargoLock.lockFile = ./Cargo.lock;
+              };
+        }
+      );
 
-							packages = with pkgs; [
-								rustToolchain
-								pkg-config
-								cargo-deny
-								cargo-edit
-								cargo-semver-checks
-								cargo-watch
-								cargo-show-asm
-								bacon
-							];
+      devShells = forAllSystems (
+        {
+          pkgs,
+          buildInputs,
+          nativeBuildInputs,
+        }:
+        let
+          check = self.checks.${pkgs.system}.pre-commit-check;
+        in
+        {
+          default = pkgs.mkShell {
+            inherit (check) shellHook;
+            buildInputs = check.enabledPackages;
 
-							env.RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
-						};
-				});
-	};
+            packages = with pkgs; [
+              rustToolchain
+              pkg-config
+              cargo-deny
+              cargo-edit
+              cargo-semver-checks
+              cargo-watch
+              cargo-show-asm
+              bacon
+              gnum4
+            ];
+
+            env.RUST_SRC_PATH = "${pkgs.rustToolchain}/lib/rustlib/src/rust/library";
+          };
+        }
+      );
+    };
 }
