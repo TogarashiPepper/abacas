@@ -508,7 +508,7 @@ where
 
 impl DivAssign<&Self> for Polynomial {
 	fn div_assign(&mut self, rhs: &Self) {
-		self.div_rem_mut(rhs).expect("abacas: cannot divide by zero");
+		self.div_rem_mut(rhs).expect("division by zero");
 	}
 }
 
@@ -576,7 +576,7 @@ where
 
 impl RemAssign<&Self> for Polynomial {
 	fn rem_assign(&mut self, rhs: &Self) {
-		*self = self.div_rem_mut(rhs).expect("abacas: cannot divide by zero");
+		*self = self.div_rem_mut(rhs).expect("division by zero");
 	}
 }
 

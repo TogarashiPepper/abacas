@@ -88,7 +88,7 @@ impl Monomial {
 		let degree = degree.into();
 
 		if coeff.is_zero() {
-			panic!("abacas: monomial coefficient must not be zero");
+			panic!("coefficient must not be zero");
 		}
 
 		Self { coeff, degree }
