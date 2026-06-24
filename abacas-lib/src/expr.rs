@@ -8,7 +8,6 @@ use itertools::Itertools;
 use rug::ops::Pow;
 
 use crate::error::SimplifyError;
-use crate::monomial::Monomial;
 use crate::number::Number;
 use crate::polynomial::Polynomial;
 
@@ -29,11 +28,6 @@ impl Symbol {
 		} else {
 			Some(Self(name))
 		}
-	}
-
-	/// The symbol `x`. This is the default for monomials and polynomials.
-	pub fn x() -> Self {
-		Self("x".into())
 	}
 }
 
@@ -58,8 +52,6 @@ pub enum Expr {
 	Poly(Symbol, Polynomial),
 	/// Represents the power of two expressions.
 	Pow(Box<Self>, Box<Self>),
-	/// Represents a variable number.
-	Var(Symbol),
 }
 
 // Constants
@@ -130,7 +122,6 @@ impl Expr {
 			Self::Num(_) => Ok(self),
 			Self::Poly(sym, poly) => Self::simplify_poly(sym, poly),
 			Self::Pow(base, exp) => Self::simplify_pow(base, exp),
-			Self::Var(_) => Ok(self),
 		}
 	}
 
@@ -153,17 +144,21 @@ impl Expr {
 			.into_grouping_map()
 			.reduce(|lhs, _, rhs| lhs + rhs);
 
-		// Extract constant polynomials from the map
-		let constants = polys
-			.extract_if(|_, poly| poly.is_constant())
-			.map(|(_, poly)| poly.into_constant().unwrap());
-
-		// Add all numbers into one
-		let num = exprs
+		// Add all numbers into one, extracting constant parts from the polynomials
+		let mut num = exprs
 			.extract_if(.., |expr| expr.is_num())
 			.map(|expr| expr.into_num().unwrap())
-			.chain(constants)
-			.reduce(|lhs, rhs| lhs + &rhs);
+			.chain(polys.values_mut().map(Polynomial::constant_mut))
+			.reduce(|lhs, rhs| lhs + &rhs)
+			.filter(|num| !num.is_zero());
+
+		// Remove potential newly created zero polynomials
+		polys.retain(|_, poly| !poly.is_zero());
+
+		// If only one polynomial is left, add the constant back into it
+		if let Ok(poly) = polys.values_mut().exactly_one() {
+			num.take().into_iter().for_each(|num| *poly += num);
+		}
 
 		// For every other expression, count how often it appears
 		let counts = exprs.into_iter().counts();
@@ -172,7 +167,7 @@ impl Expr {
 		let iter = counts
 			.into_iter()
 			.map(|(expr, count)| expr * count.into())
-			.chain(num.filter(|num| !num.is_zero()).map(Self::Num))
+			.chain(num.into_iter().map_into())
 			.chain(polys.into_iter().map(|(symbol, poly)| Self::Poly(symbol, poly)));
 
 		// If at most one element is left, return it separately
@@ -216,21 +211,25 @@ impl Expr {
 			.into_grouping_map()
 			.reduce(|lhs, _, rhs| lhs * &rhs);
 
-		// Extract constant polynomials from the map
-		let constants = polys
-			.extract_if(|_, poly| poly.is_constant())
-			.map(|(_, poly)| poly.into_constant().unwrap());
-
-		// Multiply all numbers into one
-		let num = exprs
+		// Multiply all numbers into one, extracting monic factors from the polynomials
+		let mut num = exprs
 			.extract_if(.., |expr| expr.is_num())
 			.map(|expr| expr.into_num().unwrap())
-			.chain(constants)
-			.reduce(|lhs, rhs| lhs * &rhs);
+			.chain(polys.values_mut().filter_map(Polynomial::monic_mut))
+			.reduce(|lhs, rhs| lhs * &rhs)
+			.filter(|num| !num.is_one());
 
 		// If the number is zero, the product will be zero
 		if num.as_ref().is_some_and(Number::is_zero) {
 			return Ok(Self::zero());
+		}
+
+		// Remove potential newly created one polynomials
+		polys.retain(|_, poly| !poly.is_one());
+
+		// If only one polynomial is left, multiply the factor back into it
+		if let Ok(poly) = polys.values_mut().exactly_one() {
+			num.take().into_iter().for_each(|num| *poly *= &num);
 		}
 
 		// For every other expression, count how often it appears
@@ -240,7 +239,7 @@ impl Expr {
 		let iter = counts
 			.into_iter()
 			.map(|(expr, count)| expr.pow(count.into()))
-			.chain(num.filter(|num| !num.is_one()).map(Self::Num))
+			.chain(num.into_iter().map_into())
 			.chain(polys.into_iter().map(|(symbol, poly)| Self::Poly(symbol, poly)));
 
 		// If at most one element is left, return it separately
@@ -260,7 +259,7 @@ impl Expr {
 	fn simplify_poly(sym: Symbol, poly: Polynomial) -> Result<Self, SimplifyError> {
 		// If the polynomial is constant, return it as a number
 		if poly.is_constant() {
-			return Ok(Self::Num(poly.into_constant().unwrap()));
+			return Ok(poly.constant().0.into());
 		}
 
 		// Return the result as a new polynomial
@@ -288,18 +287,8 @@ impl Expr {
 			return Ok(*base);
 		}
 
-		// If base is another power, multiply the exponents
-		if let Self::Pow(base_base, base_exp) = *base {
-			return Ok(base_base.pow(Self::Mul(vec![*base_exp, *exp])));
-		}
-
 		// Return the result as a new power
 		Ok(Self::Pow(base, exp))
-	}
-
-	/// Simplifies this expression and unwraps it with a consistent error message.
-	fn unwrap_simplify(self) -> Self {
-		self.simplify().expect("simplification failed")
 	}
 
 	/// Compares this expression with another for a consistent ordering.
@@ -329,9 +318,6 @@ impl Expr {
 				lhs_base.cmp(rhs_base).then_with(|| lhs_exp.cmp(rhs_exp))
 			}
 
-			// If both are variables, compare them directly
-			(Self::Var(lhs), Self::Var(rhs)) => lhs.cmp(rhs),
-
 			// Otherwise, compare the discriminants
 			(Self::Add(_), _) => Ordering::Less,
 			(_, Self::Add(_)) => Ordering::Greater,
@@ -343,8 +329,6 @@ impl Expr {
 			(_, Self::Num(_)) => Ordering::Greater,
 			(Self::Poly(_, _), _) => Ordering::Less,
 			(_, Self::Poly(_, _)) => Ordering::Greater,
-			(Self::Pow(_, _), _) => Ordering::Less,
-			(_, Self::Pow(_, _)) => Ordering::Greater,
 		}
 	}
 
@@ -385,7 +369,6 @@ impl Expr {
 					Expr::Num(_) => write!(f, "{}", self.0),
 					Expr::Poly(_, _) => write!(f, "{}", self.0),
 					Expr::Pow(_, _) => write!(f, "{}", self.0),
-					Expr::Var(_) => write!(f, "{}", self.0),
 				}
 			}
 		}
@@ -396,25 +379,7 @@ impl Expr {
 
 impl<T: Into<Number>> From<T> for Expr {
 	fn from(value: T) -> Self {
-		Self::Num(value.into()).unwrap_simplify()
-	}
-}
-
-impl From<Monomial> for Expr {
-	fn from(value: Monomial) -> Self {
-		Self::Poly(Symbol::x(), value.into()).unwrap_simplify()
-	}
-}
-
-impl From<Polynomial> for Expr {
-	fn from(value: Polynomial) -> Self {
-		Self::Poly(Symbol::x(), value).unwrap_simplify()
-	}
-}
-
-impl From<Symbol> for Expr {
-	fn from(value: Symbol) -> Self {
-		Self::Var(value).unwrap_simplify()
+		Self::Num(value.into())
 	}
 }
 
@@ -422,7 +387,7 @@ impl Add<Self> for Expr {
 	type Output = Self;
 
 	fn add(self, rhs: Self) -> Self::Output {
-		Self::Add(vec![self, rhs]).unwrap_simplify()
+		Self::Add(vec![self, rhs])
 	}
 }
 
@@ -431,7 +396,7 @@ impl Div<Self> for Expr {
 
 	#[expect(clippy::suspicious_arithmetic_impl)]
 	fn div(self, rhs: Self) -> Self::Output {
-		self * Self::Pow(rhs.into(), Self::neg_one().into())
+		self * rhs.pow(Self::neg_one())
 	}
 }
 
@@ -439,7 +404,7 @@ impl Mul<Self> for Expr {
 	type Output = Self;
 
 	fn mul(self, rhs: Self) -> Self::Output {
-		Self::Mul(vec![self, rhs]).unwrap_simplify()
+		Self::Mul(vec![self, rhs])
 	}
 }
 
@@ -455,21 +420,21 @@ impl Pow<Self> for Expr {
 	type Output = Self;
 
 	fn pow(self, rhs: Self) -> Self::Output {
-		Self::Pow(self.into(), rhs.into()).unwrap_simplify()
+		Self::Pow(self.into(), rhs.into())
 	}
 }
 
 impl Sub<Self> for Expr {
 	type Output = Self;
 
-	#[expect(clippy::suspicious_arithmetic_impl)]
 	fn sub(self, rhs: Self) -> Self::Output {
-		self + Self::Mul(vec![rhs, Self::neg_one()])
+		self + rhs * Self::neg_one()
 	}
 }
 
 impl fmt::Display for Expr {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+		// TODO: Proper handling of plus/minus between two polynomials
 		match self {
 			Self::Add(exprs) => write!(f, "{}", exprs.iter().format(" + ")),
 			Self::Fun(name, args) => write!(f, "{name}({})", args.iter().format(", ")),
@@ -477,7 +442,6 @@ impl fmt::Display for Expr {
 			Self::Num(num) => write!(f, "{num}"),
 			Self::Poly(sym, poly) => write!(f, "{}", poly.to_string().replace('x', sym.name())),
 			Self::Pow(base, exp) => write!(f, "{}^{}", base.with_parens(), exp.with_parens()),
-			Self::Var(var) => write!(f, "{var}"),
 		}
 	}
 }

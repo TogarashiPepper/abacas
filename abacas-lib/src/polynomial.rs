@@ -56,6 +56,42 @@ impl Polynomial {
 		self.0.retain(|mono| !mono.coeff.is_zero());
 	}
 
+	/// Removes the constant part of the polynomial and returns it.
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// let poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
+	/// let (constant, rest) = poly.constant();
+	///
+	/// assert_eq!(constant, 4);
+	/// assert_eq!(rest.to_string(), "16x^2 + 8x");
+	/// ```
+	pub fn constant(mut self) -> (Number, Self) {
+		(self.constant_mut(), self)
+	}
+
+	/// Removes the constant part of the polynomial in-place and returns it.
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// let mut poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
+	/// let constant = poly.constant_mut();
+	///
+	/// assert_eq!(constant, 4);
+	/// assert_eq!(poly.to_string(), "16x^2 + 8x");
+	/// ```
+	pub fn constant_mut(&mut self) -> Number {
+		self.search(&Number::zero())
+			.map(|index| self.0.remove(index).coeff)
+			.unwrap_or_default()
+	}
+
 	/// Returns the degree of the polynomial, or [`None`] for the zero polynomial.
 	///
 	/// # Examples
@@ -131,8 +167,7 @@ impl Polynomial {
 		self.clean();
 
 		let index = self
-			.0
-			.binary_search_by(|mono| normalizer.degree.cmp(&mono.degree))
+			.search(&normalizer.degree)
 			.map_or_else(|index| index, |index| index + 1);
 
 		let remainder = Self::new(self.0.split_off(index));
@@ -267,17 +302,13 @@ impl Polynomial {
 	/// assert_eq!(poly.get(&9.into()), Some(&Monomial::new(4, 9)));
 	/// ```
 	pub fn get(&self, degree: &Number) -> Option<&Monomial> {
-		self.0
-			.binary_search_by(|mono| degree.cmp(&mono.degree))
-			.ok()
-			.and_then(|index| self.0.get(index))
+		self.search(degree).ok().and_then(|index| self.0.get(index))
 	}
 
 	/// Internal method to get a monomial or insert it if it does not exist.
 	fn get_or_insert(&mut self, degree: &Number) -> &mut Monomial {
 		let index = self
-			.0
-			.binary_search_by(|mono| degree.cmp(&mono.degree))
+			.search(degree)
 			.inspect_err(|&index| {
 				let coeff = 0.into();
 				let degree = degree.clone();
@@ -289,29 +320,7 @@ impl Polynomial {
 		&mut self.0[index]
 	}
 
-	/// Returns the inner [`Number`] if this is a constant polynomial, otherwise returns [`None`].
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use abacas::monomial::Monomial;
-	/// use abacas::polynomial::Polynomial;
-	///
-	/// assert_eq!(Polynomial::ZERO.into_constant(), Some(0.into()));
-	/// assert_eq!(Polynomial::from(5).into_constant(), Some(5.into()));
-	///
-	/// assert_eq!(Polynomial::from(Monomial::linear(3)).into_constant(), None);
-	/// assert_eq!(Polynomial::from(Monomial::linear(3) + 5).into_constant(), None);
-	/// ```
-	pub fn into_constant(self) -> Option<Number> {
-		if self.is_constant() {
-			Some(self.0.into_iter().next().map(|mono| mono.coeff).unwrap_or_default())
-		} else {
-			None
-		}
-	}
-
-	/// Whether this polynomial can be represented as a constant [`Number`].
+	/// Returns whether this polynomial can be represented as a constant [`Number`].
 	///
 	/// # Examples
 	///
@@ -325,8 +334,36 @@ impl Polynomial {
 	/// assert!(!Polynomial::from(Monomial::linear(3)).is_constant());
 	/// assert!(!Polynomial::from(Monomial::linear(3) + 5).is_constant());
 	/// ```
-	pub fn is_constant(&self) -> bool {
-		self.0.len() <= 1 && self.0.first().is_none_or(|mono| mono.degree.is_zero())
+	pub const fn is_constant(&self) -> bool {
+		self.is_zero() || matches!(self.0.as_slice(), [mono] if mono.degree.is_zero())
+	}
+
+	/// Returns whether this polynomial is the number negative one (`-1`).
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// assert!(Polynomial::from(-1).is_neg_one());
+	/// assert!(!Polynomial::from(1).is_neg_one());
+	/// ```
+	pub fn is_neg_one(&self) -> bool {
+		matches!(self.0.as_slice(), [mono] if mono.coeff.is_neg_one() && mono.degree.is_zero())
+	}
+
+	/// Returns whether this polynomial is the number one (`1`).
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// assert!(Polynomial::from(1).is_one());
+	/// assert!(!Polynomial::from(-1).is_one());
+	/// ```
+	pub fn is_one(&self) -> bool {
+		matches!(self.0.as_slice(), [mono] if mono.coeff.is_one() && mono.degree.is_zero())
 	}
 
 	/// Returns whether this is the zero polynomial.
@@ -415,6 +452,11 @@ impl Polynomial {
 	pub fn new(monomials: impl IntoIterator<Item = Monomial>) -> Self {
 		monomials.into_iter().fold(Self::ZERO, Self::add)
 	}
+
+	/// Internal method to search for the index of the given degree.
+	fn search(&self, degree: &Number) -> Result<usize, usize> {
+		self.0.binary_search_by(|mono| degree.cmp(&mono.degree))
+	}
 }
 
 impl<T: Into<Number>> From<T> for Polynomial {
@@ -455,7 +497,7 @@ impl<T: Into<Number>> AddAssign<T> for Polynomial {
 			return;
 		}
 
-		match self.0.binary_search_by(|mono| Number::zero().cmp(&mono.degree)) {
+		match self.search(&Number::zero()) {
 			Ok(index) => self.0[index].coeff += &rhs,
 			Err(index) => self.0.insert(index, rhs.into()),
 		}
@@ -466,7 +508,7 @@ impl<T: Into<Number>> AddAssign<T> for Polynomial {
 
 impl AddAssign<Monomial> for Polynomial {
 	fn add_assign(&mut self, rhs: Monomial) {
-		match self.0.binary_search_by(|mono| rhs.degree.cmp(&mono.degree)) {
+		match self.search(&rhs.degree) {
 			Ok(index) => self.0[index].coeff += &rhs.coeff,
 			Err(index) => self.0.insert(index, rhs),
 		}
@@ -600,9 +642,9 @@ impl<T: Into<Number>> SubAssign<T> for Polynomial {
 			return;
 		}
 
-		match self.0.binary_search_by(|mono| Number::zero().cmp(&mono.degree)) {
+		match self.search(&Number::zero()) {
 			Ok(index) => self.0[index].coeff -= &rhs,
-			Err(index) => self.0.insert(index, rhs.into()),
+			Err(index) => self.0.insert(index, (-rhs).into()),
 		}
 
 		self.clean();
@@ -611,7 +653,7 @@ impl<T: Into<Number>> SubAssign<T> for Polynomial {
 
 impl SubAssign<Monomial> for Polynomial {
 	fn sub_assign(&mut self, rhs: Monomial) {
-		match self.0.binary_search_by(|mono| rhs.degree.cmp(&mono.degree)) {
+		match self.search(&rhs.degree) {
 			Ok(index) => self.0[index].coeff -= &rhs.coeff,
 			Err(index) => self.0.insert(index, -rhs),
 		}
