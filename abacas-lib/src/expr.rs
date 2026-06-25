@@ -33,7 +33,7 @@ impl Symbol {
 
 impl fmt::Display for Symbol {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		self.0.fmt(f)
+		write!(f, "{}", self.0)
 	}
 }
 
@@ -350,6 +350,35 @@ impl Expr {
 			.unwrap_or_else(|| lhs.len().cmp(&rhs.len()))
 	}
 
+	/// Writes a [`Self::Add`] expression, choosing between plus and minus dynamically.
+	fn write_add(f: &mut fmt::Formatter, exprs: &[Self]) -> fmt::Result {
+		// Format the first expression normally
+		if let Some(first) = exprs.first() {
+			write!(f, "{}", first)?;
+		}
+
+		for expr in exprs.iter().skip(1) {
+			match expr {
+				// If the number is negative, extract the minus
+				Expr::Num(num) if num.is_negative() => {
+					write!(f, " - ")?;
+					num.write(f, true)?;
+				}
+
+				// If the polyomial has a negative leading coefficient, extract the minus
+				Expr::Poly(sym, poly) if poly.leading().is_some_and(Number::is_negative) => {
+					write!(f, " - ")?;
+					poly.write(f, true, sym.name())?;
+				}
+
+				// Otherwise, write the expression normally
+				_ => write!(f, " + {}", expr)?,
+			}
+		}
+
+		Ok(())
+	}
+
 	/// Formats this expression with parentheses if necessary.
 	fn with_parens(&self) -> impl fmt::Display {
 		struct WithParens<'a>(&'a Expr);
@@ -357,18 +386,13 @@ impl Expr {
 		impl fmt::Display for WithParens<'_> {
 			fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 				match self.0 {
-					// If the expr has more than one term, use parentheses
+					// If the expression has more than one term, use parentheses
 					Expr::Add(exprs) if exprs.len() > 1 => write!(f, "({})", self.0),
 					Expr::Mul(exprs) if exprs.len() > 1 => write!(f, "({})", self.0),
 					Expr::Poly(_, poly) if poly.monomials().len() > 1 => write!(f, "({})", self.0),
 
-					// No wildcard so new variants do not get silenced
-					Expr::Add(_) => write!(f, "{}", self.0),
-					Expr::Fun(_, _) => write!(f, "{}", self.0),
-					Expr::Mul(_) => write!(f, "{}", self.0),
-					Expr::Num(_) => write!(f, "{}", self.0),
-					Expr::Poly(_, _) => write!(f, "{}", self.0),
-					Expr::Pow(_, _) => write!(f, "{}", self.0),
+					// Otherwise, write the expression normally
+					_ => write!(f, "{}", self.0),
 				}
 			}
 		}
@@ -434,13 +458,12 @@ impl Sub<Self> for Expr {
 
 impl fmt::Display for Expr {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		// TODO: Proper handling of plus/minus between two polynomials
 		match self {
-			Self::Add(exprs) => write!(f, "{}", exprs.iter().format(" + ")),
+			Self::Add(exprs) => Self::write_add(f, exprs),
 			Self::Fun(name, args) => write!(f, "{name}({})", args.iter().format(", ")),
 			Self::Mul(exprs) => write!(f, "{}", exprs.iter().map(Self::with_parens).format(" * ")),
 			Self::Num(num) => write!(f, "{num}"),
-			Self::Poly(sym, poly) => write!(f, "{}", poly.to_string().replace('x', sym.name())),
+			Self::Poly(sym, poly) => poly.write(f, false, sym.name()),
 			Self::Pow(base, exp) => write!(f, "{}^{}", base.with_parens(), exp.with_parens()),
 		}
 	}

@@ -15,7 +15,7 @@ fn add() {
 	assert_eq!(expr.to_string(), "2x + 6");
 
 	let expr = ADD(vec![2.into(), X("x"), X("x + 2"), Y("x"), Y("-2x + 1")]);
-	assert_eq!(expr.to_string(), "5 + 2x + -y");
+	assert_eq!(expr.to_string(), "5 + 2x - y");
 }
 
 #[test]

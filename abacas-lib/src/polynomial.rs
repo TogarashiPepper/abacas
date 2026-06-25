@@ -380,6 +380,20 @@ impl Polynomial {
 		self.0.is_empty()
 	}
 
+	/// Returns the leading coefficient of the polynomial, or [`None`] for the zero polynomial.
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// let poly: Polynomial = "4x^999 + 2x^3 + 1".parse().unwrap();
+	/// assert_eq!(poly.leading(), Some(&4.into()));
+	/// ```
+	pub fn leading(&self) -> Option<&Number> {
+		self.0.first().map(|mono| &mono.coeff)
+	}
+
 	/// Creates a monic polynomial by dividing all monomials by the leading coefficient.
 	/// Returns [`None`] if the polynomial is zero or already monic.
 	///
@@ -413,7 +427,7 @@ impl Polynomial {
 	/// assert_eq!(poly.to_string(), "x^9 + 0.25x^3 + 2");
 	/// ```
 	pub fn monic_mut(&mut self) -> Option<Number> {
-		let factor = self.0.first()?.coeff.clone();
+		let factor = self.leading()?.clone();
 
 		if factor.is_one() {
 			return None;
@@ -456,6 +470,26 @@ impl Polynomial {
 	/// Internal method to search for the index of the given degree.
 	fn search(&self, degree: &Number) -> Result<usize, usize> {
 		self.0.binary_search_by(|mono| degree.cmp(&mono.degree))
+	}
+
+	/// Internal method to write this polynomial with specific configuration.
+	pub(crate) fn write(&self, f: &mut fmt::Formatter<'_>, abs: bool, sym: &str) -> fmt::Result {
+		match self.0.first() {
+			Some(first) => first.write(f, abs, sym)?,
+			None => write!(f, "0")?,
+		}
+
+		for monomial in self.monomials().skip(1) {
+			if monomial.coeff.is_negative() {
+				write!(f, " - ")?;
+			} else {
+				write!(f, " + ")?;
+			}
+
+			monomial.write(f, true, sym)?;
+		}
+
+		Ok(())
 	}
 }
 
@@ -672,21 +706,7 @@ impl SubAssign<Self> for Polynomial {
 
 impl fmt::Display for Polynomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match self.0.first() {
-			Some(first) => write!(f, "{first}")?,
-			None => write!(f, "0")?,
-		}
-
-		for monomial in self.monomials().skip(1) {
-			if monomial.coeff.is_positive() {
-				write!(f, " + {monomial}")?;
-			} else {
-				// TODO: Find an alternative without allocations
-				write!(f, " - {}", -monomial.clone())?;
-			}
-		}
-
-		Ok(())
+		self.write(f, false, "x")
 	}
 }
 

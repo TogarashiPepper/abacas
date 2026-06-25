@@ -93,6 +93,25 @@ impl Monomial {
 
 		Self { coeff, degree }
 	}
+
+	/// Internal method to write this monomial with specific configuration.
+	pub(crate) fn write(&self, f: &mut fmt::Formatter<'_>, abs: bool, sym: &str) -> fmt::Result {
+		if self.degree.is_zero() {
+			return self.coeff.write(f, abs);
+		}
+
+		if self.coeff.is_neg_one() && !abs {
+			write!(f, "-")?;
+		} else if !self.coeff.is_neg_one() && !self.coeff.is_one() {
+			self.coeff.write(f, abs)?;
+		}
+
+		if self.degree.is_one() {
+			write!(f, "{sym}")
+		} else {
+			write!(f, "{sym}^{}", self.degree)
+		}
+	}
 }
 
 impl<T: Into<Number>> From<T> for Monomial {
@@ -218,23 +237,7 @@ where
 
 impl fmt::Display for Monomial {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		if self.degree.is_zero() {
-			write!(f, "{}", self.coeff)
-		} else if self.degree.is_one() {
-			if self.coeff.is_neg_one() {
-				write!(f, "-x")
-			} else if self.coeff.is_one() {
-				write!(f, "x")
-			} else {
-				write!(f, "{}x", self.coeff)
-			}
-		} else if self.coeff.is_neg_one() {
-			write!(f, "-x^{}", self.degree)
-		} else if self.coeff.is_one() {
-			write!(f, "x^{}", self.degree)
-		} else {
-			write!(f, "{}x^{}", self.coeff, self.degree)
-		}
+		self.write(f, false, "x")
 	}
 }
 
