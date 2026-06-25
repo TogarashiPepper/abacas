@@ -58,17 +58,17 @@ pub enum Expr {
 impl Expr {
 	/// The number negative one (`-1`).
 	pub fn neg_one() -> Self {
-		Number::neg_one().into()
+		Self::Num(Number::neg_one())
 	}
 
 	/// The number one (`1`).
 	pub fn one() -> Self {
-		Number::one().into()
+		Self::Num(Number::one())
 	}
 
 	/// The number zero (`0`).
 	pub fn zero() -> Self {
-		Number::zero().into()
+		Self::Num(Number::zero())
 	}
 }
 
@@ -166,14 +166,14 @@ impl Expr {
 		// Convert into iterator of products and chain extracted number and polynomials
 		let iter = counts
 			.into_iter()
-			.map(|(expr, count)| expr * count.into())
-			.chain(num.into_iter().map_into())
-			.chain(polys.into_iter().map(|(symbol, poly)| Self::Poly(symbol, poly)));
+			.map(|(expr, count)| (expr * Self::Num(count.into())).simplify())
+			.chain(num.into_iter().map(|num| Ok(Self::Num(num))))
+			.chain(polys.into_iter().map(|(sym, poly)| Ok(Self::Poly(sym, poly))));
 
 		// If at most one element is left, return it separately
-		let mut result = match iter.at_most_one() {
-			Ok(expr) => return Ok(expr.unwrap_or_else(Self::zero)),
-			Err(iter) => iter.collect_vec(),
+		let mut result: Vec<_> = match iter.at_most_one() {
+			Ok(expr) => return Ok(expr.transpose()?.unwrap_or_else(Self::zero)),
+			Err(iter) => iter.try_collect()?,
 		};
 
 		// Sort the resulting vec
@@ -238,14 +238,14 @@ impl Expr {
 		// Convert into iterator of powers and chain extracted number and polynomials
 		let iter = counts
 			.into_iter()
-			.map(|(expr, count)| expr.pow(count.into()))
-			.chain(num.into_iter().map_into())
-			.chain(polys.into_iter().map(|(symbol, poly)| Self::Poly(symbol, poly)));
+			.map(|(expr, count)| expr.pow(Self::Num(count.into())).simplify())
+			.chain(num.into_iter().map(|num| Ok(Self::Num(num))))
+			.chain(polys.into_iter().map(|(sym, poly)| Ok(Self::Poly(sym, poly))));
 
 		// If at most one element is left, return it separately
-		let mut result = match iter.at_most_one() {
-			Ok(expr) => return Ok(expr.unwrap_or_else(Self::one)),
-			Err(iter) => iter.collect_vec(),
+		let mut result: Vec<_> = match iter.at_most_one() {
+			Ok(expr) => return Ok(expr.transpose()?.unwrap_or_else(Self::one)),
+			Err(iter) => iter.try_collect()?,
 		};
 
 		// Sort the resulting vec
@@ -259,7 +259,7 @@ impl Expr {
 	fn simplify_poly(sym: Symbol, poly: Polynomial) -> Result<Self, SimplifyError> {
 		// If the polynomial is constant, return it as a number
 		if poly.is_constant() {
-			return Ok(poly.constant().0.into());
+			return Ok(Self::Num(poly.constant().0));
 		}
 
 		// Return the result as a new polynomial
@@ -398,12 +398,6 @@ impl Expr {
 		}
 
 		WithParens(self)
-	}
-}
-
-impl<T: Into<Number>> From<T> for Expr {
-	fn from(value: T) -> Self {
-		Self::Num(value.into())
 	}
 }
 
