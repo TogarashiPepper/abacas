@@ -56,42 +56,6 @@ impl Polynomial {
 		self.0.retain(|mono| !mono.coeff.is_zero());
 	}
 
-	/// Removes the constant part of the polynomial and returns it.
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use abacas::polynomial::Polynomial;
-	///
-	/// let poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
-	/// let (constant, rest) = poly.constant();
-	///
-	/// assert_eq!(constant, 4);
-	/// assert_eq!(rest.to_string(), "16x^2 + 8x");
-	/// ```
-	pub fn constant(mut self) -> (Number, Self) {
-		(self.constant_mut(), self)
-	}
-
-	/// Removes the constant part of the polynomial in-place and returns it.
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use abacas::polynomial::Polynomial;
-	///
-	/// let mut poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
-	/// let constant = poly.constant_mut();
-	///
-	/// assert_eq!(constant, 4);
-	/// assert_eq!(poly.to_string(), "16x^2 + 8x");
-	/// ```
-	pub fn constant_mut(&mut self) -> Number {
-		self.search(&Number::zero())
-			.map(|index| self.0.remove(index).coeff)
-			.unwrap_or_default()
-	}
-
 	/// Returns the degree of the polynomial, or [`None`] for the zero polynomial.
 	///
 	/// # Examples
@@ -470,6 +434,42 @@ impl Polynomial {
 	/// Internal method to search for the index of the given degree.
 	fn search(&self, degree: &Number) -> Result<usize, usize> {
 		self.0.binary_search_by(|mono| degree.cmp(&mono.degree))
+	}
+
+	/// Splits the constant part from the polynomial and returns it.
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// let poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
+	/// let (constant, rest) = poly.split_constant();
+	///
+	/// assert_eq!(constant, 4);
+	/// assert_eq!(rest.to_string(), "16x^2 + 8x");
+	/// ```
+	pub fn split_constant(mut self) -> (Number, Self) {
+		(self.split_constant_mut(), self)
+	}
+
+	/// Splits the constant part from the polynomial in-place and returns it.
+	///
+	/// # Examples
+	///
+	/// ```
+	/// use abacas::polynomial::Polynomial;
+	///
+	/// let mut poly: Polynomial = "16x^2 + 8x + 4".parse().unwrap();
+	/// let constant = poly.split_constant_mut();
+	///
+	/// assert_eq!(constant, 4);
+	/// assert_eq!(poly.to_string(), "16x^2 + 8x");
+	/// ```
+	pub fn split_constant_mut(&mut self) -> Number {
+		self.search(&Number::zero())
+			.map(|index| self.0.remove(index).coeff)
+			.unwrap_or_default()
 	}
 
 	/// Internal method to write this polynomial with specific configuration.

@@ -148,7 +148,7 @@ impl Expr {
 		let mut num = exprs
 			.extract_if(.., |expr| expr.is_num())
 			.map(|expr| expr.into_num().unwrap())
-			.chain(polys.values_mut().map(Polynomial::constant_mut))
+			.chain(polys.values_mut().map(Polynomial::split_constant_mut))
 			.reduce(|lhs, rhs| lhs + &rhs)
 			.filter(|num| !num.is_zero());
 
@@ -259,7 +259,7 @@ impl Expr {
 	fn simplify_poly(sym: Symbol, poly: Polynomial) -> Result<Self, SimplifyError> {
 		// If the polynomial is constant, return it as a number
 		if poly.is_constant() {
-			return Ok(Self::Num(poly.constant().0));
+			return Ok(Self::Num(poly.split_constant().0));
 		}
 
 		// Return the result as a new polynomial
@@ -350,6 +350,27 @@ impl Expr {
 			.unwrap_or_else(|| lhs.len().cmp(&rhs.len()))
 	}
 
+	/// Formats this expression with parentheses if necessary.
+	fn with_parens(&self) -> impl fmt::Display {
+		struct WithParens<'a>(&'a Expr);
+
+		impl fmt::Display for WithParens<'_> {
+			fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+				match self.0 {
+					// If the expression has more than one term, use parentheses
+					Expr::Add(exprs) if exprs.len() > 1 => write!(f, "({})", self.0),
+					Expr::Mul(exprs) if exprs.len() > 1 => write!(f, "({})", self.0),
+					Expr::Poly(_, poly) if poly.monomials().len() > 1 => write!(f, "({})", self.0),
+
+					// Otherwise, write the expression normally
+					_ => write!(f, "{}", self.0),
+				}
+			}
+		}
+
+		WithParens(self)
+	}
+
 	/// Writes a [`Self::Add`] expression, choosing between plus and minus dynamically.
 	fn write_add(f: &mut fmt::Formatter, exprs: &[Self]) -> fmt::Result {
 		// Format the first expression normally
@@ -377,27 +398,6 @@ impl Expr {
 		}
 
 		Ok(())
-	}
-
-	/// Formats this expression with parentheses if necessary.
-	fn with_parens(&self) -> impl fmt::Display {
-		struct WithParens<'a>(&'a Expr);
-
-		impl fmt::Display for WithParens<'_> {
-			fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-				match self.0 {
-					// If the expression has more than one term, use parentheses
-					Expr::Add(exprs) if exprs.len() > 1 => write!(f, "({})", self.0),
-					Expr::Mul(exprs) if exprs.len() > 1 => write!(f, "({})", self.0),
-					Expr::Poly(_, poly) if poly.monomials().len() > 1 => write!(f, "({})", self.0),
-
-					// Otherwise, write the expression normally
-					_ => write!(f, "{}", self.0),
-				}
-			}
-		}
-
-		WithParens(self)
 	}
 }
 
