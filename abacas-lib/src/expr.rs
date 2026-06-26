@@ -381,13 +381,13 @@ impl Expr {
 		for expr in exprs.iter().skip(1) {
 			match expr {
 				// If the number is negative, extract the minus
-				Expr::Num(num) if num.is_negative() => {
+				Self::Num(num) if num.is_negative() => {
 					write!(f, " - ")?;
 					num.write(f, true)?;
 				}
 
 				// If the polyomial has a negative leading coefficient, extract the minus
-				Expr::Poly(sym, poly) if poly.leading().is_some_and(Number::is_negative) => {
+				Self::Poly(sym, poly) if poly.leading().is_some_and(Number::is_negative) => {
 					write!(f, " - ")?;
 					poly.write(f, true, sym.name())?;
 				}
