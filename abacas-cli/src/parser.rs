@@ -1,6 +1,7 @@
 use std::iter::Peekable;
 
 use abacas::expr::{Expr, Symbol};
+use abacas::monomial::Monomial;
 use rug::ops::Pow;
 
 use crate::token::Token::{self, *};
@@ -21,7 +22,7 @@ impl Parser {
 		let mut lhs = match tokens.next() {
 			Some(Sub) => -Self::expr_bp(prefix_bp(Sub), tokens),
 			Some(Number(num)) => Expr::Num(num),
-			Some(Ident(name)) => Expr::Var(Symbol::new(name).unwrap()),
+			Some(Ident(name)) => Expr::Poly(Symbol::new(name).unwrap(), Monomial::linear(1).into()),
 			Some(LParen) => {
 				let lhs = Self::expr_bp(0, tokens);
 				assert_eq!(tokens.next(), Some(RParen));

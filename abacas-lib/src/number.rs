@@ -109,6 +109,15 @@ impl Number {
 		let (numer, denom) = self.0.into_numer_denom();
 		(Self(numer.into()), Self(denom.into()))
 	}
+
+	/// Internal method to write this number with specific configuration.
+	pub(crate) fn write(&self, f: &mut fmt::Formatter<'_>, abs: bool) -> fmt::Result {
+		if abs {
+			write!(f, "{}", self.0.to_f64().abs())
+		} else {
+			write!(f, "{}", self.0.to_f64())
+		}
+	}
 }
 
 impl<T> Add<T> for Number
@@ -348,7 +357,7 @@ impl SubAssign<&Self> for Number {
 
 impl fmt::Display for Number {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		self.0.to_f64().fmt(f)
+		self.write(f, false)
 	}
 }
 
