@@ -1,9 +1,7 @@
 //! The Standard Library of abacas
-use rug::ops::Pow;
 
 use crate::context::Context;
 use crate::expr::Expr;
-use crate::number::Number;
 
 //TODO: Add proper error mechanism
 //TODO: Add `abs` method
@@ -20,11 +18,11 @@ pub fn round(args: Vec<Expr>, ctx: &mut Context) -> Expr {
 		panic!("expected one argument")
 	}
 
-	let Expr::Number(n) = args.into_iter().next().unwrap().simplify(ctx) else {
+	let Ok(Expr::Num(n)) = args.into_iter().next().unwrap().simplify(ctx) else {
 		unimplemented!()
 	};
 
-	Expr::Number(n.round())
+	Expr::Num(n.round())
 }
 
 pub fn ceil(args: Vec<Expr>, ctx: &mut Context) -> Expr {
@@ -32,11 +30,11 @@ pub fn ceil(args: Vec<Expr>, ctx: &mut Context) -> Expr {
 		panic!("expected one argument")
 	}
 
-	let Expr::Number(n) = args.into_iter().next().unwrap().simplify(ctx) else {
+	let Ok(Expr::Num(n)) = args.into_iter().next().unwrap().simplify(ctx) else {
 		unimplemented!()
 	};
 
-	Expr::Number(n.ceil())
+	Expr::Num(n.ceil())
 }
 
 pub fn floor(args: Vec<Expr>, ctx: &mut Context) -> Expr {
@@ -44,37 +42,37 @@ pub fn floor(args: Vec<Expr>, ctx: &mut Context) -> Expr {
 		panic!("expected one argument")
 	}
 
-	let Expr::Number(n) = args.into_iter().next().unwrap().simplify(ctx) else {
+	let Ok(Expr::Num(n)) = args.into_iter().next().unwrap().simplify(ctx) else {
 		unimplemented!()
 	};
 
-	Expr::Number(n.floor())
+	Expr::Num(n.floor())
 }
 
-pub fn exp(args: Vec<Expr>, ctx: &mut Context) -> Expr {
-	if args.len() != 1 {
-		panic!("expected one argument")
-	}
+// pub fn exp(args: Vec<Expr>, ctx: &mut Context) -> Expr {
+// 	if args.len() != 1 {
+// 		panic!("expected one argument")
+// 	}
 
-	let Expr::Number(n) = args.into_iter().next().unwrap().simplify(ctx) else {
-		unimplemented!()
-	};
+// 	let Ok(Expr::Num(n)) = args.into_iter().next().unwrap().simplify(ctx) else {
+// 		unimplemented!()
+// 	};
 
-	Expr::Number(Number::e().pow(&n))
-}
+// 	Expr::Num(Number::e().pow(&n))
+// }
 
-pub fn ln(args: Vec<Expr>, ctx: &mut Context) -> Expr {
-	if args.len() != 1 {
-		panic!("expected one argument")
-	}
+// pub fn ln(args: Vec<Expr>, ctx: &mut Context) -> Expr {
+// 	if args.len() != 1 {
+// 		panic!("expected one argument")
+// 	}
 
-	let Expr::Number(n) = args.into_iter().next().unwrap().simplify(ctx) else {
-		unimplemented!()
-	};
+// 	let Ok(Expr::Num(n)) = args.into_iter().next().unwrap().simplify(ctx) else {
+// 		unimplemented!()
+// 	};
 
-	// Expr::Number(n.ln())
-	todo!()
-}
+// 	// Expr::Num(n.ln())
+// 	todo!()
+// }
 
 // pub fn log10(args: Vec<Expr>) -> Expr {
 // 	match a {

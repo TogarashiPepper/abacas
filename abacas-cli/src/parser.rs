@@ -3,6 +3,7 @@ use std::iter::Peekable;
 use abacas::context::Context;
 use abacas::expr::{Expr, Symbol};
 use abacas::monomial::Monomial;
+use abacas::number::Number;
 use rug::ops::Pow;
 
 use crate::token::Token::{self, *};
@@ -21,7 +22,7 @@ impl Parser {
 		T: Iterator<Item = Token>,
 	{
 		let mut lhs = match tokens.next() {
-			Some(Sub) => -Self::expr_bp(prefix_bp(Sub), tokens),
+			Some(Sub) => -Self::expr_bp(ctx, prefix_bp(Sub), tokens),
 			Some(Number(num)) => Expr::Num(num),
 			Some(Ident(name)) => {
 				if tokens.peek().is_some_and(|x| *x == LParen) {
@@ -70,9 +71,12 @@ impl Parser {
 						expression.clear();
 					}
 
-					Expr::Fun(Symbol::new(name), params)
+					Expr::Fun(Symbol::new(name).expect("Error while parsing symbol"), params)
 				} else {
-					Expr::Var(Symbol::new(name))
+					Expr::Poly(
+						Symbol::new(name).expect("Error while parsing symbol"),
+						Monomial::linear(Number::one()).into(),
+					)
 				}
 			}
 			Some(LParen) => {
@@ -98,7 +102,10 @@ impl Parser {
 
 					match op {
 						Eq => {
-							if let Expr::Var(name) = lhs {
+							if let Expr::Poly(name, poly) = lhs
+								&& poly.degree().is_some_and(|x| x.is_one())
+								&& !poly.has_constant()
+							{
 								ctx.variables.insert(name, rhs.clone());
 								lhs = rhs;
 							} else {

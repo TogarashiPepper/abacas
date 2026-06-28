@@ -7,8 +7,8 @@ use std::ops::{Add, Div, Mul, Neg, Sub};
 use itertools::Itertools;
 use rug::ops::Pow;
 
-use crate::error::SimplifyError;
 use crate::context::Context;
+use crate::error::SimplifyError;
 use crate::number::Number;
 use crate::polynomial::Polynomial;
 
@@ -17,11 +17,6 @@ use crate::polynomial::Polynomial;
 pub struct Symbol(String);
 
 impl Symbol {
-	/// Initialize a symbol with the given name
-	pub fn new(name: impl Into<String>) -> Self {
-		Self(name.into())
-	}
-
 	/// Gets the name of the symbol
 	pub fn name(&self) -> &str {
 		&self.0
@@ -120,23 +115,23 @@ impl Expr {
 	}
 
 	/// Simplifies this expression on a best-effort basis.
-	pub fn simplify(self) -> Result<Self, SimplifyError> {
+	pub fn simplify(self, ctx: &mut Context) -> Result<Self, SimplifyError> {
 		match self {
-			Self::Add(exprs) => Self::simplify_add(exprs),
-			Self::Fun(name, args) => Self::simplify_fun(name, args),
-			Self::Mul(exprs) => Self::simplify_mul(exprs),
+			Self::Add(exprs) => Self::simplify_add(exprs, ctx),
+			Self::Fun(name, args) => Self::simplify_fun(name, args, ctx),
+			Self::Mul(exprs) => Self::simplify_mul(exprs, ctx),
 			Self::Num(_) => Ok(self),
 			Self::Poly(sym, poly) => Self::simplify_poly(sym, poly),
-			Self::Pow(base, exp) => Self::simplify_pow(base, exp),
+			Self::Pow(base, exp) => Self::simplify_pow(base, exp, ctx),
 		}
 	}
 
 	/// Simplifies a [`Self::Add`] expression.
-	fn simplify_add(mut exprs: Vec<Self>) -> Result<Self, SimplifyError> {
+	fn simplify_add(mut exprs: Vec<Self>, ctx: &mut Context) -> Result<Self, SimplifyError> {
 		// Simplify all elements individually and flatten inner sums
 		exprs = exprs
 			.into_iter()
-			.map(|expr| match expr.simplify()? {
+			.map(|expr| match expr.simplify(ctx)? {
 				Self::Add(exprs) => Ok(exprs),
 				expr => Ok(vec![expr]),
 			})
@@ -172,7 +167,7 @@ impl Expr {
 		// Convert into iterator of products and chain extracted number and polynomials
 		let iter = counts
 			.into_iter()
-			.map(|(expr, count)| (expr * Self::Num(count.into())).simplify())
+			.map(|(expr, count)| (expr * Self::Num(count.into())).simplify(ctx))
 			.chain(num.into_iter().map(|num| Ok(Self::Num(num))))
 			.chain(polys.into_iter().map(|(sym, poly)| Ok(Self::Poly(sym, poly))));
 
@@ -190,20 +185,20 @@ impl Expr {
 	}
 
 	/// Simplifies a [`Self::Fun`] expression.
-	fn simplify_fun(name: Symbol, mut args: Vec<Self>) -> Result<Self, SimplifyError> {
+	fn simplify_fun(name: Symbol, mut args: Vec<Self>, ctx: &mut Context) -> Result<Self, SimplifyError> {
 		// Simplify the inner arguments
-		args = args.into_iter().map(Self::simplify).try_collect()?;
+		args = args.into_iter().map(|f| Self::simplify(f, ctx)).try_collect()?;
 
 		// Return the result as a new function call
 		Ok(Self::Fun(name, args))
 	}
 
 	/// Simplifies a [`Self::Mul`] expression.
-	fn simplify_mul(mut exprs: Vec<Self>) -> Result<Self, SimplifyError> {
+	fn simplify_mul(mut exprs: Vec<Self>, ctx: &mut Context) -> Result<Self, SimplifyError> {
 		// Simplify all elements individually and flatten inner products
 		exprs = exprs
 			.into_iter()
-			.map(|expr| match expr.simplify()? {
+			.map(|expr| match expr.simplify(ctx)? {
 				Self::Mul(exprs) => Ok(exprs),
 				expr => Ok(vec![expr]),
 			})
@@ -244,7 +239,7 @@ impl Expr {
 		// Convert into iterator of powers and chain extracted number and polynomials
 		let iter = counts
 			.into_iter()
-			.map(|(expr, count)| expr.pow(Self::Num(count.into())).simplify())
+			.map(|(expr, count)| expr.pow(Self::Num(count.into())).simplify(ctx))
 			.chain(num.into_iter().map(|num| Ok(Self::Num(num))))
 			.chain(polys.into_iter().map(|(sym, poly)| Ok(Self::Poly(sym, poly))));
 
@@ -273,10 +268,10 @@ impl Expr {
 	}
 
 	/// Simplifies a [`Self::Pow`] expression.
-	fn simplify_pow(mut base: Box<Self>, mut exp: Box<Self>) -> Result<Self, SimplifyError> {
+	fn simplify_pow(mut base: Box<Self>, mut exp: Box<Self>, ctx: &mut Context) -> Result<Self, SimplifyError> {
 		// First simplify the base and exponent separately
-		*base = base.simplify()?;
-		*exp = exp.simplify()?;
+		*base = base.simplify(ctx)?;
+		*exp = exp.simplify(ctx)?;
 
 		// If base is zero and exponent is negative, return zero division error
 		if base.is_num_and(Number::is_zero) && exp.is_num_and(Number::is_negative) {

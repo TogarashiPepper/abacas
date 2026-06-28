@@ -1,7 +1,7 @@
 use abacas::VERSION;
 use abacas::context::Context;
 use abacas::expr::Expr;
-use abacas::stdlib::{ceil, exp, floor, identity, round};
+use abacas::stdlib::{ceil, floor, identity, round};
 use argh::FromArgs;
 use dark_light::{Mode, detect};
 use logos::Logos;
@@ -51,7 +51,7 @@ fn main() {
 	let mut ast = Parser::parse_line(&mut ctx, tokens);
 
 	if !cfg.raw {
-		ast = ast.simplify(&mut ctx);
+		ast = ast.simplify(&mut ctx).expect("Error while simplifying");
 	}
 
 	println!("{ast}");
@@ -147,17 +147,12 @@ fn repl(cfg: CasConfig) {
 				let mut ast = Parser::parse_line(&mut ctx, tokens);
 
 				if !cfg.raw {
-<<<<<<< HEAD
-					ast = ast.simplify().unwrap();
-=======
-					ast = ast.simplify(&mut ctx);
->>>>>>> 5ba25d8 (feat: context)
+					ast = ast.simplify(&mut ctx).unwrap();
 				}
 
 				ast = if let Expr::Fun(name, args) = ast {
 					match name.to_string().as_str() {
 						"ceil" => ceil(args, &mut ctx),
-						"exp" => exp(args, &mut ctx),
 						"floor" => floor(args, &mut ctx),
 						"identity" => identity(args).unwrap(),
 						"round" => round(args, &mut ctx),
