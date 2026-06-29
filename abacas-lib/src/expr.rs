@@ -121,7 +121,7 @@ impl Expr {
 			Self::Fun(name, args) => Self::simplify_fun(name, args, ctx),
 			Self::Mul(exprs) => Self::simplify_mul(exprs, ctx),
 			Self::Num(_) => Ok(self),
-			Self::Poly(sym, poly) => Self::simplify_poly(sym, poly),
+			Self::Poly(sym, poly) => Self::simplify_poly(sym, poly, ctx),
 			Self::Pow(base, exp) => Self::simplify_pow(base, exp, ctx),
 		}
 	}
@@ -257,10 +257,15 @@ impl Expr {
 	}
 
 	/// Simplifies a [`Self::Poly`] expression.
-	fn simplify_poly(sym: Symbol, poly: Polynomial) -> Result<Self, SimplifyError> {
+	fn simplify_poly(sym: Symbol, poly: Polynomial, ctx: &mut Context) -> Result<Self, SimplifyError> {
 		// If the polynomial is constant, return it as a number
 		if poly.is_constant() {
 			return Ok(Self::Num(poly.split_constant().0));
+		}
+
+		// If the polynomial is a monomial and the monomial is a declared variable, return it as a number
+		if ctx.variables.contains_key(&sym) && poly.degree().is_some_and(|x| x.is_one()) && !poly.has_constant() {
+			return Ok(ctx.variables.get(&sym).unwrap().clone());
 		}
 
 		// Return the result as a new polynomial
