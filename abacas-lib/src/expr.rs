@@ -188,7 +188,7 @@ impl Expr {
 	/// Simplifies a [`Self::Fun`] expression.
 	fn simplify_fun(name: Symbol, mut args: Vec<Self>, ctx: &mut Context) -> Result<Self, SimplifyError> {
 		// Simplify the inner arguments
-		args = args.into_iter().map(|f| Self::simplify(f, ctx)).try_collect()?;
+		args = args.into_iter().map(|arg| Self::simplify(arg, ctx)).try_collect()?;
 
 		// Return the result as a new function call
 		Ok(Self::Fun(name, args))
