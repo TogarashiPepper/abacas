@@ -18,7 +18,6 @@ impl StdLib {
 			Symbol::new("echo").unwrap(),
 			StdLibFunction {
 				name: Symbol::new("echo").unwrap(),
-				diff: None,
 				execute: echo,
 			},
 		);
@@ -27,7 +26,6 @@ impl StdLib {
 			Symbol::new("round").unwrap(),
 			StdLibFunction {
 				name: Symbol::new("round").unwrap(),
-				diff: None,
 				execute: round,
 			},
 		);
@@ -36,7 +34,6 @@ impl StdLib {
 			Symbol::new("ceil").unwrap(),
 			StdLibFunction {
 				name: Symbol::new("ceil").unwrap(),
-				diff: None,
 				execute: ceil,
 			},
 		);
@@ -45,7 +42,6 @@ impl StdLib {
 			Symbol::new("floor").unwrap(),
 			StdLibFunction {
 				name: Symbol::new("floor").unwrap(),
-				diff: None,
 				execute: floor,
 			},
 		);
@@ -59,8 +55,6 @@ impl StdLib {
 pub struct StdLibFunction {
 	/// Name of the function
 	pub name: Symbol,
-	/// The differentiation of the function if any
-	pub diff: Option<Expr>,
 	/// The implementation of the function
 	pub execute: fn(args: Vec<Expr>, ctx: &mut Context) -> Expr,
 }
