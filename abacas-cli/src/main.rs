@@ -47,7 +47,7 @@ fn main() {
 	let exp = cfg.expr.unwrap();
 	let tokens = Token::lexer(&exp).collect::<Result<Vec<Token>, ()>>().unwrap();
 
-	let mut ctx = Context::new();
+	let mut ctx = Context::default();
 	let stdlib = StdLib::new();
 	let mut ast = Parser::parse_line(&mut ctx, tokens);
 
@@ -136,7 +136,7 @@ fn repl(cfg: CasConfig) {
 	let mut rl = Editor::with_config(config).unwrap();
 	rl.set_helper(Some(h));
 
-	let mut ctx = Context::new();
+	let mut ctx = Context::default();
 	let stdlib = StdLib::new();
 
 	loop {
