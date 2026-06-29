@@ -310,7 +310,7 @@ impl Polynomial {
 	/// use abacas::monomial::Monomial;
 	/// use abacas::polynomial::Polynomial;
 	///
-	/// assert!(!Polynomial::ZERO.has_constant());
+	/// assert!(Polynomial::ZERO.has_constant());
 	/// assert!(Polynomial::from(5).has_constant());
 	///
 	/// assert!(!Polynomial::from(Monomial::linear(3)).has_constant());

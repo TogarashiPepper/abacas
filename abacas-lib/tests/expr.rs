@@ -4,11 +4,11 @@ use abacas::expr::{Expr, Symbol};
 const ADD: fn(Vec<Expr>, ctx: &mut Context) -> Expr = |exprs, ctx| Expr::Add(exprs).simplify(ctx).unwrap();
 const MUL: fn(Vec<Expr>, ctx: &mut Context) -> Expr = |exprs, ctx| Expr::Mul(exprs).simplify(ctx).unwrap();
 
-const COS: fn(Expr) -> Expr = |arg| Expr::Fun(Symbol::new("cos".into()).unwrap(), vec![arg]);
+const COS: fn(Expr) -> Expr = |arg| Expr::Fun(Symbol::new("cos").unwrap(), vec![arg]);
 const NUM: fn(i8) -> Expr = |num| Expr::Num(num.into());
 
-const X: fn(&str) -> Expr = |poly| Expr::Poly(Symbol::new("x".into()).unwrap(), poly.parse().unwrap());
-const Y: fn(&str) -> Expr = |poly| Expr::Poly(Symbol::new("y".into()).unwrap(), poly.parse().unwrap());
+const X: fn(&str) -> Expr = |poly| Expr::Poly(Symbol::new("x").unwrap(), poly.parse().unwrap());
+const Y: fn(&str) -> Expr = |poly| Expr::Poly(Symbol::new("y").unwrap(), poly.parse().unwrap());
 
 #[test]
 fn add() {
