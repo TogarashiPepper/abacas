@@ -75,7 +75,7 @@ pub fn echo(args: Vec<Expr>, _: &mut Context) -> Expr {
 	if args.len() != 1 {
 		panic!("expected one argument")
 	}
-	args.first().unwrap().clone()
+	args.into_iter().next().unwrap()
 }
 
 /// round(n) -> n
