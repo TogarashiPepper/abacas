@@ -317,11 +317,7 @@ impl Polynomial {
 	/// assert!(Polynomial::from(Monomial::linear(3) + 5).has_constant());
 	/// ```
 	pub const fn has_constant(&self) -> bool {
-		self.is_zero()
-			|| match self.0.as_slice() {
-				[.., n] if n.degree.is_zero() => true,
-				_ => false,
-			}
+		self.is_zero() || matches!(self.0.as_slice(), [.., n] if n.degree.is_zero())
 	}
 
 	/// Returns whether this polynomial is the number negative one (`-1`).

@@ -23,7 +23,8 @@ impl Symbol {
 	}
 
 	/// Creates a new symbol with the given name. Symbols must not be empty and contain no whitespace.
-	pub fn new(name: String) -> Option<Self> {
+	pub fn new(name: impl Into<String>) -> Option<Self> {
+		let name = name.into();
 		if name.is_empty() || name.chars().any(char::is_whitespace) {
 			None
 		} else {
