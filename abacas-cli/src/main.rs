@@ -1,4 +1,7 @@
 use abacas::VERSION;
+use abacas::context::Context;
+use abacas::expr::Expr;
+use abacas::stdlib::StdLib;
 use argh::FromArgs;
 use dark_light::{Mode, detect};
 use logos::Logos;
@@ -44,11 +47,21 @@ fn main() {
 	let exp = cfg.expr.unwrap();
 	let tokens = Token::lexer(&exp).collect::<Result<Vec<Token>, ()>>().unwrap();
 
-	let mut ast = Parser::parse_line(tokens);
+	let mut ctx = Context::new();
+	let stdlib = StdLib::new();
+	let mut ast = Parser::parse_line(&mut ctx, tokens);
 
 	if !cfg.raw {
-		ast = ast.simplify().unwrap();
+		ast = ast.simplify(&mut ctx).expect("Error while simplifying");
 	}
+
+	ast = if let Expr::Fun(ref name, ref args) = ast
+		&& let Some(f) = stdlib.0.get(name)
+	{
+		(f.execute)(args.to_vec(), &mut ctx)
+	} else {
+		ast
+	};
 
 	println!("{ast}");
 }
@@ -123,6 +136,9 @@ fn repl(cfg: CasConfig) {
 	let mut rl = Editor::with_config(config).unwrap();
 	rl.set_helper(Some(h));
 
+	let mut ctx = Context::new();
+	let stdlib = StdLib::new();
+
 	loop {
 		"\x1b[1m\x1b[32m[In]:\x1b[0m ".clone_into(&mut rl.helper_mut().expect("No helper").colored_prompt);
 
@@ -138,11 +154,19 @@ fn repl(cfg: CasConfig) {
 
 				let tokens = Token::lexer(&line).collect::<Result<Vec<Token>, ()>>().unwrap();
 
-				let mut ast = Parser::parse_line(tokens);
+				let mut ast = Parser::parse_line(&mut ctx, tokens);
 
 				if !cfg.raw {
-					ast = ast.simplify().unwrap();
+					ast = ast.simplify(&mut ctx).unwrap();
 				}
+
+				ast = if let Expr::Fun(ref name, ref args) = ast
+					&& let Some(f) = stdlib.0.get(name)
+				{
+					(f.execute)(args.to_vec(), &mut ctx)
+				} else {
+					ast
+				};
 
 				println!("{ast}");
 			}

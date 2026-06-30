@@ -1,7 +1,9 @@
 use std::iter::Peekable;
 
+use abacas::context::Context;
 use abacas::expr::{Expr, Symbol};
 use abacas::monomial::Monomial;
+use abacas::number::Number;
 use rug::ops::Pow;
 
 use crate::token::Token::{self, *};
@@ -9,22 +11,76 @@ use crate::token::Token::{self, *};
 pub struct Parser {}
 
 impl Parser {
-	pub fn parse_line(line: Vec<Token>) -> Expr {
+	pub fn parse_line(ctx: &mut Context, line: Vec<Token>) -> Expr {
 		let mut it = line.into_iter().peekable();
 
-		Self::expr_bp(0, &mut it)
+		Self::expr_bp(ctx, 0, &mut it)
 	}
 
-	fn expr_bp<T>(min_bp: u8, tokens: &mut Peekable<T>) -> Expr
+	fn expr_bp<T>(ctx: &mut Context, min_bp: u8, tokens: &mut Peekable<T>) -> Expr
 	where
 		T: Iterator<Item = Token>,
 	{
 		let mut lhs = match tokens.next() {
-			Some(Sub) => -Self::expr_bp(prefix_bp(Sub), tokens),
+			Some(Sub) => -Self::expr_bp(ctx, prefix_bp(Sub), tokens),
 			Some(Number(num)) => Expr::Num(num),
-			Some(Ident(name)) => Expr::Poly(Symbol::new(name).unwrap(), Monomial::linear(1).into()),
+			Some(Ident(name)) => {
+				if tokens.peek().is_some_and(|x| *x == LParen) {
+					let mut depth = 0;
+					let mut params = vec![];
+					let mut expression = vec![];
+
+					loop {
+						let token = tokens.next();
+
+						if token.is_none() {
+							break;
+						}
+
+						let token = token.unwrap();
+
+						if token == RParen {
+							if depth == 0 {
+								break;
+							}
+							depth -= 1;
+						}
+
+						if token == LParen {
+							depth += 1;
+						}
+
+						if token == Comma && depth == 0 {
+							let mut it = expression.clone().into_iter().peekable();
+							let data = Self::expr_bp(ctx, 0, &mut it);
+
+							params.push(data);
+							expression.clear();
+
+							continue;
+						}
+
+						expression.push(token);
+					}
+
+					if !expression.is_empty() {
+						let mut it = expression.clone().into_iter().peekable();
+						let data = Self::expr_bp(ctx, 0, &mut it);
+
+						params.push(data);
+						expression.clear();
+					}
+
+					Expr::Fun(Symbol::new(name).expect("Error while parsing symbol"), params)
+				} else {
+					Expr::Poly(
+						Symbol::new(name).expect("Error while parsing symbol"),
+						Monomial::linear(Number::one()).into(),
+					)
+				}
+			}
 			Some(LParen) => {
-				let lhs = Self::expr_bp(0, tokens);
+				let lhs = Self::expr_bp(ctx, 0, tokens);
 				assert_eq!(tokens.next(), Some(RParen));
 
 				lhs
@@ -42,10 +98,22 @@ impl Parser {
 					}
 
 					let op = tokens.next().unwrap();
-					let rhs = Self::expr_bp(r_bp, tokens);
+					let rhs = Self::expr_bp(ctx, r_bp, tokens);
 
 					match op {
-						Eq => todo!(),
+						Eq => {
+							if let Expr::Poly(ref name, ref poly) = lhs {
+								if poly.degree().is_some_and(|x| x.is_one())
+									&& poly.monomials().count() == 1
+									&& poly.get(&Number::one()).unwrap().coeff.is_one()
+								{
+									ctx.variables.insert(name.clone(), rhs.clone());
+									lhs = rhs;
+								}
+							} else {
+								unimplemented!()
+							}
+						}
 						Add => lhs = lhs + rhs,
 						Sub => lhs = lhs - rhs,
 						Mul => lhs = lhs * rhs,
@@ -62,10 +130,11 @@ impl Parser {
 						break;
 					}
 
-					let rhs = Self::expr_bp(r_bp, tokens);
+					let rhs = Self::expr_bp(ctx, r_bp, tokens);
 
 					lhs = lhs * rhs;
 				}
+				Some(Comma) => unreachable!(),
 				None | Some(RParen) => break,
 			}
 		}

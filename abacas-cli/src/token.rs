@@ -9,9 +9,8 @@ use logos::Logos;
 pub enum Token {
 	#[regex(r"\d+(\.\d+)?", |lex| parse_num(lex.slice()))]
 	Number(Number),
-	// #[regex(r"[a-zA-Z]+", |lex| lex.slice().to_owned())]
 	// Ident(String),
-	#[regex(r"[a-zA-Z]", |lex| lex.slice().to_owned())]
+	#[regex(r"[a-zA-Z]+", |lex| lex.slice().to_owned())]
 	Ident(String),
 
 	#[token("=")]
@@ -33,6 +32,8 @@ pub enum Token {
 	LParen,
 	#[token(")")]
 	RParen,
+	#[token(",")]
+	Comma,
 }
 
 impl Display for Token {
@@ -49,6 +50,7 @@ impl Display for Token {
 			Token::Rem => write!(f, "%"),
 			Token::LParen => write!(f, "("),
 			Token::RParen => write!(f, ")"),
+			Token::Comma => write!(f, ","),
 		}
 	}
 }
