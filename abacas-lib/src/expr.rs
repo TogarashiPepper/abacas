@@ -265,7 +265,7 @@ impl Expr {
 		}
 
 		// If the polynomial is a monomial and the monomial is a declared variable, return it as a number
-		if ctx.variables.contains_key(&sym) && poly.degree().is_some_and(|x| x.is_one()) && !poly.has_constant() {
+		if ctx.variables.contains_key(&sym) {
 			return Ok(ctx.variables.get(&sym).unwrap().clone());
 		}
 

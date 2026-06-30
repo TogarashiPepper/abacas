@@ -302,24 +302,6 @@ impl Polynomial {
 		self.is_zero() || matches!(self.0.as_slice(), [mono] if mono.degree.is_zero())
 	}
 
-	/// Returns whether this polynomial has a constant term.
-	///
-	/// # Examples
-	///
-	/// ```
-	/// use abacas::monomial::Monomial;
-	/// use abacas::polynomial::Polynomial;
-	///
-	/// assert!(Polynomial::ZERO.has_constant());
-	/// assert!(Polynomial::from(5).has_constant());
-	///
-	/// assert!(!Polynomial::from(Monomial::linear(3)).has_constant());
-	/// assert!(Polynomial::from(Monomial::linear(3) + 5).has_constant());
-	/// ```
-	pub const fn has_constant(&self) -> bool {
-		self.is_zero() || matches!(self.0.as_slice(), [.., n] if n.degree.is_zero())
-	}
-
 	/// Returns whether this polynomial is the number negative one (`-1`).
 	///
 	/// # Examples

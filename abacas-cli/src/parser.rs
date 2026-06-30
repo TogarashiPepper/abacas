@@ -102,12 +102,14 @@ impl Parser {
 
 					match op {
 						Eq => {
-							if let Expr::Poly(name, poly) = lhs
-								&& poly.degree().is_some_and(|x| x.is_one())
-								&& !poly.has_constant()
-							{
-								ctx.variables.insert(name, rhs.clone());
-								lhs = rhs;
+							if let Expr::Poly(ref name, ref poly) = lhs {
+								if poly.degree().is_some_and(|x| x.is_one())
+									&& poly.monomials().count() == 1
+									&& poly.get(&Number::one()).unwrap().coeff.is_one()
+								{
+									ctx.variables.insert(name.clone(), rhs.clone());
+									lhs = rhs;
+								}
 							} else {
 								unimplemented!()
 							}
