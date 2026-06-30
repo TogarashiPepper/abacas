@@ -1,20 +1,21 @@
-//! The Function struct and its related methods
+//! The Function struct and its related methods.
+
 use crate::expr::{Expr, Symbol};
 
-/// User defined function
+/// User defined function.
 #[derive(Clone, Debug)]
 pub struct Function {
-	/// The parameters required by this function as arguments
-	pub args: Vec<Symbol>,
-	/// Expression to execute when this function is called
+	/// Expression to execute when this function is called.
 	pub execute: Expr,
-	/// Name of the function
+	/// Name of the function.
 	pub name: Symbol,
+	/// The parameters required by this function as arguments.
+	pub params: Vec<Symbol>,
 }
 
 impl Function {
-	/// Create a new function
-	pub fn new(args: Vec<Symbol>, execute: Expr, name: Symbol) -> Self {
-		Self { args, execute, name }
+	/// Create a new function.
+	pub fn new(execute: Expr, name: Symbol, params: Vec<Symbol>) -> Self {
+		Self { execute, name, params }
 	}
 }

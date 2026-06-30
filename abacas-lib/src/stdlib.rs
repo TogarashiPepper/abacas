@@ -1,16 +1,16 @@
-//! The Standard Library of abacas
+//! The Standard Library of abacas.
 
 use std::collections::HashMap;
 
 use crate::context::Context;
 use crate::expr::{Expr, Symbol};
 
-/// StdLib struct containing all the global functions
+/// StdLib struct containing all the global functions.
 #[derive(Clone, Debug, Default)]
 pub struct StdLib(pub HashMap<Symbol, StdLibFunction>);
 
 impl StdLib {
-	/// Creates a new copy of the StdLib
+	/// Creates a new copy of the StdLib.
 	pub fn new() -> Self {
 		let mut functions = HashMap::new();
 
@@ -50,12 +50,12 @@ impl StdLib {
 	}
 }
 
-/// A StdLib Function
+/// A StdLib Function.
 #[derive(Clone, Debug)]
 pub struct StdLibFunction {
-	/// Name of the function
+	/// Name of the function.
 	pub name: Symbol,
-	/// The implementation of the function
+	/// The implementation of the function.
 	pub execute: fn(args: Vec<Expr>, ctx: &mut Context) -> Expr,
 }
 
@@ -64,7 +64,7 @@ pub struct StdLibFunction {
 
 /// echo(a) -> a
 ///
-/// Returns the argument provided to it
+/// Returns the argument provided to it.
 pub fn echo(args: Vec<Expr>, _: &mut Context) -> Expr {
 	if args.len() != 1 {
 		panic!("expected one argument")
@@ -74,7 +74,7 @@ pub fn echo(args: Vec<Expr>, _: &mut Context) -> Expr {
 
 /// round(n) -> n
 ///
-/// Returns the rounded number following Banker's Rounding
+/// Returns the rounded number following Banker's Rounding.
 pub fn round(args: Vec<Expr>, ctx: &mut Context) -> Expr {
 	if args.len() != 1 {
 		panic!("expected one argument")
@@ -89,7 +89,7 @@ pub fn round(args: Vec<Expr>, ctx: &mut Context) -> Expr {
 
 /// ceil(n) -> n
 ///
-/// Returns the smallest integer more than or equal to n
+/// Returns the smallest integer more than or equal to n.
 pub fn ceil(args: Vec<Expr>, ctx: &mut Context) -> Expr {
 	if args.len() != 1 {
 		panic!("expected one argument")
@@ -104,7 +104,7 @@ pub fn ceil(args: Vec<Expr>, ctx: &mut Context) -> Expr {
 
 /// floor(n) -> n
 ///
-/// Returns the smallest integer less than or equal to n
+/// Returns the smallest integer less than or equal to n.
 pub fn floor(args: Vec<Expr>, ctx: &mut Context) -> Expr {
 	if args.len() != 1 {
 		panic!("expected one argument")
