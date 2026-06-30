@@ -12,3 +12,10 @@ pub struct Context {
 	/// Functions declared in this context
 	pub functions: HashMap<Symbol, Function>,
 }
+
+impl Context {
+	/// Create a new context
+	pub fn new() -> Self {
+		Self::default()
+	}
+}
