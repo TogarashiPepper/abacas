@@ -8,7 +8,7 @@ use itertools::Itertools;
 use rug::ops::Pow;
 
 use crate::context::Context;
-use crate::error::SimplifyError;
+use crate::error::{Error, Result};
 use crate::number::Number;
 use crate::polynomial::Polynomial;
 
@@ -116,7 +116,7 @@ impl Expr {
 	}
 
 	/// Simplifies this expression on a best-effort basis.
-	pub fn simplify(self, ctx: &mut Context) -> Result<Self, SimplifyError> {
+	pub fn simplify(self, ctx: &mut Context) -> Result<Self> {
 		match self {
 			Self::Add(exprs) => Self::simplify_add(exprs, ctx),
 			Self::Fun(name, args) => Self::simplify_fun(name, args, ctx),
@@ -128,7 +128,7 @@ impl Expr {
 	}
 
 	/// Simplifies a [`Self::Add`] expression.
-	fn simplify_add(mut exprs: Vec<Self>, ctx: &mut Context) -> Result<Self, SimplifyError> {
+	fn simplify_add(mut exprs: Vec<Self>, ctx: &mut Context) -> Result<Self> {
 		// Simplify all elements individually and flatten inner sums
 		exprs = exprs
 			.into_iter()
@@ -186,7 +186,7 @@ impl Expr {
 	}
 
 	/// Simplifies a [`Self::Fun`] expression.
-	fn simplify_fun(name: Symbol, mut args: Vec<Self>, ctx: &mut Context) -> Result<Self, SimplifyError> {
+	fn simplify_fun(name: Symbol, mut args: Vec<Self>, ctx: &mut Context) -> Result<Self> {
 		// Simplify the inner arguments
 		args = args.into_iter().map(|arg| Self::simplify(arg, ctx)).try_collect()?;
 
@@ -195,7 +195,7 @@ impl Expr {
 	}
 
 	/// Simplifies a [`Self::Mul`] expression.
-	fn simplify_mul(mut exprs: Vec<Self>, ctx: &mut Context) -> Result<Self, SimplifyError> {
+	fn simplify_mul(mut exprs: Vec<Self>, ctx: &mut Context) -> Result<Self> {
 		// Simplify all elements individually and flatten inner products
 		exprs = exprs
 			.into_iter()
@@ -258,7 +258,7 @@ impl Expr {
 	}
 
 	/// Simplifies a [`Self::Poly`] expression.
-	fn simplify_poly(sym: Symbol, poly: Polynomial, ctx: &mut Context) -> Result<Self, SimplifyError> {
+	fn simplify_poly(sym: Symbol, poly: Polynomial, ctx: &mut Context) -> Result<Self> {
 		// If the polynomial is constant, return it as a number
 		if poly.is_constant() {
 			return Ok(Self::Num(poly.split_constant().0));
@@ -274,14 +274,14 @@ impl Expr {
 	}
 
 	/// Simplifies a [`Self::Pow`] expression.
-	fn simplify_pow(mut base: Box<Self>, mut exp: Box<Self>, ctx: &mut Context) -> Result<Self, SimplifyError> {
+	fn simplify_pow(mut base: Box<Self>, mut exp: Box<Self>, ctx: &mut Context) -> Result<Self> {
 		// First simplify the base and exponent separately
 		*base = base.simplify(ctx)?;
 		*exp = exp.simplify(ctx)?;
 
 		// If base is zero and exponent is negative, return zero division error
 		if base.is_num_and(Number::is_zero) && exp.is_num_and(Number::is_negative) {
-			return Err(SimplifyError::DivisionByZero);
+			return Err(Error::DivisionByZero);
 		}
 
 		// If base is one or exponent is zero, return one

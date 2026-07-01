@@ -1,42 +1,31 @@
-//! Collection of error types used across the library.
+//! The error type and all related types.
 
-use std::{error, fmt};
+use std::{error, fmt, result};
 
 use crate::number::Number;
 
-/// An error that can occur while parsing.
+/// The error type used across the library.
 #[derive(Debug)]
-pub enum ParseError {
+pub enum Error {
+	/// The expression tried to divide by zero.
+	DivisionByZero,
 	/// The parser encountered an invalid number.
 	InvalidNumber(Number),
 	/// The parser encountered an invalid string.
 	InvalidString(String),
 }
 
-impl fmt::Display for ParseError {
+impl fmt::Display for Error {
 	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
 		match self {
+			Self::DivisionByZero => write!(f, "division by zero"),
 			Self::InvalidNumber(number) => write!(f, "invalid number: {number}"),
 			Self::InvalidString(string) => write!(f, "invalid string: {string}"),
 		}
 	}
 }
 
-impl error::Error for ParseError {}
+impl error::Error for Error {}
 
-/// An error that can occur while simplifying an expression.
-#[derive(Debug)]
-pub enum SimplifyError {
-	/// The expression tried to divide by zero.
-	DivisionByZero,
-}
-
-impl fmt::Display for SimplifyError {
-	fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-		match self {
-			Self::DivisionByZero => write!(f, "division by zero"),
-		}
-	}
-}
-
-impl error::Error for SimplifyError {}
+/// The standard result type, but with the error set to [`Error`].
+pub type Result<T> = result::Result<T, Error>;
