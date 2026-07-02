@@ -110,6 +110,16 @@ impl Number {
 		(Self(numer.into()), Self(denom.into()))
 	}
 
+	/// Converts this number into an [`f32`].
+	pub fn to_f32(&self) -> f32 {
+		self.0.to_f32()
+	}
+
+	/// Converts this number into an [`f64`].
+	pub fn to_f64(&self) -> f64 {
+		self.0.to_f64()
+	}
+
 	/// Internal method to write this number with specific configuration.
 	pub(crate) fn write(&self, f: &mut fmt::Formatter<'_>, abs: bool) -> fmt::Result {
 		if abs {

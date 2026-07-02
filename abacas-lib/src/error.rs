@@ -16,6 +16,8 @@ pub enum Error {
 	InvalidNumber(Number),
 	/// The parser encountered an invalid string.
 	InvalidString(String),
+	/// The provided value is not declared in the current context.
+	UndeclaredValue(Symbol),
 }
 
 impl fmt::Display for Error {
@@ -25,6 +27,7 @@ impl fmt::Display for Error {
 			Self::DivisionByZero => write!(f, "division by zero"),
 			Self::InvalidNumber(number) => write!(f, "invalid number: {number}"),
 			Self::InvalidString(string) => write!(f, "invalid string: {string}"),
+			Self::UndeclaredValue(name) => write!(f, "undeclared value: {name}"),
 		}
 	}
 }

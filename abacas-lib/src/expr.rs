@@ -72,6 +72,49 @@ impl Expr {
 
 // Operations
 impl Expr {
+	/// Evaluates this expression as an approximate value.
+	pub fn evaluate(self, ctx: &Context) -> Result<f64> {
+		match self {
+			Self::Add(exprs) => exprs.into_iter().map(|expr| expr.evaluate(ctx)).sum(),
+			Self::Fun(name, args) => Self::evaluate_fun(name, args, ctx),
+			Self::Mul(exprs) => exprs.into_iter().map(|expr| expr.evaluate(ctx)).product(),
+			Self::Num(num) => Ok(num.to_f64()),
+			Self::Poly(sym, poly) => Self::evaluate_poly(sym, poly, ctx),
+			Self::Pow(base, exp) => Ok(base.evaluate(ctx)?.pow(exp.evaluate(ctx)?)),
+		}
+	}
+
+	/// Evaluates a [`Self::Fun`] expression.
+	pub fn evaluate_fun(name: Symbol, args: Vec<Expr>, ctx: &Context) -> Result<f64> {
+		// Get the evaluator or return an error
+		let Some(evaluator) = ctx.evaluators.get(&name) else {
+			return Err(Error::UndeclaredValue(name));
+		};
+
+		// Evaluate the inner arguments
+		let args = args.into_iter().map(|arg| arg.evaluate(ctx)).try_collect()?;
+
+		// Execute the evaluator
+		evaluator(args)
+	}
+
+	/// Evaluates a [`Self::Poly`] expression.
+	pub fn evaluate_poly(sym: Symbol, poly: Polynomial, ctx: &Context) -> Result<f64> {
+		// Get the constant or return an error
+		let Some(constant) = ctx.constants.get(&sym) else {
+			return Err(Error::UndeclaredValue(sym));
+		};
+
+		// Handle each monomial individually
+		let sum = poly
+			.monomials()
+			.map(|mono| mono.coeff.to_f64() * constant.pow(mono.degree.to_f64()))
+			.sum();
+
+		// Return the summed monomials
+		Ok(sum)
+	}
+
 	/// Returns the inner value if this expression is [`Self::Num`], otherwise returns [`None`].
 	pub fn into_num(self) -> Option<Number> {
 		match self {

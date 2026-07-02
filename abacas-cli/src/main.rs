@@ -1,6 +1,5 @@
 use abacas::VERSION;
 use abacas::context::Context;
-use abacas::expr::Expr;
 use argh::FromArgs;
 use dark_light::{Mode, detect};
 use logos::Logos;
@@ -53,15 +52,13 @@ fn main() {
 		ast = ast.simplify(&ctx).expect("Error while simplifying");
 	}
 
-	ast = if let Expr::Fun(ref name, ref args) = ast
-		&& let Some(f) = ctx.simplifiers.get(name)
-	{
-		f(args.to_vec()).unwrap()
-	} else {
-		ast
-	};
-
 	println!("{ast}");
+
+	if !ast.is_num()
+		&& let Ok(float) = ast.evaluate(&ctx)
+	{
+		println!("Approximation: {float}")
+	}
 }
 
 #[derive(Helper, Completer, Hinter, Validator)]
@@ -157,15 +154,13 @@ fn repl(cfg: CasConfig) {
 					ast = ast.simplify(&ctx).unwrap();
 				}
 
-				ast = if let Expr::Fun(ref name, ref args) = ast
-					&& let Some(f) = ctx.simplifiers.get(name)
-				{
-					f(args.to_vec()).unwrap()
-				} else {
-					ast
-				};
-
 				println!("{ast}");
+
+				if !ast.is_num()
+					&& let Ok(float) = ast.evaluate(&ctx)
+				{
+					println!("Approximation: {float}")
+				}
 			}
 			Err(ReadlineError::Interrupted) => {
 				println!("CTRL-C");
