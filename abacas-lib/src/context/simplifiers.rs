@@ -13,7 +13,7 @@ pub fn abs(args: Vec<Expr>) -> Result<Expr> {
 	if args.first().unwrap().is_num() {
 		Ok(Expr::Num(args.into_iter().next().unwrap().into_num().unwrap().abs()))
 	} else {
-		Ok(Expr::Fun(Symbol::CEIL, args))
+		Ok(Expr::Fun(Symbol::ABS, args))
 	}
 }
 

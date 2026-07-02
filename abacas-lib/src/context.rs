@@ -112,7 +112,7 @@ impl Symbol {
 	/// The symbol `round`.
 	pub const ROUND: Self = Self(Cow::Borrowed("round"));
 
-	/// The symbol `pi`.
+	/// The symbol `trunc`.
 	pub const TRUNC: Self = Self(Cow::Borrowed("trunc"));
 
 	/// Gets the name of this symbol.
