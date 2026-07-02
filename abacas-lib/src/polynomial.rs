@@ -6,7 +6,7 @@ use std::{fmt, mem, str};
 
 use rug::ops::NegAssign;
 
-use crate::error::ParseError;
+use crate::error::Error;
 use crate::monomial::Monomial;
 use crate::number::Number;
 
@@ -711,7 +711,7 @@ impl fmt::Display for Polynomial {
 }
 
 impl str::FromStr for Polynomial {
-	type Err = ParseError;
+	type Err = Error;
 
 	fn from_str(s: &str) -> Result<Self, Self::Err> {
 		let mut result = Self::ZERO;
@@ -720,7 +720,7 @@ impl str::FromStr for Polynomial {
 			for (index, part) in full.split(" - ").enumerate() {
 				let monomial: Monomial = match part.parse() {
 					Ok(monomial) => monomial,
-					Err(ParseError::InvalidNumber(number)) if number.is_zero() => continue,
+					Err(Error::InvalidNumber(number)) if number.is_zero() => continue,
 					Err(error) => return Err(error),
 				};
 
