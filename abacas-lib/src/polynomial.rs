@@ -4,9 +4,10 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssi
 use std::slice::Iter;
 use std::{fmt, mem, str};
 
-use rug::ops::NegAssign;
+use rug::ops::{NegAssign, Pow};
 
 use crate::error::Error;
+use crate::expr::Expr;
 use crate::monomial::Monomial;
 use crate::number::Number;
 
@@ -141,6 +142,13 @@ impl Polynomial {
 		}
 
 		Some(remainder)
+	}
+
+	/// Evaluates this polynomial at the given value for `x`.
+	pub fn evaluate(&self, value: f64) -> f64 {
+		self.monomials()
+			.map(|mono| mono.coeff.to_f64() * value.pow(mono.degree.to_f64()))
+			.sum()
 	}
 
 	/// Extracts the common factor of all monomials.
@@ -282,6 +290,17 @@ impl Polynomial {
 			.unwrap_or_else(|index| index);
 
 		&mut self.0[index]
+	}
+
+	/// Creates a new expression from this polynomial, replacing `x` with the given expression.
+	pub fn into_expr(self, expr: &Expr) -> Expr {
+		let exprs = self
+			.0
+			.into_iter()
+			.map(|mono| Expr::Num(mono.coeff) * expr.clone().pow(Expr::Num(mono.degree)))
+			.collect();
+
+		Expr::Add(exprs)
 	}
 
 	/// Returns whether this polynomial can be represented as a constant [`Number`].

@@ -85,7 +85,7 @@ impl Expr {
 	}
 
 	/// Evaluates a [`Self::Fun`] expression.
-	pub fn evaluate_fun(name: Symbol, args: Vec<Expr>, ctx: &Context) -> Result<f64> {
+	fn evaluate_fun(name: Symbol, args: Vec<Expr>, ctx: &Context) -> Result<f64> {
 		// Get the evaluator or return an error
 		let Some(evaluator) = ctx.evaluators.get(&name) else {
 			return Err(Error::UndeclaredValue(name));
@@ -99,20 +99,14 @@ impl Expr {
 	}
 
 	/// Evaluates a [`Self::Poly`] expression.
-	pub fn evaluate_poly(sym: Symbol, poly: Polynomial, ctx: &Context) -> Result<f64> {
+	fn evaluate_poly(sym: Symbol, poly: Polynomial, ctx: &Context) -> Result<f64> {
 		// Get the constant or return an error
 		let Some(constant) = ctx.constants.get(&sym) else {
 			return Err(Error::UndeclaredValue(sym));
 		};
 
-		// Handle each monomial individually
-		let sum = poly
-			.monomials()
-			.map(|mono| mono.coeff.to_f64() * constant.pow(mono.degree.to_f64()))
-			.sum();
-
 		// Return the summed monomials
-		Ok(sum)
+		Ok(poly.evaluate(*constant))
 	}
 
 	/// Returns the inner value if this expression is [`Self::Num`], otherwise returns [`None`].
@@ -305,14 +299,8 @@ impl Expr {
 
 		// If the symbol is a declared variable, insert it into the polynomial
 		if let Some(variable) = ctx.variables.get(&sym) {
-			// Handle each monomial individually
-			let add = poly
-				.monomials()
-				.map(|mono| Self::Num(mono.coeff.clone()) * variable.clone().pow(Self::Num(mono.degree.clone())))
-				.collect_vec();
-
 			// Return the simplified sum
-			return Self::Add(add).simplify(ctx);
+			return poly.into_expr(variable).simplify(ctx);
 		}
 
 		// Return the result as a new polynomial

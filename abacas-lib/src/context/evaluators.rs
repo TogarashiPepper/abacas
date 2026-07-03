@@ -12,7 +12,7 @@ pub fn abs(args: Vec<f64>) -> Result<f64> {
 	Ok(args.into_iter().next().unwrap().abs())
 }
 
-/// Rounds its argument towards infinity.
+/// Rounds its argument towards positive infinity.
 pub fn ceil(args: Vec<f64>) -> Result<f64> {
 	if args.len() != 1 {
 		return Err(Error::ArgumentCount(Symbol::CEIL));
@@ -21,7 +21,7 @@ pub fn ceil(args: Vec<f64>) -> Result<f64> {
 	Ok(args.into_iter().next().unwrap().ceil())
 }
 
-/// Rounds its argument away from infinity.
+/// Rounds its argument towards negative infinity.
 pub fn floor(args: Vec<f64>) -> Result<f64> {
 	if args.len() != 1 {
 		return Err(Error::ArgumentCount(Symbol::FLOOR));
@@ -48,7 +48,7 @@ pub fn min(args: Vec<f64>) -> Result<f64> {
 	Ok(args.into_iter().min_by(f64::total_cmp).unwrap())
 }
 
-/// Rounds its argument away from zero.
+/// Rounds its argument towards the nearest integer.
 pub fn round(args: Vec<f64>) -> Result<f64> {
 	if args.len() != 1 {
 		return Err(Error::ArgumentCount(Symbol::ROUND));

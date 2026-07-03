@@ -17,7 +17,7 @@ pub fn abs(args: Vec<Expr>) -> Result<Expr> {
 	}
 }
 
-/// Rounds its argument towards infinity.
+/// Rounds its argument towards positive infinity.
 pub fn ceil(args: Vec<Expr>) -> Result<Expr> {
 	if args.len() != 1 {
 		return Err(Error::ArgumentCount(Symbol::CEIL));
@@ -30,7 +30,7 @@ pub fn ceil(args: Vec<Expr>) -> Result<Expr> {
 	}
 }
 
-/// Rounds its argument away from infinity.
+/// Rounds its argument towards negative infinity.
 pub fn floor(args: Vec<Expr>) -> Result<Expr> {
 	if args.len() != 1 {
 		return Err(Error::ArgumentCount(Symbol::FLOOR));
@@ -87,7 +87,7 @@ pub fn min(mut args: Vec<Expr>) -> Result<Expr> {
 	}
 }
 
-/// Rounds its argument away from zero.
+/// Rounds its argument towards the nearest integer.
 pub fn round(args: Vec<Expr>) -> Result<Expr> {
 	if args.len() != 1 {
 		return Err(Error::ArgumentCount(Symbol::ROUND));
