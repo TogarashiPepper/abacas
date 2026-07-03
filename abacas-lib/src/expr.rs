@@ -80,7 +80,7 @@ impl Expr {
 			Self::Mul(exprs) => exprs.into_iter().map(|expr| expr.evaluate(ctx)).product(),
 			Self::Num(num) => Ok(num.to_f64()),
 			Self::Poly(sym, poly) => Self::evaluate_poly(sym, poly, ctx),
-			Self::Pow(base, exp) => Ok(base.evaluate(ctx)?.pow(exp.evaluate(ctx)?)),
+			Self::Pow(base, exp) => Self::evaluate_pow(*base, *exp, ctx),
 		}
 	}
 
@@ -107,6 +107,21 @@ impl Expr {
 
 		// Return the summed monomials
 		Ok(poly.evaluate(*constant))
+	}
+
+	/// Evaluates a [`Self::Pow`] expression.
+	fn evaluate_pow(base: Expr, exp: Expr, ctx: &Context) -> Result<f64> {
+		// First evaluate the base and exponent separately
+		let base = base.evaluate(ctx)?;
+		let exp = exp.evaluate(ctx)?;
+
+		// If base is zero and exponent is negative, return zero division error
+		if base == 0.0 && exp < 0.0 {
+			return Err(Error::DivisionByZero);
+		}
+
+		// Return the power of both evaluations
+		Ok(base.pow(exp))
 	}
 
 	/// Returns the inner value if this expression is [`Self::Num`], otherwise returns [`None`].
