@@ -4,9 +4,8 @@ use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
 use std::{fmt, str};
 
-use num::integer::Integer;
-use num::traits::{FromPrimitive, One, Pow, ToPrimitive};
-use num::{BigRational, Signed, Zero};
+use num::traits::{One, Pow, Signed, ToPrimitive, Zero};
+use num::{BigRational, Integer};
 
 use crate::error::Error;
 
@@ -36,7 +35,7 @@ impl Number {
 impl Number {
 	/// Whether this number is an integer.
 	pub fn is_integer(&self) -> bool {
-		BigRational::is_integer(&self.0)
+		self.0.is_integer()
 	}
 
 	/// Whether this is the number negative one (`-1`).
@@ -46,22 +45,22 @@ impl Number {
 
 	/// Whether this number is less than zero.
 	pub fn is_negative(&self) -> bool {
-		BigRational::is_negative(&self.0)
+		self.0.is_negative()
 	}
 
 	/// Whether this is the number one (`1`).
 	pub fn is_one(&self) -> bool {
-		BigRational::is_one(&self.0)
+		self.0.is_one()
 	}
 
 	/// Whether this number is greater than zero.
 	pub fn is_positive(&self) -> bool {
-		BigRational::is_positive(&self.0)
+		self.0.is_positive()
 	}
 
 	/// Whether this is the number zero (`0`).
 	pub fn is_zero(&self) -> bool {
-		BigRational::is_zero(&self.0)
+		self.0.is_zero()
 	}
 }
 
@@ -69,134 +68,34 @@ impl Number {
 impl Number {
 	/// Gets the denominator of this number.
 	pub fn denom(self) -> Self {
-		Self(self.0.denom().clone().into())
-	}
-
-	/// Performs division, rounding the quotient up.
-	pub fn div_ceil(mut self, rhs: &Self) -> Self {
-		self.div_ceil_assign(rhs);
-		self
-	}
-
-	/// Performs division, rounding the quotient up and assigns it in-place.
-	pub fn div_ceil_assign(&mut self, rhs: &Self) {
-		self.0 /= &rhs.0;
-		self.ceil_mut();
-	}
-
-	/// Performs Euclidean division, rounding the quotient so that the remainder cannot be negative.
-	pub fn div_euc(mut self, rhs: &Self) -> Self {
-		self.div_euc_assign(rhs);
-		self
-	}
-
-	/// Performs Euclidean division, rounding the quotient so that the remainder cannot be negative and assigns it in-place.
-	pub fn div_euc_assign(&mut self, rhs: &Self) {
-		if rhs.is_positive() {
-			self.div_floor_assign(rhs);
-		} else {
-			self.div_ceil_assign(rhs);
-		}
-	}
-
-	/// Performs division, rounding the quotient down.
-	pub fn div_floor(mut self, rhs: &Self) -> Self {
-		self.div_floor_assign(rhs);
-		self
-	}
-
-	/// Performs division, rounding the quotient down and assigns it in-place.
-	pub fn div_floor_assign(&mut self, rhs: &Self) {
-		self.0 /= &rhs.0;
-		self.floor_mut();
-	}
-
-	/// Performs division, rounding the quotient towards zero.
-	pub fn div_trunc(mut self, rhs: &Self) -> Self {
-		self.div_trunc_assign(rhs);
-		self
-	}
-
-	/// Performs division, rounding the quotient towards zero and assigns it in-place.
-	pub fn div_trunc_assign(&mut self, rhs: &Self) {
-		self.0 /= &rhs.0;
-		self.trunc_mut();
+		Self(self.0.into_raw().1.into())
 	}
 
 	/// Gets the greatest common divisor.
-	pub fn gcd(mut self, rhs: &Self) -> Self {
-		self.gcd_mut(rhs);
-		self
-	}
-
-	/// Gets the greatest common divisor and assigns it in-place.
-	pub fn gcd_mut(&mut self, rhs: &Self) {
-		self.0 = BigRational::new(self.0.numer().gcd(rhs.0.numer()), self.0.denom().lcm(rhs.0.denom()))
+	pub fn gcd(self, rhs: &Self) -> Self {
+		Self(BigRational::new(
+			self.0.numer().gcd(rhs.0.numer()),
+			self.0.denom().lcm(rhs.0.denom()),
+		))
 	}
 
 	/// Gets the least common multiple.
-	pub fn lcm(mut self, rhs: &Self) -> Self {
-		self.lcm_mut(rhs);
-		self
-	}
-
-	/// Gets the least common multiple and assigns it in-place.
-	pub fn lcm_mut(&mut self, rhs: &Self) {
-		self.0 = BigRational::new(self.0.numer().lcm(rhs.0.numer()), self.0.denom().gcd(rhs.0.denom()))
+	pub fn lcm(self, rhs: &Self) -> Self {
+		Self(BigRational::new(
+			self.0.numer().lcm(rhs.0.numer()),
+			self.0.denom().gcd(rhs.0.denom()),
+		))
 	}
 
 	/// Gets the numerator of this number.
 	pub fn numer(self) -> Self {
-		Self(self.0.numer().clone().into())
+		Self(self.0.into_raw().0.into())
 	}
 
 	/// Gets the numerator and denominator of this number as a tuple.
 	pub fn ratio(self) -> (Self, Self) {
-		(self.clone().numer(), self.denom())
-	}
-
-	/// Finds the remainder when the quotient is rounded up.
-	pub fn rem_ceil(mut self, rhs: &Self) -> Self {
-		self.rem_ceil_assign(rhs);
-		self
-	}
-
-	/// Finds the remainder when the quotient is rounded up and assigns it in-place.
-	pub fn rem_ceil_assign(&mut self, rhs: &Self) {
-		self.0 -= self.clone().div_ceil(rhs).0 * &rhs.0;
-	}
-
-	/// Finds the positive remainder from Euclidean division.
-	pub fn rem_euc(mut self, rhs: &Self) -> Self {
-		self.rem_euc_assign(rhs);
-		self
-	}
-
-	/// Finds the positive remainder from Euclidean division and assigns it in-place.
-	pub fn rem_euc_assign(&mut self, rhs: &Self) {
-		self.0 -= self.clone().div_euc(rhs).0 * &rhs.0;
-	}
-
-	/// Finds the remainder when the quotient is rounded down.
-	pub fn rem_floor(mut self, rhs: &Self) -> Self {
-		self.rem_floor_assign(rhs);
-		self
-	}
-
-	/// Finds the remainder when the quotient is rounded down and assigns it in-place.
-	pub fn rem_floor_assign(&mut self, rhs: &Self) {
-		self.0 -= self.clone().div_floor(rhs).0 * &rhs.0;
-	}
-
-	/// Finds the remainder when the quotient is rounded towards zero.
-	pub fn rem_trunc(mut self, rhs: &Self) -> Self {
-		self.rem_trunc_assign(rhs);
-		self
-	}
-
-	/// Finds the remainder when the quotient is rounded towards zero and assigns it in-place.
-	pub fn rem_trunc_assign(&mut self, rhs: &Self) {
-		self.0 -= self.clone().div_trunc(rhs).0 * &rhs.0;
+		let (numer, denom) = self.0.into_raw();
+		(Self(numer.into()), Self(denom.into()))
 	}
 
 	/// Converts this number into an [`f32`].
@@ -212,9 +111,9 @@ impl Number {
 	/// Internal method to write this number with specific configuration.
 	pub(crate) fn write(&self, f: &mut fmt::Formatter<'_>, abs: bool) -> fmt::Result {
 		if abs {
-			write!(f, "{}", self.0.to_f64().unwrap().abs())
+			write!(f, "{}", self.to_f64().abs())
 		} else {
-			write!(f, "{}", self.0.to_f64().unwrap())
+			write!(f, "{}", self.to_f64())
 		}
 	}
 }
@@ -277,18 +176,19 @@ impl Neg for Number {
 	type Output = Self;
 
 	fn neg(self) -> Self::Output {
-		Self(self.0.neg())
+		Self(-self.0)
 	}
 }
 
-impl<T> Pow<T> for Number
-where
-	BigRational: Pow<T, Output = BigRational>,
-{
+impl Pow<&Self> for Number {
 	type Output = Self;
 
-	fn pow(self, rhs: T) -> Self::Output {
-		Self(self.0.pow(rhs))
+	fn pow(self, rhs: &Self) -> Self::Output {
+		if !rhs.is_integer() {
+			panic!("exponent must be an integer");
+		}
+
+		Self(self.0.pow(rhs.0.numer()))
 	}
 }
 
@@ -304,12 +204,9 @@ where
 	}
 }
 
-impl<T> RemAssign<T> for Number
-where
-	Number: From<T>,
-{
-	fn rem_assign(&mut self, rhs: T) {
-		self.rem_trunc_assign(&rhs.into());
+impl RemAssign<&Self> for Number {
+	fn rem_assign(&mut self, rhs: &Self) {
+		self.0 %= &rhs.0;
 	}
 }
 
@@ -350,63 +247,62 @@ impl str::FromStr for Number {
 	}
 }
 
-macro_rules! impl_float {
-	($(($float:ty, $fn:ident),)*) => {
-
-		$(
-			impl TryFrom<$float> for Number {
-				type Error = $float;
-
-				fn try_from(value: $float) -> Result<Self, Self::Error> {
-					Ok(Self(BigRational::$fn(value.into()).unwrap()))
-				}
-			}
-		)*
-	};
-}
-
 macro_rules! impl_int {
-	($(($int:ty, $fn:ident),)*) => {
+	($($int:ty,)*) => {
 		$(
 			impl From<$int> for Number {
 				fn from(value: $int) -> Self {
-					Self(BigRational::$fn(value).unwrap())
+					Self(BigRational::from_integer(value.into()))
 				}
 			}
 
 			impl AddAssign<$int> for Number {
 				fn add_assign(&mut self, rhs: $int) {
-					self.0 += BigRational::$fn(rhs).unwrap();
+					self.0 += BigRational::from_integer(rhs.into());
 				}
 			}
 
 			impl DivAssign<$int> for Number {
 				fn div_assign(&mut self, rhs: $int) {
-					self.0 /= BigRational::$fn(rhs).unwrap();
+					self.0 /= BigRational::from_integer(rhs.into());
 				}
 			}
 
 			impl MulAssign<$int> for Number {
 				fn mul_assign(&mut self, rhs: $int) {
-					self.0 *= BigRational::$fn(rhs).unwrap();
+					self.0 *= BigRational::from_integer(rhs.into());
 				}
 			}
 
 			impl PartialEq<$int> for Number {
 				fn eq(&self, other: &$int) -> bool {
-					self.0 == BigRational::$fn(*other).unwrap()
+					self.0 == BigRational::from_integer((*other).into())
 				}
 			}
 
 			impl PartialOrd<$int> for Number {
 				fn partial_cmp(&self, other: &$int) -> Option<Ordering> {
-					self.0.partial_cmp(&BigRational::$fn(*other).unwrap())
+					self.0.partial_cmp(&BigRational::from_integer((*other).into()))
+				}
+			}
+
+			impl Pow<$int> for Number {
+				type Output = Self;
+
+				fn pow(self, rhs: $int) -> Self::Output {
+					Self(self.0.pow(rhs))
+				}
+			}
+
+			impl RemAssign<$int> for Number {
+				fn rem_assign(&mut self, rhs: $int) {
+					self.0 %= BigRational::from_integer(rhs.into());
 				}
 			}
 
 			impl SubAssign<$int> for Number {
 				fn sub_assign(&mut self, rhs: $int) {
-					self.0 -= BigRational::$fn(rhs).unwrap()
+					self.0 -= BigRational::from_integer(rhs.into());
 				}
 			}
 		)*
@@ -418,7 +314,7 @@ macro_rules! impl_rational {
 		impl Number {
 			$(
 				#[doc = concat!("Gets the ", $doc, " of this number.")]
-				pub fn $name(self) -> Self {
+				pub fn $name(&self) -> Self {
 					Self(self.0.$name())
 				}
 
@@ -431,13 +327,9 @@ macro_rules! impl_rational {
 	};
 }
 
-impl_float! {
-	(f32, from_f32), (f64, from_f64),
-}
-
 impl_int! {
-	(i8, from_i8), (i16, from_i16), (i32, from_i32), (i64, from_i64), (i128, from_i128), (isize, from_isize),
-	(u8, from_u8), (u16, from_u16), (u32, from_u32), (u64, from_u64), (u128, from_u128), (usize, from_usize),
+	i8, i16, i32, i64, i128, isize,
+	u8, u16, u32, u64, u128, usize,
 }
 
 impl_rational! {

@@ -643,11 +643,8 @@ impl MulAssign<&Self> for Polynomial {
 impl Neg for Polynomial {
 	type Output = Self;
 
-	fn neg(mut self) -> Self::Output {
-		for monomial in &mut self.0 {
-			*monomial = monomial.clone().neg();
-		}
-		self
+	fn neg(self) -> Self::Output {
+		Self(self.0.into_iter().map(Monomial::neg).collect())
 	}
 }
 

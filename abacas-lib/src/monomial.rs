@@ -190,24 +190,19 @@ impl MulAssign<&Self> for Monomial {
 impl Neg for Monomial {
 	type Output = Self;
 
-	fn neg(mut self) -> Self::Output {
-		self.coeff = self.coeff.neg();
-		self
+	fn neg(self) -> Self::Output {
+		Self::new(-self.coeff, self.degree)
 	}
 }
 
-impl<T> Pow<T> for Monomial
+impl<T: Copy> Pow<T> for Monomial
 where
-	Number: Pow<T, Output = Number>,
-	Number: MulAssign<T>,
-	T: Clone,
+	Number: Mul<T, Output = Number> + Pow<T, Output = Number>,
 {
 	type Output = Self;
 
-	fn pow(mut self, rhs: T) -> Self::Output {
-		self.coeff = self.coeff.pow(rhs.clone());
-		self.degree *= rhs;
-		self
+	fn pow(self, rhs: T) -> Self::Output {
+		Self::new(self.coeff.pow(rhs), self.degree * rhs)
 	}
 }
 
