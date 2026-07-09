@@ -1,5 +1,5 @@
 [workspace]
-members = ["abacas-cli", "abacas-lib"]
+members = ["abacas-cli", "abacas-lib", "abacas-num"]
 resolver = "3"
 
 [workspace.dependencies]
