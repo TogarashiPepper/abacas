@@ -4,7 +4,7 @@ use abacas::context::{Context, Symbol};
 use abacas::expr::Expr;
 use abacas::monomial::Monomial;
 use abacas::number::Number;
-use rug::ops::Pow;
+use num::traits::Pow;
 
 use crate::token::Token::{self, *};
 

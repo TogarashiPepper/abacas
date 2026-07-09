@@ -8,6 +8,6 @@ abacas = { workspace = true }
 argh = { workspace = true }
 dark-light = { workspace = true }
 logos = { workspace = true }
-rug = { workspace = true }
+num = { workspace = true }
 rustyline = { workspace = true, features = ["derive"] }
 syntect = { workspace = true }

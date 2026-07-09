@@ -4,63 +4,64 @@ use std::cmp::Ordering;
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssign, Sub, SubAssign};
 use std::{fmt, str};
 
-use rug::Rational;
-use rug::ops::{DivRounding, DivRoundingAssign, NegAssign, Pow, PowAssign, RemRounding, RemRoundingAssign};
+use num::integer::Integer;
+use num::traits::{FromPrimitive, One, Pow, ToPrimitive};
+use num::{BigRational, Signed, Zero};
 
 use crate::error::Error;
 
-/// Represents a specific number. Currently uses [`Rational`] under the hood, however this should not be relied upon.
+/// Represents a specific number. Currently uses [`BigRational`] under the hood, however this should not be relied upon.
 #[derive(Clone, Debug, Default, Eq, Hash, Ord, PartialEq, PartialOrd)]
-pub struct Number(Rational);
+pub struct Number(BigRational);
 
 // Constants
 impl Number {
 	/// The number negative one (`-1`).
 	pub fn neg_one() -> Self {
-		Self(Rational::NEG_ONE.clone())
+		Self(-BigRational::ONE)
 	}
 
 	/// The number one (`1`).
 	pub fn one() -> Self {
-		Self(Rational::ONE.clone())
+		Self(BigRational::ONE)
 	}
 
 	/// The number zero (`0`).
 	pub fn zero() -> Self {
-		Self(Rational::new())
+		Self(BigRational::ZERO)
 	}
 }
 
 // Guards
 impl Number {
 	/// Whether this number is an integer.
-	pub const fn is_integer(&self) -> bool {
-		self.0.is_integer()
+	pub fn is_integer(&self) -> bool {
+		BigRational::is_integer(&self.0)
 	}
 
 	/// Whether this is the number negative one (`-1`).
 	pub fn is_neg_one(&self) -> bool {
-		self.0 == *Rational::NEG_ONE
+		self.0 == -BigRational::ONE
 	}
 
 	/// Whether this number is less than zero.
-	pub const fn is_negative(&self) -> bool {
-		self.0.is_negative()
+	pub fn is_negative(&self) -> bool {
+		BigRational::is_negative(&self.0)
 	}
 
 	/// Whether this is the number one (`1`).
 	pub fn is_one(&self) -> bool {
-		self.0 == *Rational::ONE
+		BigRational::is_one(&self.0)
 	}
 
 	/// Whether this number is greater than zero.
-	pub const fn is_positive(&self) -> bool {
-		self.0.is_positive()
+	pub fn is_positive(&self) -> bool {
+		BigRational::is_positive(&self.0)
 	}
 
 	/// Whether this is the number zero (`0`).
-	pub const fn is_zero(&self) -> bool {
-		self.0.is_zero()
+	pub fn is_zero(&self) -> bool {
+		BigRational::is_zero(&self.0)
 	}
 }
 
@@ -68,7 +69,58 @@ impl Number {
 impl Number {
 	/// Gets the denominator of this number.
 	pub fn denom(self) -> Self {
-		Self(self.0.into_numer_denom().1.into())
+		Self(self.0.denom().clone().into())
+	}
+
+	/// Performs division, rounding the quotient up.
+	pub fn div_ceil(mut self, rhs: &Self) -> Self {
+		self.div_ceil_assign(rhs);
+		self
+	}
+
+	/// Performs division, rounding the quotient up and assigns it in-place.
+	pub fn div_ceil_assign(&mut self, rhs: &Self) {
+		self.0 /= &rhs.0;
+		self.ceil_mut();
+	}
+
+	/// Performs Euclidean division, rounding the quotient so that the remainder cannot be negative.
+	pub fn div_euc(mut self, rhs: &Self) -> Self {
+		self.div_euc_assign(rhs);
+		self
+	}
+
+	/// Performs Euclidean division, rounding the quotient so that the remainder cannot be negative and assigns it in-place.
+	pub fn div_euc_assign(&mut self, rhs: &Self) {
+		if rhs.is_positive() {
+			self.div_floor_assign(rhs);
+		} else {
+			self.div_ceil_assign(rhs);
+		}
+	}
+
+	/// Performs division, rounding the quotient down.
+	pub fn div_floor(mut self, rhs: &Self) -> Self {
+		self.div_floor_assign(rhs);
+		self
+	}
+
+	/// Performs division, rounding the quotient down and assigns it in-place.
+	pub fn div_floor_assign(&mut self, rhs: &Self) {
+		self.0 /= &rhs.0;
+		self.floor_mut();
+	}
+
+	/// Performs division, rounding the quotient towards zero.
+	pub fn div_trunc(mut self, rhs: &Self) -> Self {
+		self.div_trunc_assign(rhs);
+		self
+	}
+
+	/// Performs division, rounding the quotient towards zero and assigns it in-place.
+	pub fn div_trunc_assign(&mut self, rhs: &Self) {
+		self.0 /= &rhs.0;
+		self.trunc_mut();
 	}
 
 	/// Gets the greatest common divisor.
@@ -79,10 +131,7 @@ impl Number {
 
 	/// Gets the greatest common divisor and assigns it in-place.
 	pub fn gcd_mut(&mut self, rhs: &Self) {
-		self.0.mutate_numer_denom(|numer, denom| {
-			numer.gcd_mut(rhs.0.numer());
-			denom.lcm_mut(rhs.0.denom());
-		});
+		self.0 = BigRational::new(self.0.numer().gcd(rhs.0.numer()), self.0.denom().lcm(rhs.0.denom()))
 	}
 
 	/// Gets the least common multiple.
@@ -93,39 +142,79 @@ impl Number {
 
 	/// Gets the least common multiple and assigns it in-place.
 	pub fn lcm_mut(&mut self, rhs: &Self) {
-		self.0.mutate_numer_denom(|numer, denom| {
-			numer.lcm_mut(rhs.0.numer());
-			denom.gcd_mut(rhs.0.denom());
-		});
+		self.0 = BigRational::new(self.0.numer().lcm(rhs.0.numer()), self.0.denom().gcd(rhs.0.denom()))
 	}
 
 	/// Gets the numerator of this number.
 	pub fn numer(self) -> Self {
-		Self(self.0.into_numer_denom().0.into())
+		Self(self.0.numer().clone().into())
 	}
 
 	/// Gets the numerator and denominator of this number as a tuple.
 	pub fn ratio(self) -> (Self, Self) {
-		let (numer, denom) = self.0.into_numer_denom();
-		(Self(numer.into()), Self(denom.into()))
+		(self.clone().numer(), self.denom())
+	}
+
+	/// Finds the remainder when the quotient is rounded up.
+	pub fn rem_ceil(mut self, rhs: &Self) -> Self {
+		self.rem_ceil_assign(rhs);
+		self
+	}
+
+	/// Finds the remainder when the quotient is rounded up and assigns it in-place.
+	pub fn rem_ceil_assign(&mut self, rhs: &Self) {
+		self.0 -= self.clone().div_ceil(rhs).0 * &rhs.0;
+	}
+
+	/// Finds the positive remainder from Euclidean division.
+	pub fn rem_euc(mut self, rhs: &Self) -> Self {
+		self.rem_euc_assign(rhs);
+		self
+	}
+
+	/// Finds the positive remainder from Euclidean division and assigns it in-place.
+	pub fn rem_euc_assign(&mut self, rhs: &Self) {
+		self.0 -= self.clone().div_euc(rhs).0 * &rhs.0;
+	}
+
+	/// Finds the remainder when the quotient is rounded down.
+	pub fn rem_floor(mut self, rhs: &Self) -> Self {
+		self.rem_floor_assign(rhs);
+		self
+	}
+
+	/// Finds the remainder when the quotient is rounded down and assigns it in-place.
+	pub fn rem_floor_assign(&mut self, rhs: &Self) {
+		self.0 -= self.clone().div_floor(rhs).0 * &rhs.0;
+	}
+
+	/// Finds the remainder when the quotient is rounded towards zero.
+	pub fn rem_trunc(mut self, rhs: &Self) -> Self {
+		self.rem_trunc_assign(rhs);
+		self
+	}
+
+	/// Finds the remainder when the quotient is rounded towards zero and assigns it in-place.
+	pub fn rem_trunc_assign(&mut self, rhs: &Self) {
+		self.0 -= self.clone().div_trunc(rhs).0 * &rhs.0;
 	}
 
 	/// Converts this number into an [`f32`].
 	pub fn to_f32(&self) -> f32 {
-		self.0.to_f32()
+		self.0.to_f32().unwrap()
 	}
 
 	/// Converts this number into an [`f64`].
 	pub fn to_f64(&self) -> f64 {
-		self.0.to_f64()
+		self.0.to_f64().unwrap()
 	}
 
 	/// Internal method to write this number with specific configuration.
 	pub(crate) fn write(&self, f: &mut fmt::Formatter<'_>, abs: bool) -> fmt::Result {
 		if abs {
-			write!(f, "{}", self.0.to_f64().abs())
+			write!(f, "{}", self.0.to_f64().unwrap().abs())
 		} else {
-			write!(f, "{}", self.0.to_f64())
+			write!(f, "{}", self.0.to_f64().unwrap())
 		}
 	}
 }
@@ -166,58 +255,6 @@ impl DivAssign<&Self> for Number {
 	}
 }
 
-impl<T> DivRounding<T> for Number
-where
-	Self: DivRoundingAssign<T>,
-{
-	type Output = Self;
-
-	fn div_ceil(mut self, rhs: T) -> Self::Output {
-		self.div_ceil_assign(rhs);
-		self
-	}
-
-	fn div_euc(mut self, rhs: T) -> Self::Output {
-		self.div_euc_assign(rhs);
-		self
-	}
-
-	fn div_floor(mut self, rhs: T) -> Self::Output {
-		self.div_floor_assign(rhs);
-		self
-	}
-
-	fn div_trunc(mut self, rhs: T) -> Self::Output {
-		self.div_trunc_assign(rhs);
-		self
-	}
-}
-
-impl DivRoundingAssign<&Self> for Number {
-	fn div_ceil_assign(&mut self, rhs: &Self) {
-		self.0 /= &rhs.0;
-		self.0.ceil_mut();
-	}
-
-	fn div_euc_assign(&mut self, rhs: &Self) {
-		if rhs.is_positive() {
-			self.div_floor_assign(rhs);
-		} else {
-			self.div_ceil_assign(rhs);
-		}
-	}
-
-	fn div_floor_assign(&mut self, rhs: &Self) {
-		self.0 /= &rhs.0;
-		self.0.floor_mut();
-	}
-
-	fn div_trunc_assign(&mut self, rhs: &Self) {
-		self.0 /= &rhs.0;
-		self.0.trunc_mut();
-	}
-}
-
 impl<T> Mul<T> for Number
 where
 	Self: MulAssign<T>,
@@ -239,45 +276,19 @@ impl MulAssign<&Self> for Number {
 impl Neg for Number {
 	type Output = Self;
 
-	fn neg(mut self) -> Self::Output {
-		self.neg_assign();
-		self
-	}
-}
-
-impl NegAssign for Number {
-	fn neg_assign(&mut self) {
-		self.0.neg_assign();
+	fn neg(self) -> Self::Output {
+		Self(self.0.neg())
 	}
 }
 
 impl<T> Pow<T> for Number
 where
-	Self: PowAssign<T>,
+	BigRational: Pow<T, Output = BigRational>,
 {
 	type Output = Self;
 
-	fn pow(mut self, rhs: T) -> Self::Output {
-		self.pow_assign(rhs);
-		self
-	}
-}
-
-impl PowAssign<&Self> for Number {
-	fn pow_assign(&mut self, rhs: &Self) {
-		if !rhs.is_integer() {
-			panic!("exponent must be an integer");
-		}
-
-		let Some(exponent) = rhs.0.numer().as_abs().to_u32() else {
-			panic!("exponent must be less than 2^32");
-		};
-
-		self.0.pow_assign(exponent);
-
-		if rhs.is_negative() {
-			self.0.recip_mut();
-		}
+	fn pow(self, rhs: T) -> Self::Output {
+		Self(self.0.pow(rhs))
 	}
 }
 
@@ -295,55 +306,10 @@ where
 
 impl<T> RemAssign<T> for Number
 where
-	Self: RemRoundingAssign<T>,
+	Number: From<T>,
 {
 	fn rem_assign(&mut self, rhs: T) {
-		self.rem_trunc_assign(rhs);
-	}
-}
-
-impl<T> RemRounding<T> for Number
-where
-	Self: RemRoundingAssign<T>,
-{
-	type Output = Self;
-
-	fn rem_ceil(mut self, rhs: T) -> Self::Output {
-		self.rem_ceil_assign(rhs);
-		self
-	}
-
-	fn rem_euc(mut self, rhs: T) -> Self::Output {
-		self.rem_euc_assign(rhs);
-		self
-	}
-
-	fn rem_floor(mut self, rhs: T) -> Self::Output {
-		self.rem_floor_assign(rhs);
-		self
-	}
-
-	fn rem_trunc(mut self, rhs: T) -> Self::Output {
-		self.rem_trunc_assign(rhs);
-		self
-	}
-}
-
-impl RemRoundingAssign<&Self> for Number {
-	fn rem_ceil_assign(&mut self, rhs: &Self) {
-		self.0 -= self.clone().div_ceil(rhs).0 * &rhs.0;
-	}
-
-	fn rem_euc_assign(&mut self, rhs: &Self) {
-		self.0 -= self.clone().div_euc(rhs).0 * &rhs.0;
-	}
-
-	fn rem_floor_assign(&mut self, rhs: &Self) {
-		self.0 -= self.clone().div_floor(rhs).0 * &rhs.0;
-	}
-
-	fn rem_trunc_assign(&mut self, rhs: &Self) {
-		self.0 -= self.clone().div_trunc(rhs).0 * &rhs.0;
+		self.rem_trunc_assign(&rhs.into());
 	}
 }
 
@@ -385,13 +351,14 @@ impl str::FromStr for Number {
 }
 
 macro_rules! impl_float {
-	($($float:ty,)*) => {
+	($(($float:ty, $fn:ident),)*) => {
+
 		$(
 			impl TryFrom<$float> for Number {
 				type Error = $float;
 
 				fn try_from(value: $float) -> Result<Self, Self::Error> {
-					value.try_into().map(Self).map_err(|_| value)
+					Ok(Self(BigRational::$fn(value.into()).unwrap()))
 				}
 			}
 		)*
@@ -399,98 +366,47 @@ macro_rules! impl_float {
 }
 
 macro_rules! impl_int {
-	($($int:ty,)*) => {
+	($(($int:ty, $fn:ident),)*) => {
 		$(
 			impl From<$int> for Number {
 				fn from(value: $int) -> Self {
-					Self(value.into())
+					Self(BigRational::$fn(value).unwrap())
 				}
 			}
 
 			impl AddAssign<$int> for Number {
 				fn add_assign(&mut self, rhs: $int) {
-					self.0 += rhs;
+					self.0 += BigRational::$fn(rhs).unwrap();
 				}
 			}
 
 			impl DivAssign<$int> for Number {
 				fn div_assign(&mut self, rhs: $int) {
-					self.0 /= rhs;
-				}
-			}
-
-			impl DivRoundingAssign<$int> for Number {
-				fn div_ceil_assign(&mut self, rhs: $int) {
-					self.0 /= rhs;
-					self.0.ceil_mut();
-				}
-
-				fn div_euc_assign(&mut self, rhs: $int) {
-					if rhs > 0 {
-						self.div_floor_assign(rhs);
-					} else {
-						self.div_ceil_assign(rhs);
-					}
-				}
-
-				fn div_floor_assign(&mut self, rhs: $int) {
-					self.0 /= rhs;
-					self.0.floor_mut();
-				}
-
-				fn div_trunc_assign(&mut self, rhs: $int) {
-					self.0 /= rhs;
-					self.0.trunc_mut();
+					self.0 /= BigRational::$fn(rhs).unwrap();
 				}
 			}
 
 			impl MulAssign<$int> for Number {
 				fn mul_assign(&mut self, rhs: $int) {
-					self.0 *= rhs;
+					self.0 *= BigRational::$fn(rhs).unwrap();
 				}
 			}
 
 			impl PartialEq<$int> for Number {
 				fn eq(&self, other: &$int) -> bool {
-					self.0 == *other
+					self.0 == BigRational::$fn(*other).unwrap()
 				}
 			}
 
 			impl PartialOrd<$int> for Number {
 				fn partial_cmp(&self, other: &$int) -> Option<Ordering> {
-					self.0.partial_cmp(other)
-				}
-			}
-
-
-			impl PowAssign<$int> for Number {
-				fn pow_assign(&mut self, rhs: $int) {
-					// TODO: Find a good way to remove this allocation
-					self.pow_assign(&Self::from(rhs));
-				}
-			}
-
-			impl RemRoundingAssign<$int> for Number {
-				fn rem_ceil_assign(&mut self, rhs: $int) {
-					self.0 -= self.clone().div_ceil(rhs).0 * rhs;
-				}
-
-				fn rem_euc_assign(&mut self, rhs: $int) {
-					self.0 -= self.clone().div_euc(rhs).0 * rhs;
-				}
-
-				fn rem_floor_assign(&mut self, rhs: $int) {
-					self.0 -= self.clone().div_floor(rhs).0 * rhs;
-				}
-
-				fn rem_trunc_assign(&mut self, rhs: $int) {
-					self.0 -= self.clone().div_trunc(rhs).0 * rhs;
+					self.0.partial_cmp(&BigRational::$fn(*other).unwrap())
 				}
 			}
 
 			impl SubAssign<$int> for Number {
 				fn sub_assign(&mut self, rhs: $int) {
-					self.0 -= rhs;
+					self.0 -= BigRational::$fn(rhs).unwrap()
 				}
 			}
 		)*
@@ -508,7 +424,7 @@ macro_rules! impl_rational {
 
 				#[doc = concat!("Gets the ", $doc, " of this number and assigns it in-place.")]
 				pub fn $name_mut(&mut self) {
-					self.0.$name_mut();
+					self.0 = self.0.$name();
 				}
 			)*
 		}
@@ -516,12 +432,12 @@ macro_rules! impl_rational {
 }
 
 impl_float! {
-	f32, f64,
+	(f32, from_f32), (f64, from_f64),
 }
 
 impl_int! {
-	i8, i16, i32, i64, i128, isize,
-	u8, u16, u32, u64, u128, usize,
+	(i8, from_i8), (i16, from_i16), (i32, from_i32), (i64, from_i64), (i128, from_i128), (isize, from_isize),
+	(u8, from_u8), (u16, from_u16), (u32, from_u32), (u64, from_u64), (u128, from_u128), (usize, from_usize),
 }
 
 impl_rational! {
@@ -530,7 +446,5 @@ impl_rational! {
 	floor, floor_mut, "floored integer";
 	recip, recip_mut, "reciprocal value";
 	round, round_mut, "rounded integer";
-	signum, signum_mut, "sign";
-	square, square_mut, "squared value";
 	trunc, trunc_mut, "truncated integer";
 }

@@ -3,7 +3,7 @@
 use std::ops::{Add, Div, DivAssign, Mul, MulAssign, Neg, Sub};
 use std::{fmt, str};
 
-use rug::ops::{NegAssign, Pow, PowAssign};
+use num::traits::Pow;
 
 use crate::error::Error;
 use crate::number::Number;
@@ -191,36 +191,23 @@ impl Neg for Monomial {
 	type Output = Self;
 
 	fn neg(mut self) -> Self::Output {
-		self.neg_assign();
+		self.coeff = self.coeff.neg();
 		self
-	}
-}
-
-impl NegAssign for Monomial {
-	fn neg_assign(&mut self) {
-		self.coeff.neg_assign();
 	}
 }
 
 impl<T> Pow<T> for Monomial
 where
-	Self: PowAssign<T>,
+	Number: Pow<T, Output = Number>,
+	Number: MulAssign<T>,
+	T: Clone,
 {
 	type Output = Self;
 
 	fn pow(mut self, rhs: T) -> Self::Output {
-		self.pow_assign(rhs);
-		self
-	}
-}
-
-impl<T: Copy> PowAssign<T> for Monomial
-where
-	Number: MulAssign<T> + PowAssign<T>,
-{
-	fn pow_assign(&mut self, rhs: T) {
-		self.coeff.pow_assign(rhs);
+		self.coeff = self.coeff.pow(rhs.clone());
 		self.degree *= rhs;
+		self
 	}
 }
 

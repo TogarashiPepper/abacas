@@ -9,7 +9,7 @@ harness = false
 
 [dependencies]
 itertools = { workspace = true }
-rug = { workspace = true }
+num = { workspace = true }
 
 [dev-dependencies]
 divan = { workspace = true }

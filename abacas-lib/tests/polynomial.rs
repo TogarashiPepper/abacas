@@ -56,7 +56,7 @@ fn gcd_ext() {
 
 #[test]
 fn impls() {
-	use rug::ops::Pow;
+	use num::traits::Pow;
 
 	let mono = m("5x^4").pow(3);
 	assert_eq!(mono.to_string(), "125x^12");

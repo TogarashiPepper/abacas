@@ -5,7 +5,7 @@ use std::fmt;
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use itertools::Itertools;
-use rug::ops::Pow;
+use num::traits::Pow;
 
 use crate::context::{Context, Symbol};
 use crate::error::{Error, Result};

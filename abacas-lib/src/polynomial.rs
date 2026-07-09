@@ -4,7 +4,7 @@ use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Neg, Rem, RemAssi
 use std::slice::Iter;
 use std::{fmt, mem, str};
 
-use rug::ops::{NegAssign, Pow};
+use num::pow::Pow;
 
 use crate::error::Error;
 use crate::expr::Expr;
@@ -317,7 +317,7 @@ impl Polynomial {
 	/// assert!(!Polynomial::from(Monomial::linear(3)).is_constant());
 	/// assert!(!Polynomial::from(Monomial::linear(3) + 5).is_constant());
 	/// ```
-	pub const fn is_constant(&self) -> bool {
+	pub fn is_constant(&self) -> bool {
 		self.is_zero() || matches!(self.0.as_slice(), [mono] if mono.degree.is_zero())
 	}
 
@@ -644,16 +644,10 @@ impl Neg for Polynomial {
 	type Output = Self;
 
 	fn neg(mut self) -> Self::Output {
-		self.neg_assign();
-		self
-	}
-}
-
-impl NegAssign for Polynomial {
-	fn neg_assign(&mut self) {
 		for monomial in &mut self.0 {
-			monomial.neg_assign();
+			*monomial = monomial.clone().neg();
 		}
+		self
 	}
 }
 
