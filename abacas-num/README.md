@@ -1,2 +1,3 @@
 # abacas-num
-An implementation of bignums, bigrationals, and bigfloats.
+
+An implementation of arbitrary precision numbers.
