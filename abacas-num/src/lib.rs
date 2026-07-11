@@ -1,9 +1,10 @@
 #![doc = include_str!("../README.md")]
-#![warn(missing_docs)]
+#![warn(missing_docs, clippy::missing_docs_in_private_items)]
 
-pub mod digit;
+pub mod digits;
 pub mod integer;
 pub mod natural;
+pub mod ops;
 pub mod rational;
 pub mod real;
 pub mod symbol;
