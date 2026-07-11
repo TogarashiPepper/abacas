@@ -1,5 +1,6 @@
 //! The real enum and related items.
 
+use std::iter::{Product, Sum};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 use crate::ops::{Inv, Pow};
@@ -40,7 +41,7 @@ impl Real {
 			Self::Fun(name, args) => Self::simplify_fun(name, args),
 			Self::Mul(reals) => Self::simplify_mul(reals),
 			Self::Pow(base, exp) => Self::simplify_pow(base, exp),
-			Self::Rat(rat) => Self::Rat(rat),
+			Self::Rat(rational) => Self::Rat(rational),
 		}
 	}
 
@@ -87,6 +88,15 @@ impl Div for Real {
 	}
 }
 
+impl<T> From<T> for Real
+where
+	T: Into<Rational>,
+{
+	fn from(value: T) -> Self {
+		Self::Rat(value.into()).simplify()
+	}
+}
+
 impl Inv for Real {
 	type Output = Self;
 
@@ -119,10 +129,28 @@ impl Pow for Real {
 	}
 }
 
+impl Product for Real {
+	fn product<I>(iter: I) -> Self
+	where
+		I: Iterator<Item = Self>,
+	{
+		Self::Mul(iter.collect()).simplify()
+	}
+}
+
 impl Sub for Real {
 	type Output = Self;
 
 	fn sub(self, rhs: Self) -> Self::Output {
 		self.add(rhs.neg())
+	}
+}
+
+impl Sum for Real {
+	fn sum<I>(iter: I) -> Self
+	where
+		I: Iterator<Item = Self>,
+	{
+		Self::Add(iter.collect()).simplify()
 	}
 }
