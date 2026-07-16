@@ -1,6 +1,7 @@
 //! The digit type and related items.
 
 mod add;
+mod iter;
 
 use std::num::NonZeroUsize;
 use std::ops::{Deref, DerefMut};
@@ -64,6 +65,11 @@ impl Digits {
 
 			Self::Stack(_) => NonZeroUsize::MIN,
 		}
+	}
+
+	/// Gets the digit at the given index, even if it is not part of the list.
+	pub fn digit(&self, index: usize) -> Digit {
+		self.get(index).copied().unwrap_or(0)
 	}
 
 	/// Adds a new digit to the list.

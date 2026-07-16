@@ -3,6 +3,7 @@
 use std::iter::{Product, Sum};
 use std::ops::{Add, AddAssign, Div, DivAssign, Mul, MulAssign, Rem, RemAssign, Sub, SubAssign};
 
+use crate::digits::Digits;
 use crate::integer::Integer;
 use crate::natural::Natural;
 use crate::ops::{Pow, PowAssign};
@@ -107,8 +108,12 @@ macro_rules! forward_impls {
 			}
 		}
 	};
+
+	($($target:ty)*) => {
+		$(forward_impls! { $target })*
+	};
 }
 
-forward_impls!(Integer);
-forward_impls!(Natural);
-forward_impls!(Rational);
+forward_impls! {
+	Digits Integer Natural Rational
+}

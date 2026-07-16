@@ -4,6 +4,7 @@ use std::mem;
 use std::ops::AddAssign;
 
 use crate::digits::Digits;
+use crate::digits::iter::IterDigits;
 
 impl AddAssign for Digits {
 	fn add_assign(&mut self, mut rhs: Self) {
@@ -15,28 +16,37 @@ impl AddAssign for Digits {
 	}
 }
 
-impl AddAssign<&Self> for Digits {
-	fn add_assign(&mut self, rhs: &Self) {
-		let len = self.len().max(rhs.len());
+/// Implements addition with a common algorithm.
+macro_rules! impl_add {
+	($target:ty) => {
+		impl AddAssign<$target> for Digits {
+			fn add_assign(&mut self, rhs: $target) {
+				let mut carry = false;
+				let mut sum;
 
-		let mut carry = false;
-		let mut sum;
+				for (index, rhs) in rhs.iter_digits().enumerate() {
+					(sum, carry) = self.digit(index).carrying_add(rhs, carry);
 
-		for index in 0..len {
-			let lhs = self.get(index).copied().unwrap_or_default();
-			let rhs = rhs.get(index).copied().unwrap_or_default();
+					match self.get_mut(index) {
+						None => self.push(sum),
+						Some(digit) => *digit = sum,
+					}
+				}
 
-			(sum, carry) = lhs.carrying_add(rhs, carry);
-
-			if let Some(lhs) = self.get_mut(index) {
-				*lhs = sum;
-			} else {
-				self.push(sum);
+				if carry {
+					self.push(1);
+				}
 			}
 		}
+	};
 
-		if carry {
-			self.push(1);
-		}
-	}
+	($($target:ty)*) => {
+		$(impl_add! { $target })*
+	};
+}
+
+impl_add! {
+	u8 u16 u32 u64 u128 usize
+	&u8 &u16 &u32 &u64 &u128 &usize
+	&Digits
 }
