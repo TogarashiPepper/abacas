@@ -1,10 +1,12 @@
 //! The digit type and related items.
 
+mod add;
+
 use std::num::NonZeroUsize;
 use std::ops::{Deref, DerefMut};
 
 /// Represents a single digit.
-type Digit = u64;
+type Digit = usize;
 
 /// Represents a list of digits with more optimal memory usage.
 #[derive(Debug)]
@@ -59,6 +61,7 @@ impl Digits {
 				None => NonZeroUsize::MIN,
 				Some(capacity) => capacity,
 			},
+
 			Self::Stack(_) => NonZeroUsize::MIN,
 		}
 	}
@@ -70,10 +73,24 @@ impl Digits {
 				0 => *self = Self::Stack(Some(digit)),
 				_ => heap.push(digit),
 			},
+
 			Self::Stack(stack) => match stack.take() {
 				None => *self = Self::Stack(Some(digit)),
 				Some(stack) => *self = Self::Heap(vec![stack, digit]),
 			},
+		}
+	}
+}
+
+impl Clone for Digits {
+	fn clone(&self) -> Self {
+		match self {
+			Self::Heap(heap) => match heap.len() {
+				..2 => Self::Stack(heap.first().copied()),
+				2.. => Self::Heap(heap.clone()),
+			},
+
+			Self::Stack(stack) => Self::Stack(*stack),
 		}
 	}
 }

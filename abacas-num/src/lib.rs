@@ -8,6 +8,7 @@ pub mod integer;
 pub mod natural;
 pub mod ops;
 pub mod rational;
+pub mod sign;
 
 /// The library version currently in use.
 pub const VERSION: &str = env!("CARGO_PKG_VERSION");

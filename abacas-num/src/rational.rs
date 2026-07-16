@@ -1,32 +1,38 @@
 //! The rational struct and related items.
 
-use crate::integer::Integer;
+use std::mem;
+use std::ops::Neg;
+
 use crate::natural::Natural;
+use crate::ops::{Inv, InvAssign, NegAssign};
+use crate::sign::Sign;
 
 /// Represents a rational number.
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Rational {
 	/// The denominator of this rational.
 	denom: Natural,
 	/// The numerator of this rational.
-	numer: Integer,
+	numer: Natural,
+	/// The sign of this rational.
+	sign: Sign,
 }
 
 impl Rational {
 	/// The number negative one (-1).
-	pub const NEG_ONE: Self = Self::new(Natural::ONE, Integer::NEG_ONE);
+	pub const NEG_ONE: Self = Self::new(Natural::ONE, Natural::ONE, Sign::Minus);
 
 	/// The number one (1).
-	pub const ONE: Self = Self::new(Natural::ONE, Integer::ONE);
+	pub const ONE: Self = Self::new(Natural::ONE, Natural::ONE, Sign::Plus);
 
 	/// The number zero (0).
-	pub const ZERO: Self = Self::new(Natural::ONE, Integer::ZERO);
+	pub const ZERO: Self = Self::new(Natural::ONE, Natural::ZERO, Sign::Zero);
 }
 
 impl Rational {
 	/// Creates a new rational.
-	const fn new(denom: Natural, numer: Integer) -> Self {
-		Self { denom, numer }
+	const fn new(denom: Natural, numer: Natural, sign: Sign) -> Self {
+		Self { denom, numer, sign }
 	}
 }
 
@@ -38,27 +44,27 @@ impl Rational {
 
 	/// Whether this rational is the number negative one (-1).
 	pub const fn is_neg_one(&self) -> bool {
-		self.denom.is_one() && self.numer.is_neg_one()
+		self.denom.is_one() && self.numer.is_one() && self.sign.is_negative()
 	}
 
 	/// Whether this rational is negative.
 	pub const fn is_negative(&self) -> bool {
-		self.numer.is_negative()
+		self.sign.is_negative()
 	}
 
 	/// Whether this rational is the number one (1).
 	pub const fn is_one(&self) -> bool {
-		self.denom.is_one() && self.numer.is_one()
+		self.denom.is_one() && self.numer.is_one() && self.sign.is_negative()
 	}
 
 	/// Whether this rational is positive.
 	pub const fn is_positive(&self) -> bool {
-		self.numer.is_positive()
+		self.sign.is_positive()
 	}
 
 	/// Whether this rational is the number zero (0).
 	pub const fn is_zero(&self) -> bool {
-		self.numer.is_zero()
+		self.sign.is_zero()
 	}
 }
 
@@ -69,13 +75,52 @@ impl Rational {
 	}
 
 	/// Returns a reference to the numerator.
-	pub const fn numer(&self) -> &Integer {
+	pub const fn numer(&self) -> &Natural {
 		&self.numer
+	}
+
+	/// Returns the sign of this rational.
+	pub const fn sign(&self) -> Sign {
+		self.sign
 	}
 }
 
 impl Default for Rational {
 	fn default() -> Self {
 		Self::ZERO
+	}
+}
+
+impl Inv for Rational {
+	type Output = Self;
+
+	fn inv(mut self) -> Self::Output {
+		self.inv_assign();
+		self
+	}
+}
+
+impl InvAssign for Rational {
+	fn inv_assign(&mut self) {
+		if self.sign.is_zero() {
+			panic!("division by zero");
+		}
+
+		mem::swap(&mut self.denom, &mut self.numer);
+	}
+}
+
+impl Neg for Rational {
+	type Output = Self;
+
+	fn neg(mut self) -> Self::Output {
+		self.neg_assign();
+		self
+	}
+}
+
+impl NegAssign for Rational {
+	fn neg_assign(&mut self) {
+		self.sign.neg_assign();
 	}
 }
