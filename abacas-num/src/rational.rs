@@ -54,7 +54,7 @@ impl Rational {
 
 	/// Whether this rational is the number one (1).
 	pub const fn is_one(&self) -> bool {
-		self.denom.is_one() && self.numer.is_one() && self.sign.is_negative()
+		self.denom.is_one() && self.numer.is_one() && self.sign.is_positive()
 	}
 
 	/// Whether this rational is positive.
