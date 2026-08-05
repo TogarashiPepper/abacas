@@ -9,6 +9,7 @@ harness = false
 
 [dependencies]
 itertools = { workspace = true }
+logos = { workspace = true }
 rug = { workspace = true }
 
 [dev-dependencies]
