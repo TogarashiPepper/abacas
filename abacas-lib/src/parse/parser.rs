@@ -25,7 +25,14 @@ impl Parser {
 
 	/// Tries to parse an expression from a source string.
 	pub fn parse(&mut self, source: &str) -> ParseResult<Expr> {
-		self.pratt(0, &mut Tokens::new(source))
+		let tokens = &mut Tokens::new(source);
+		let result = self.pratt(0, tokens);
+
+		if tokens.is_empty() {
+			result
+		} else {
+			Err(ParseError::InvalidToken(tokens.span()))
+		}
 	}
 
 	/// Internal method to recursively apply pratt parsing.
