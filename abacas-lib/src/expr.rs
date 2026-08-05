@@ -218,8 +218,8 @@ impl Expr {
 		// Handle user-defined functions with higher priority
 		if let Some(function) = ctx.functions.get(&name) {
 			// Check that the argument count matches
-			if function.params.len() != args.len() {
-				return Err(Error::ArgumentCount(function.name.clone()));
+			if args.len() != function.params.len() {
+				return Err(Error::ArgumentCount(name));
 			}
 
 			// Create a new temporary context with the arguments

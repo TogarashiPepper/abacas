@@ -6,6 +6,7 @@ pub mod error;
 pub mod expr;
 pub mod monomial;
 pub mod number;
+pub mod parse;
 pub mod polynomial;
 
 /// The library version currently in use.

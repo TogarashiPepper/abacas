@@ -1,16 +1,12 @@
-use abacas::VERSION;
-use abacas::context::Context;
-use argh::FromArgs;
-use dark_light::{Mode, detect};
-use logos::Logos;
-
-mod parser;
-mod token;
-
 use std::borrow::Cow::{self, Borrowed, Owned};
 use std::fmt::Write;
 use std::process::exit;
 
+use abacas::VERSION;
+use abacas::context::Context;
+use abacas::parse::Parser;
+use argh::FromArgs;
+use dark_light::{Mode, detect};
 use rustyline::error::ReadlineError;
 use rustyline::highlight::{CmdKind, Highlighter};
 use rustyline::validate::MatchingBracketValidator;
@@ -18,9 +14,6 @@ use rustyline::{Completer, Config, Editor, Helper, Hinter, Validator};
 use syntect::easy::HighlightLines;
 use syntect::highlighting::ThemeSet;
 use syntect::parsing::SyntaxSet;
-
-use crate::parser::Parser;
-use crate::token::Token;
 
 #[derive(FromArgs)]
 /// Configuation options for abacas. Pass no arguments for REPL
@@ -37,25 +30,22 @@ struct CasConfig {
 fn main() {
 	let cfg: CasConfig = argh::from_env();
 
-	if cfg.expr.is_none() {
+	let Some(expr) = cfg.expr else {
 		repl(cfg);
 		return;
-	}
+	};
 
-	let exp = cfg.expr.unwrap();
-	let tokens = Token::lexer(&exp).collect::<Result<Vec<Token>, ()>>().unwrap();
-
-	let mut ctx = Context::new();
-	let mut ast = Parser::parse_line(&mut ctx, tokens);
+	let mut parser = Parser::new(Context::new());
+	let mut ast = parser.parse(&expr).unwrap();
 
 	if !cfg.raw {
-		ast = ast.simplify(&ctx).expect("Error while simplifying");
+		ast = ast.simplify(parser.ctx()).expect("Error while simplifying");
 	}
 
 	println!("{ast}");
 
 	if !ast.is_num()
-		&& let Ok(float) = ast.evaluate(&ctx)
+		&& let Ok(float) = ast.evaluate(parser.ctx())
 	{
 		println!("Approximation: {float}")
 	}
@@ -131,7 +121,7 @@ fn repl(cfg: CasConfig) {
 	let mut rl = Editor::with_config(config).unwrap();
 	rl.set_helper(Some(h));
 
-	let mut ctx = Context::new();
+	let mut parser = Parser::new(Context::new());
 
 	loop {
 		"\x1b[1m\x1b[32m[In]:\x1b[0m ".clone_into(&mut rl.helper_mut().expect("No helper").colored_prompt);
@@ -146,18 +136,16 @@ fn repl(cfg: CasConfig) {
 
 				println!("\x1b[1m\x1b[31m[Out]:\x1b[0m ");
 
-				let tokens = Token::lexer(&line).collect::<Result<Vec<Token>, ()>>().unwrap();
-
-				let mut ast = Parser::parse_line(&mut ctx, tokens);
+				let mut ast = parser.parse(&line).unwrap();
 
 				if !cfg.raw {
-					ast = ast.simplify(&ctx).unwrap();
+					ast = ast.simplify(parser.ctx()).unwrap();
 				}
 
 				println!("{ast}");
 
 				if !ast.is_num()
-					&& let Ok(float) = ast.evaluate(&ctx)
+					&& let Ok(float) = ast.evaluate(parser.ctx())
 				{
 					println!("Approximation: {float}")
 				}

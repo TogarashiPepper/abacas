@@ -70,16 +70,14 @@ impl Context {
 pub struct Function {
 	/// The function body that gets inserted when calling the function.
 	pub body: Expr,
-	/// The name of the function.
-	pub name: Symbol,
 	/// The parameters required by this function.
 	pub params: Vec<Symbol>,
 }
 
 impl Function {
 	/// Creates a new function.
-	pub fn new(body: Expr, name: Symbol, params: Vec<Symbol>) -> Self {
-		Self { body, name, params }
+	pub fn new(body: Expr, params: Vec<Symbol>) -> Self {
+		Self { body, params }
 	}
 }
 
