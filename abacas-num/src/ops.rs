@@ -21,12 +21,6 @@ pub trait NegAssign {
 	fn neg_assign(&mut self);
 }
 
-/// The in-place bitwise inversion operation.
-pub trait NotAssign {
-	/// Performs the bitwise inversion in-place.
-	fn not_assign(&mut self);
-}
-
 /// The exponentiation operation.
 pub trait Pow<Rhs = Self> {
 	/// The output after the exponentiation.

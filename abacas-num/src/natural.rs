@@ -1,25 +1,25 @@
 //! The natural struct and related items.
 
-use crate::digits::Digits;
+use crate::list::List;
 
 /// Represents a natural number.
 #[derive(Clone, Debug)]
 pub struct Natural {
 	/// The digits that constitute this natural.
-	digits: Digits,
+	digits: List<usize>,
 }
 
 impl Natural {
 	/// The number one (1).
-	pub const ONE: Self = Self::new(Digits::ONE);
+	pub const ONE: Self = Self::new(List::singleton(1));
 
 	/// The number zero (0).
-	pub const ZERO: Self = Self::new(Digits::ZERO);
+	pub const ZERO: Self = Self::new(List::new());
 }
 
 impl Natural {
 	/// Creates a new natural.
-	const fn new(digits: Digits) -> Self {
+	const fn new(digits: List<usize>) -> Self {
 		Self { digits }
 	}
 }
@@ -27,12 +27,12 @@ impl Natural {
 impl Natural {
 	/// Checks whether this natural is the number one (1).
 	pub const fn is_one(&self) -> bool {
-		self.digits.is_one()
+		matches!(self.digits.as_slice(), [1])
 	}
 
 	/// Checks whether this natural is the number zero (0).
 	pub const fn is_zero(&self) -> bool {
-		self.digits.is_zero()
+		matches!(self.digits.as_slice(), [])
 	}
 }
 
