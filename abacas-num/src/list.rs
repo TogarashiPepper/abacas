@@ -1,5 +1,6 @@
-//! The digit type and related items.
+//! The list type and related items.
 
+use std::mem;
 use std::num::NonZeroUsize;
 use std::ops::{Deref, DerefMut, Index, IndexMut};
 use std::slice::SliceIndex;
@@ -50,7 +51,10 @@ impl<T> List<T> {
 				Some(capacity) => capacity,
 			},
 
-			Self::Stack(_) => NonZeroUsize::MIN,
+			Self::Stack(_) => match mem::size_of::<T>() {
+				0 => NonZeroUsize::MAX,
+				_ => NonZeroUsize::MIN,
+			},
 		}
 	}
 
