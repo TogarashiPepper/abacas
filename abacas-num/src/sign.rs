@@ -46,7 +46,7 @@ impl NegAssign for Sign {
 		match self {
 			Self::Minus => *self = Self::Plus,
 			Self::Plus => *self = Self::Minus,
-			Self::Zero => (),
+			Self::Zero => *self = Self::Zero,
 		}
 	}
 }
